@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>System One / Triage Evidence Dossier</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f1eee4;
+      --paper-raised: #faf8f1;
+      --ink: #20211f;
+      --muted: #69675f;
+      --line: #292a27;
+      --amber: #c98718;
+      --amber-soft: #f2dfb8;
+      --red: #a53b2f;
+      --green: #49684d;
+      --blue: #3f6472;
+      --shadow: 7px 7px 0 rgba(32, 33, 31, .12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(rgba(32, 33, 31, .035) 1px, transparent 1px),
+        var(--paper);
+      background-size: 100% 28px;
+      font-family: "Courier New", Courier, monospace;
+      line-height: 1.5;
+    }
+    a { color: inherit; text-underline-offset: .18em; }
+    button, select { font: inherit; }
+    :focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
+
+    .fixture-banner {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .65rem clamp(1rem, 3vw, 3.5rem);
+      color: var(--paper-raised);
+      background: var(--red);
+      border-bottom: 3px solid var(--line);
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+    .fixture-banner span:last-child { font-weight: 400; letter-spacing: 0; }
+
+    header, main, footer { width: min(1440px, calc(100% - 2rem)); margin-inline: auto; }
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 2.2fr) minmax(16rem, .8fr);
+      gap: 2rem;
+      padding: 3.5rem 0 2rem;
+      border-bottom: 3px solid var(--line);
+    }
+    .kicker, .eyebrow { margin: 0 0 .5rem; text-transform: uppercase; letter-spacing: .16em; font-size: .75rem; font-weight: 700; }
+    h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; line-height: 1.04; }
+    h1 { max-width: 13ch; margin: 0; font-size: clamp(2.8rem, 7vw, 7.5rem); letter-spacing: -.055em; }
+    h2 { margin: 0 0 1rem; font-size: clamp(1.6rem, 3vw, 3rem); letter-spacing: -.025em; }
+    h3 { margin: .6rem 0 .3rem; font-size: 1.35rem; }
+    .dossier-meta {
+      align-self: end;
+      padding: 1.2rem;
+      background: var(--paper-raised);
+      border: 2px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    .stamp { display: inline-block; padding: .25rem .5rem; color: var(--red); border: 2px solid currentColor; transform: rotate(-2deg); font-weight: 700; }
+    nav ul { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; padding: 0; list-style: none; }
+
+    main { padding: 2rem 0 4rem; }
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 1rem; }
+    .panel { padding: clamp(1rem, 2vw, 1.6rem); background: var(--paper-raised); border: 2px solid var(--line); box-shadow: var(--shadow); }
+    .comparison { grid-column: span 8; }
+    .semgrep { grid-column: span 4; margin-top: 3.5rem; }
+    .waterfall-panel { grid-column: span 5; }
+    .cases-panel { grid-column: span 7; margin-top: 2.5rem; }
+    .disclosure { grid-column: 2 / span 10; margin-top: 2rem; border-left: 10px solid var(--amber); }
+
+    table { width: 100%; border-collapse: collapse; }
+    caption { padding: 0 0 .75rem; color: var(--muted); text-align: left; }
+    th, td { padding: .8rem .55rem; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; }
+    td strong, td small { display: block; }
+    td strong { font-size: 1.4rem; }
+    td small { margin-top: .15rem; color: var(--muted); }
+
+    .waterfall { display: grid; gap: 1rem; padding: 0; list-style: none; }
+    .waterfall-head { display: flex; justify-content: space-between; gap: 1rem; }
+    .waterfall-track { height: 13px; margin-top: .3rem; background: #d7d2c4; border: 1px solid var(--line); }
+    .waterfall-track span { display: block; height: 100%; background: var(--amber); border-right: 2px solid var(--line); transition: width 420ms ease-out; }
+
+    form { display: flex; flex-wrap: wrap; gap: 1rem; align-items: end; padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
+    label { display: grid; gap: .3rem; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    select { min-width: 12rem; padding: .55rem 2rem .55rem .65rem; color: var(--ink); background: var(--paper); border: 2px solid var(--line); border-radius: 0; }
+    #case-count { margin-left: auto; color: var(--muted); font-size: .8rem; }
+    .case-grid { display: grid; gap: 1rem; margin-top: 1rem; }
+    .case-card { position: relative; padding: 1rem; border: 1px solid var(--line); background: var(--paper); }
+    .case-meta { color: var(--muted); font-size: .78rem; }
+    .case-evidence { padding-top: .75rem; border-top: 1px dashed var(--line); }
+    .decision { float: right; padding: .2rem .45rem; border: 1px solid currentColor; font-size: .72rem; font-weight: 700; text-transform: uppercase; }
+    .decision--supported { color: var(--green); }
+    .decision--contradicted { color: var(--red); }
+    .decision--inconclusive { color: var(--blue); }
+    .legend { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: .7rem 0 0; padding: 0; list-style: none; font-size: .78rem; }
+
+    .notice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .notice-grid section + section { border-left: 1px solid var(--line); padding-left: 1.5rem; }
+    footer { padding: 1.5rem 0 3rem; border-top: 3px solid var(--line); color: var(--muted); font-size: .78rem; }
+
+    @media (max-width: 900px) {
+      header, .notice-grid { grid-template-columns: 1fr; }
+      .comparison, .semgrep, .waterfall-panel, .cases-panel, .disclosure { grid-column: 1 / -1; margin-top: 0; }
+      .notice-grid section + section { padding: 1rem 0 0; border-left: 0; border-top: 1px solid var(--line); }
+      .fixture-banner { display: block; }
+      .fixture-banner span { display: block; }
+      #case-count { width: 100%; margin-left: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="fixture-banner" role="status">
+    <span>NON-LIVE FIXTURE</span>
+    <span>Illustrative estimates only · no production telemetry</span>
+  </div>
+
+  <header>
+    <div>
+      <p class="kicker">System One security triage / evidence console</p>
+      <h1>Routing under examination.</h1>
+      <nav aria-label="Dossier sections">
+        <ul>
+          <li><a href="#comparisons">Comparisons</a></li>
+          <li><a href="#flow">Alert flow</a></li>
+          <li><a href="#cases">Cases</a></li>
+          <li><a href="#limits">Disclosures</a></li>
+        </ul>
+      </nav>
+    </div>
+    <aside class="dossier-meta" aria-label="Fixture dossier metadata">
+      <p class="stamp">FIXTURE / NOT EVIDENCE</p>
+      <p><strong>Dossier</strong><br>TRIAGE-FX-0918</p>
+      <p><strong>Scope</strong><br>Recall · cost · latency · retention</p>
+      <p><strong>Handling</strong><br>Redacted case summaries</p>
+    </aside>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="panel comparison" id="comparisons" aria-labelledby="comparison-heading">
+        <p class="eyebrow">Exhibit A / routing strategies</p>
+        <h2 id="comparison-heading">Jev → Terra versus Terra all</h2>
+        <table>
+          <caption>Estimated recall, cost, and latency with illustrative interval text.</caption>
+          <thead><tr><th scope="col">Strategy</th><th scope="col">Recall</th><th scope="col">Cost</th><th scope="col">Latency</th></tr></thead>
+          <tbody id="strategy-rows"></tbody>
+        </table>
+      </section>
+
+      <section class="panel semgrep" aria-labelledby="semgrep-heading">
+        <p class="eyebrow">Exhibit B / retention</p>
+        <h2 id="semgrep-heading">Semgrep signal</h2>
+        <table>
+          <caption>Raw Semgrep compared with alerts retained after Jev routing.</caption>
+          <thead><tr><th scope="col">Stage</th><th scope="col">Alerts</th><th scope="col">Retained</th></tr></thead>
+          <tbody id="semgrep-rows"></tbody>
+        </table>
+        <p><strong>Raw Semgrep</strong> establishes the fixture baseline. <strong>Retained after Jev</strong> is a routing estimate, not measured production performance.</p>
+      </section>
+
+      <section class="panel waterfall-panel" id="flow" aria-labelledby="flow-heading">
+        <p class="eyebrow">Exhibit C / disposition chain</p>
+        <h2 id="flow-heading">Candidate → review waterfall</h2>
+        <ol class="waterfall" id="waterfall"></ol>
+      </section>
+
+      <section class="panel cases-panel" id="cases" aria-labelledby="cases-heading">
+        <p class="eyebrow">Exhibit D / redacted case file</p>
+        <h2 id="cases-heading">Decision register</h2>
+        <form id="case-filters">
+          <label for="family-filter">Family<select id="family-filter"></select></label>
+          <label for="corpus-filter">Corpus<select id="corpus-filter"></select></label>
+          <output id="case-count" aria-live="polite"></output>
+        </form>
+        <ul class="legend" aria-label="Decision state legend">
+          <li>● supported</li>
+          <li>◆ contradicted</li>
+          <li>▲ inconclusive</li>
+        </ul>
+        <div class="case-grid" id="case-grid"></div>
+      </section>
+
+      <section class="panel disclosure" id="limits" aria-labelledby="limits-heading">
+        <p class="eyebrow">Disclosure / read before interpretation</p>
+        <h2 id="limits-heading">Limitations &amp; contamination</h2>
+        <div class="notice-grid">
+          <section aria-labelledby="limitations-label">
+            <h3 id="limitations-label">Limitations</h3>
+            <p>All values are fabricated fixtures for interface preparation. Intervals are display examples, not confidence claims. No scanner run, model call, or manual adjudication produced these numbers.</p>
+          </section>
+          <section aria-labelledby="contamination-label">
+            <h3 id="contamination-label">Public-corpus contamination</h3>
+            <p>Public cases may appear in training data, documentation, or prior tool tuning. Future benchmark reports must group shared repositories and avoid presenting public-corpus performance as unseen-case generalization.</p>
+          </section>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>Static preparation artifact · keyboard-operable native controls · local assets only</footer>
+
+  <!-- ponytail: inline fixture keeps this page request-free; generate both copies if fixture edits become frequent. -->
+  <script id="fixture-data" type="application/json">
+  {
+    "mode": "fixture",
+    "snapshot": "TRIAGE-FX-0918",
+    "filters": { "families": ["all", "injection", "broken-access-control", "ssrf"], "corpora": ["all", "public", "private"] },
+    "strategies": [
+      { "id": "jev-terra", "label": "Jev → Terra", "recall": { "estimate": "84%", "interval": "78–89% interval" }, "cost": { "estimate": "$0.14", "interval": "$0.11–$0.18 / 1k candidates" }, "latency": { "estimate": "1.8 s", "interval": "1.4–2.5 s p50 range" } },
+      { "id": "terra-all", "label": "Terra all", "recall": { "estimate": "88%", "interval": "82–92% interval" }, "cost": { "estimate": "$0.63", "interval": "$0.55–$0.74 / 1k candidates" }, "latency": { "estimate": "6.7 s", "interval": "5.6–8.1 s p50 range" } }
+    ],
+    "semgrep": { "raw": { "label": "Raw Semgrep", "alerts": 1240, "rate": "100%" }, "retained": { "label": "Retained after Jev", "alerts": 286, "rate": "23.1%" } },
+    "waterfall": { "candidate": 1240, "routed": 286, "escalated": 72, "finalAlert": 29, "manualReview": 11 },
+    "cases": [
+      { "caseId": "CASE-7C2A", "spanId": "span_cmd_014", "family": "injection", "corpus": "public", "decision": "supported", "finding": "Unsanitized value reaches a command boundary.", "evidence": "Two independent spans preserve the same data-flow path." },
+      { "caseId": "CASE-91FD", "spanId": "span_acl_203", "family": "broken-access-control", "corpus": "private", "decision": "contradicted", "finding": "Object access appears to bypass an ownership check.", "evidence": "A dominating authorization branch rejects the reported path." },
+      { "caseId": "CASE-B480", "spanId": "span_ssrf_077", "family": "ssrf", "corpus": "public", "decision": "inconclusive", "finding": "A user-controlled host may reach the outbound client.", "evidence": "The fixture omits runtime allow-list configuration." }
+    ]
+  }
+  </script>
+  <script src="./app.js"></script>
+</body>
+</html>

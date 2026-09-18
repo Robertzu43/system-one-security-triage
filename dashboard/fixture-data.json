@@ -1,0 +1,64 @@
+{
+  "mode": "fixture",
+  "snapshot": "TRIAGE-FX-0918",
+  "filters": {
+    "families": ["all", "injection", "broken-access-control", "ssrf"],
+    "corpora": ["all", "public", "private"]
+  },
+  "strategies": [
+    {
+      "id": "jev-terra",
+      "label": "Jev → Terra",
+      "recall": { "estimate": "84%", "interval": "78–89% interval" },
+      "cost": { "estimate": "$0.14", "interval": "$0.11–$0.18 / 1k candidates" },
+      "latency": { "estimate": "1.8 s", "interval": "1.4–2.5 s p50 range" }
+    },
+    {
+      "id": "terra-all",
+      "label": "Terra all",
+      "recall": { "estimate": "88%", "interval": "82–92% interval" },
+      "cost": { "estimate": "$0.63", "interval": "$0.55–$0.74 / 1k candidates" },
+      "latency": { "estimate": "6.7 s", "interval": "5.6–8.1 s p50 range" }
+    }
+  ],
+  "semgrep": {
+    "raw": { "label": "Raw Semgrep", "alerts": 1240, "rate": "100%" },
+    "retained": { "label": "Retained after Jev", "alerts": 286, "rate": "23.1%" }
+  },
+  "waterfall": {
+    "candidate": 1240,
+    "routed": 286,
+    "escalated": 72,
+    "finalAlert": 29,
+    "manualReview": 11
+  },
+  "cases": [
+    {
+      "caseId": "CASE-7C2A",
+      "spanId": "span_cmd_014",
+      "family": "injection",
+      "corpus": "public",
+      "decision": "supported",
+      "finding": "Unsanitized value reaches a command boundary.",
+      "evidence": "Two independent spans preserve the same data-flow path."
+    },
+    {
+      "caseId": "CASE-91FD",
+      "spanId": "span_acl_203",
+      "family": "broken-access-control",
+      "corpus": "private",
+      "decision": "contradicted",
+      "finding": "Object access appears to bypass an ownership check.",
+      "evidence": "A dominating authorization branch rejects the reported path."
+    },
+    {
+      "caseId": "CASE-B480",
+      "spanId": "span_ssrf_077",
+      "family": "ssrf",
+      "corpus": "public",
+      "decision": "inconclusive",
+      "finding": "A user-controlled host may reach the outbound client.",
+      "evidence": "The fixture omits runtime allow-list configuration."
+    }
+  ]
+}
