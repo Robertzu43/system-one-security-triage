@@ -1,0 +1,61 @@
+{
+  "targets": [
+    { "targetId": "a1", "repositoryId": "repo-a", "family": "injection", "cwe": "CWE-89", "severity": "high", "vulnerable": true, "rawSemgrepMatched": true },
+    { "targetId": "a2", "repositoryId": "repo-a", "family": "ssrf", "cwe": "CWE-918", "severity": "high", "vulnerable": true, "rawSemgrepMatched": true },
+    { "targetId": "b1", "repositoryId": "repo-b", "family": "broken_access_control", "cwe": "CWE-862", "severity": "critical", "vulnerable": true, "rawSemgrepMatched": false },
+    { "targetId": "b2", "repositoryId": "repo-b", "family": "injection", "cwe": "CWE-78", "severity": "medium", "vulnerable": true, "rawSemgrepMatched": false }
+  ],
+  "predictions": [
+    { "predictionId":"ta1-1", "deduplicationId":"a1-1", "targetId":"a1", "repositoryId":"repo-a", "arm":"terra_all", "repetition":1, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"ta1-2", "deduplicationId":"a1-2", "targetId":"a1", "repositoryId":"repo-a", "arm":"terra_all", "repetition":2, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"ta1-3", "deduplicationId":"a1-3", "targetId":"a1", "repositoryId":"repo-a", "arm":"terra_all", "repetition":3, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"ta1-4", "deduplicationId":"a1-4", "targetId":"a1", "repositoryId":"repo-a", "arm":"terra_all", "repetition":4, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"ta1-5", "deduplicationId":"a1-5", "targetId":"a1", "repositoryId":"repo-a", "arm":"terra_all", "repetition":5, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"ta2-1", "deduplicationId":"a2-1", "targetId":"a2", "repositoryId":"repo-a", "arm":"terra_all", "repetition":1, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"ta2-2", "deduplicationId":"a2-2", "targetId":"a2", "repositoryId":"repo-a", "arm":"terra_all", "repetition":2, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"ta2-3", "deduplicationId":"a2-3", "targetId":"a2", "repositoryId":"repo-a", "arm":"terra_all", "repetition":3, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"ta2-4", "deduplicationId":"a2-4", "targetId":"a2", "repositoryId":"repo-a", "arm":"terra_all", "repetition":4, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"ta2-5", "deduplicationId":"a2-5", "targetId":"a2", "repositoryId":"repo-a", "arm":"terra_all", "repetition":5, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"tb1-1", "deduplicationId":"b1-1", "targetId":"b1", "repositoryId":"repo-b", "arm":"terra_all", "repetition":1, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"tb1-2", "deduplicationId":"b1-2", "targetId":"b1", "repositoryId":"repo-b", "arm":"terra_all", "repetition":2, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"tb1-3", "deduplicationId":"b1-3", "targetId":"b1", "repositoryId":"repo-b", "arm":"terra_all", "repetition":3, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"tb1-4", "deduplicationId":"b1-4", "targetId":"b1", "repositoryId":"repo-b", "arm":"terra_all", "repetition":4, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"tb1-5", "deduplicationId":"b1-5", "targetId":"b1", "repositoryId":"repo-b", "arm":"terra_all", "repetition":5, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"tb2-1", "deduplicationId":"b2-1", "targetId":"b2", "repositoryId":"repo-b", "arm":"terra_all", "repetition":1, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"tb2-2", "deduplicationId":"b2-2", "targetId":"b2", "repositoryId":"repo-b", "arm":"terra_all", "repetition":2, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"tb2-3", "deduplicationId":"b2-3", "targetId":"b2", "repositoryId":"repo-b", "arm":"terra_all", "repetition":3, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"tb2-4", "deduplicationId":"b2-4", "targetId":"b2", "repositoryId":"repo-b", "arm":"terra_all", "repetition":4, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"tb2-5", "deduplicationId":"b2-5", "targetId":"b2", "repositoryId":"repo-b", "arm":"terra_all", "repetition":5, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"ca1-1", "deduplicationId":"ca1-1", "targetId":"a1", "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":1, "finalOutcome":"alert", "retainedAlert":true, "adjudication":"confirmed" },
+    { "predictionId":"ca1-2", "deduplicationId":"ca1-2", "targetId":"a1", "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":2, "finalOutcome":"alert", "retainedAlert":true, "adjudication":"confirmed" },
+    { "predictionId":"ca1-3", "deduplicationId":"ca1-3", "targetId":"a1", "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":3, "finalOutcome":"alert", "retainedAlert":true, "adjudication":"confirmed" },
+    { "predictionId":"ca1-4", "deduplicationId":"ca1-4", "targetId":"a1", "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":4, "finalOutcome":"alert", "retainedAlert":true, "adjudication":"confirmed" },
+    { "predictionId":"ca1-5", "deduplicationId":"ca1-5", "targetId":"a1", "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":5, "finalOutcome":"alert", "retainedAlert":true, "adjudication":"confirmed" },
+    { "predictionId":"ca2-1", "deduplicationId":"ca2-1", "targetId":"a2", "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":1, "finalOutcome":"alert", "retainedAlert":true, "adjudication":"confirmed" },
+    { "predictionId":"ca2-2", "deduplicationId":"ca2-2", "targetId":"a2", "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":2, "finalOutcome":"alert", "retainedAlert":true, "adjudication":"confirmed" },
+    { "predictionId":"ca2-3", "deduplicationId":"ca2-3", "targetId":"a2", "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":3, "finalOutcome":"alert", "retainedAlert":true, "adjudication":"confirmed" },
+    { "predictionId":"ca2-4", "deduplicationId":"ca2-4", "targetId":"a2", "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":4, "finalOutcome":"alert", "retainedAlert":true, "adjudication":"confirmed" },
+    { "predictionId":"cb1-1", "deduplicationId":"cb1-1", "targetId":"b1", "repositoryId":"repo-b", "arm":"jev_to_terra", "repetition":1, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"cb1-2", "deduplicationId":"cb1-2", "targetId":"b1", "repositoryId":"repo-b", "arm":"jev_to_terra", "repetition":2, "finalOutcome":"alert", "retainedAlert":false, "adjudication":"confirmed" },
+    { "predictionId":"sa1-1", "deduplicationId":"sa1-1", "targetId":"a1", "repositoryId":"repo-a", "arm":"semgrep_to_jev", "repetition":1, "finalOutcome":"alert", "retainedAlert":true, "adjudication":"confirmed" },
+    { "predictionId":"sa2-1", "deduplicationId":"sa2-1", "targetId":"a2", "repositoryId":"repo-a", "arm":"semgrep_to_jev", "repetition":1, "finalOutcome":"manual_review", "retainedAlert":true, "adjudication":"insufficient_evidence" }
+  ],
+  "efficiency": [
+    { "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":1, "costUsd":2, "coldLatencyMs":10 }, { "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":2, "costUsd":2, "coldLatencyMs":10 }, { "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":3, "costUsd":2, "coldLatencyMs":10 }, { "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":4, "costUsd":2, "coldLatencyMs":10 }, { "repositoryId":"repo-a", "arm":"jev_to_terra", "repetition":5, "costUsd":2, "coldLatencyMs":10 },
+    { "repositoryId":"repo-a", "arm":"terra_all", "repetition":1, "costUsd":4, "coldLatencyMs":20 }, { "repositoryId":"repo-a", "arm":"terra_all", "repetition":2, "costUsd":4, "coldLatencyMs":20 }, { "repositoryId":"repo-a", "arm":"terra_all", "repetition":3, "costUsd":4, "coldLatencyMs":20 }, { "repositoryId":"repo-a", "arm":"terra_all", "repetition":4, "costUsd":4, "coldLatencyMs":20 }, { "repositoryId":"repo-a", "arm":"terra_all", "repetition":5, "costUsd":4, "coldLatencyMs":20 },
+    { "repositoryId":"repo-b", "arm":"jev_to_terra", "repetition":1, "costUsd":6, "coldLatencyMs":40 }, { "repositoryId":"repo-b", "arm":"jev_to_terra", "repetition":2, "costUsd":6, "coldLatencyMs":40 }, { "repositoryId":"repo-b", "arm":"jev_to_terra", "repetition":3, "costUsd":6, "coldLatencyMs":40 }, { "repositoryId":"repo-b", "arm":"jev_to_terra", "repetition":4, "costUsd":6, "coldLatencyMs":40 }, { "repositoryId":"repo-b", "arm":"jev_to_terra", "repetition":5, "costUsd":6, "coldLatencyMs":40 },
+    { "repositoryId":"repo-b", "arm":"terra_all", "repetition":1, "costUsd":8, "coldLatencyMs":50 }, { "repositoryId":"repo-b", "arm":"terra_all", "repetition":2, "costUsd":8, "coldLatencyMs":50 }, { "repositoryId":"repo-b", "arm":"terra_all", "repetition":3, "costUsd":8, "coldLatencyMs":50 }, { "repositoryId":"repo-b", "arm":"terra_all", "repetition":4, "costUsd":8, "coldLatencyMs":50 }, { "repositoryId":"repo-b", "arm":"terra_all", "repetition":5, "costUsd":8, "coldLatencyMs":50 }
+  ],
+  "discoveryMatches": [
+    { "findingId": "semgrep-a1", "source": "semgrep", "targetId": "a1", "adjudication": "confirmed" },
+    { "findingId": "ast-a1", "source": "ast", "targetId": "a1", "adjudication": "confirmed" },
+    { "findingId": "ast-b1", "source": "ast", "targetId": "b1", "adjudication": "confirmed" }
+  ],
+  "controlled": [
+    { "packetId":"jev-a1", "evaluator":"jev", "repetition":1, "decision":"vulnerable", "family":"injection", "evidenceSpanIds":["span-a1"], "matchedTargetId":"a1" },
+    { "packetId":"terra-a1", "evaluator":"terra", "repetition":1, "decision":"vulnerable", "family":"injection", "evidenceSpanIds":["span-a1"], "matchedTargetId":"a1" },
+    { "packetId":"opus-a1", "evaluator":"opus", "repetition":1, "decision":"vulnerable", "family":"injection", "evidenceSpanIds":["span-a1"], "matchedTargetId":"a1" }
+  ],
+  "validGroundTruth": true,
+  "actualCostAvailable": true
+}

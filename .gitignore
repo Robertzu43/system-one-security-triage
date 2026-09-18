@@ -1,0 +1,5 @@
+artifacts/
+private/
+.env
+dist/
+node_modules/

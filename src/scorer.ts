@@ -1,0 +1,43 @@
+import type { Arm, ControlledEvaluator, Decision, Interval, PrimaryInference, ScoreInput, ScoreReport, SystemArm, TargetInstance } from "./contracts.js";
+export { parseScoreInput } from "./contracts.js";
+
+const repetitions = [1, 2, 3, 4, 5] as const;
+const evaluators: ControlledEvaluator[] = ["jev", "terra", "opus"];
+
+function mean(values: number[]): number { if (values.length === 0) throw new Error("zero denominator"); return values.reduce((sum, value) => sum + value, 0) / values.length; }
+function median(values: number[]): number { if (values.length === 0) throw new Error("zero denominator"); const ordered = [...values].sort((a, b) => a - b); return ordered[Math.floor(ordered.length / 2)]!; }
+function vulnerableTargets(input: ScoreInput, repositoryIds?: string[]): TargetInstance[] { const targets = input.targets.filter((target) => target.vulnerable); return repositoryIds === undefined ? targets : repositoryIds.flatMap((id) => targets.filter((target) => target.repositoryId === id)); }
+function targetRate(input: ScoreInput, target: TargetInstance, arm: Arm, retained: boolean): number { return mean(repetitions.map((repetition) => Number(input.predictions.some((prediction) => prediction.targetId === target.targetId && prediction.arm === arm && prediction.repetition === repetition && (retained ? prediction.retainedAlert : prediction.finalOutcome === "alert"))))); }
+function recall(input: ScoreInput, arm: SystemArm, repositories?: string[]): number { return mean(vulnerableTargets(input, repositories).map((target) => targetRate(input, target, arm, false))); }
+function repositoryMetric(input: ScoreInput, repositoryId: string, arm: SystemArm, metric: "costUsd" | "coldLatencyMs"): number { const records = input.efficiency.filter((record) => record.repositoryId === repositoryId && record.arm === arm); if (records.length !== 5 || new Set(records.map((record) => record.repetition)).size !== 5) throw new Error(`expected five ${arm} records for ${repositoryId}`); const values = records.map((record) => record[metric]); return metric === "costUsd" ? mean(values) : median(values); }
+function efficiencyRatio(input: ScoreInput, numerator: SystemArm, denominator: SystemArm, metric: "costUsd" | "coldLatencyMs", repositories?: string[]): number { const ids = repositories ?? [...new Set(input.targets.map((target) => target.repositoryId))]; const lower = mean(ids.map((id) => repositoryMetric(input, id, numerator, metric))); const upper = mean(ids.map((id) => repositoryMetric(input, id, denominator, metric))); if (upper === 0) throw new Error("zero denominator"); return lower / upper; }
+function controlledMetrics(input: ScoreInput, evaluator: ControlledEvaluator): { recall: number; precision: number; abstentionRate: number } { const rows = input.controlled.filter((row) => row.evaluator === evaluator); const targets = vulnerableTargets(input); const controlledRecall = mean(targets.map((target) => mean(repetitions.map((repetition) => Number(rows.some((row) => row.matchedTargetId === target.targetId && row.repetition === repetition && row.decision === "vulnerable")))))); const alerts = rows.filter((row) => row.decision === "vulnerable" && row.matchedTargetId !== null); const adjudicated = alerts.filter((row) => input.targets.some((target) => target.targetId === row.matchedTargetId)); const confirmed = adjudicated.filter((row) => input.targets.some((target) => target.targetId === row.matchedTargetId && target.vulnerable)); return { recall: controlledRecall, precision: confirmed.length / adjudicated.length, abstentionRate: rows.filter((row) => row.decision === "abstain").length / rows.length }; }
+function report(input: ScoreInput, repositories?: string[]): ScoreReport {
+  if (!input.validGroundTruth) throw new Error("valid ground truth is required");
+  const terraAllRecall = recall(input, "terra_all", repositories); const cascadeRecall = recall(input, "jev_to_terra", repositories);
+  const filteredTargets = vulnerableTargets(input, repositories).filter((target) => target.rawSemgrepMatched);
+  const filteredRecall = mean(filteredTargets.map((target) => targetRate(input, target, "semgrep_to_jev", true)));
+  const rawTargets = vulnerableTargets(input, repositories); const rawRecall = mean(rawTargets.map((target) => Number(target.rawSemgrepMatched)));
+  const filteredAlerts = input.predictions.filter((prediction) => prediction.arm === "semgrep_to_jev" && prediction.retainedAlert);
+  const adjudicatedAlerts = filteredAlerts.filter((prediction) => prediction.adjudication !== "insufficient_evidence");
+  const filteredPrecision = adjudicatedAlerts.filter((prediction) => prediction.adjudication === "confirmed").length / adjudicatedAlerts.length;
+  const semgrepTargets = new Set(input.discoveryMatches.filter((match) => match.source === "semgrep").map((match) => match.targetId));
+  const additionalValidatedYield = new Set(input.discoveryMatches.filter((match) => match.source === "ast" && match.adjudication === "confirmed" && !semgrepTargets.has(match.targetId)).map((match) => match.targetId)).size;
+  const costRatio = input.actualCostAvailable ? efficiencyRatio(input, "jev_to_terra", "terra_all", "costUsd", repositories) : null;
+  return { claim1: { terraAllRecall, cascadeRecall, recallDifference: Math.round((cascadeRecall - terraAllRecall) * 1e12) / 1e12 }, claim2: { rawRecall, filteredRecall, filteredPrecision, unresolvedWorkload: filteredAlerts.filter((prediction) => prediction.adjudication === "insufficient_evidence").length }, claim3: { additionalValidatedYield }, controlled: Object.fromEntries(evaluators.map((evaluator) => [evaluator, controlledMetrics(input, evaluator)])) as ScoreReport["controlled"], efficiency: { costRatio, latencyRatio: efficiencyRatio(input, "jev_to_terra", "terra_all", "coldLatencyMs", repositories) } };
+}
+
+export function scoreClaims(input: ScoreInput): ScoreReport { return report(input); }
+export function classifyDifference([lower, upper]: Interval, margin = -0.02): Decision { if (lower > margin) return "supported"; if (upper <= margin) return "contradicted"; return "inconclusive"; }
+export function classifyRatio([lower, upper]: Interval): Decision { if (upper < 1) return "supported"; if (lower >= 1) return "contradicted"; return "inconclusive"; }
+function mulberry32(seed: number): () => number { let state = seed >>> 0; return () => { state += 0x6d2b79f5; let value = state; value = Math.imul(value ^ (value >>> 15), value | 1); value ^= value + Math.imul(value ^ (value >>> 7), value | 61); return ((value ^ (value >>> 14)) >>> 0) / 4294967296; }; }
+function interval(values: number[]): Interval { const ordered = values.filter(Number.isFinite).sort((a, b) => a - b); if (ordered.length === 0) throw new Error("no finite bootstrap estimates"); return [ordered[Math.floor((ordered.length - 1) * 0.05)]!, ordered[Math.floor((ordered.length - 1) * 0.95)]!]; }
+function combined(decisions: Decision[]): Decision { if (decisions.every((decision) => decision === "supported")) return "supported"; if (decisions.includes("contradicted")) return "contradicted"; return "inconclusive"; }
+export function bootstrapPrimary(input: ScoreInput, draws = 10_000, seed = 20260918): PrimaryInference {
+  if (!Number.isInteger(draws) || draws < 1) throw new Error("draws must be a positive integer");
+  const ids = [...new Set(input.targets.map((target) => target.repositoryId))]; if (ids.length === 0) throw new Error("zero denominator"); const random = mulberry32(seed); const recalls: number[] = []; const costs: number[] = []; const latencies: number[] = [];
+  for (let draw = 0; draw < draws; draw += 1) { const sample = Array.from({ length: ids.length }, () => ids[Math.floor(random() * ids.length)]!); const scores = report(input, sample); recalls.push(scores.claim1.recallDifference); if (scores.efficiency.costRatio !== null) costs.push(scores.efficiency.costRatio); latencies.push(scores.efficiency.latencyRatio); }
+  const recallInterval = interval(recalls); const latencyInterval = interval(latencies); const costInterval = input.actualCostAvailable ? interval(costs) : null;
+  const recallDecision = classifyDifference(recallInterval); const costDecision = costInterval === null ? "inconclusive" : classifyRatio(costInterval); const latencyDecision = classifyRatio(latencyInterval);
+  return { recall: { estimate: report(input).claim1.recallDifference, interval: recallInterval, decision: recallDecision }, cost: { estimate: report(input).efficiency.costRatio, interval: costInterval, decision: costDecision }, latency: { estimate: report(input).efficiency.latencyRatio, interval: latencyInterval, decision: latencyDecision }, primaryDecision: combined([recallDecision, costDecision, latencyDecision]) };
+}
