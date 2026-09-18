@@ -1,12 +1,12 @@
 import { spawn } from "node:child_process";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { access, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { delimiter, isAbsolute, join, resolve, sep } from "node:path";
 
 export type ReasoningEvaluator = "terra" | "opus";
 export type ReasoningMode = "agentic" | "controlled";
 export type StructuredReview = { decision: "vulnerable" | "safe" | "abstain"; family: "injection" | "broken_access_control" | "ssrf"; evidence_span_ids: string[]; };
-export type ReasoningFailureKind = "timeout" | "malformed_output" | "tool_denied" | "budget_exhausted" | "nonzero_exit" | "spawn_error";
+export type ReasoningFailureKind = "timeout" | "malformed_output" | "tool_denied" | "budget_exhausted" | "budget_unverifiable" | "version_mismatch" | "unsupported_platform" | "nonzero_exit" | "spawn_error";
 export interface ReasoningRequest {
   readonly evaluator: ReasoningEvaluator;
   readonly mode: ReasoningMode;
@@ -24,11 +24,13 @@ export interface ReasoningConfig {
   readonly outputDirectory?: string;
   readonly environment?: NodeJS.ProcessEnv;
   readonly environmentKeys?: readonly string[];
+  readonly platform?: NodeJS.Platform;
 }
 export interface ReasoningResult {
   readonly finalOutcome: "alert" | "no_alert" | "manual_review";
   readonly output: StructuredReview | null;
   readonly usage: { inputTokens: number; outputTokens: number } | null;
+  readonly usageStatus: "available" | "inconclusive";
   readonly chargeUsd: number | null;
   readonly costStatus: "available" | "inconclusive";
   readonly attempts: number;
@@ -42,6 +44,7 @@ interface ProcessResult { code: number; stdout: string; stderr: string; timedOut
 
 const decisions = new Set<StructuredReview["decision"]>(["vulnerable", "safe", "abstain"]);
 const families = new Set<StructuredReview["family"]>(["injection", "broken_access_control", "ssrf"]);
+const expectedVersions: Readonly<Record<ReasoningEvaluator, string>> = { terra: "codex-cli 0.147.0", opus: "2.1.276 (Claude Code)" };
 
 function record(value: unknown): Record<string, unknown> | null { return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null; }
 function usage(value: unknown): ReasoningResult["usage"] {
@@ -58,6 +61,7 @@ function parseStructured(value: unknown): StructuredReview {
 function finalOutput(text: string): StructuredReview {
   const parsed = JSON.parse(text) as unknown;
   const outer = record(parsed);
+  if (outer !== null && outer.structured_output !== undefined) return parseStructured(outer.structured_output);
   if (outer !== null && typeof outer.result === "string") return parseStructured(JSON.parse(outer.result));
   return parseStructured(parsed);
 }
@@ -114,6 +118,32 @@ async function execute(command: Command, prompt: string, timeoutMs: number, envi
   });
 }
 
+async function executablePath(executable: string, environment: NodeJS.ProcessEnv): Promise<string> {
+  if (isAbsolute(executable) || executable.includes(sep)) return realpath(resolve(executable));
+  for (const directory of (environment.PATH ?? "").split(delimiter)) {
+    if (directory.length === 0) continue;
+    const candidate = join(directory, executable);
+    try { await access(candidate); return realpath(candidate); } catch { /* keep searching PATH */ }
+  }
+  throw new Error(`executable not found on PATH: ${executable}`);
+}
+
+function sandboxProfile(snapshot: string, schemaPath: string, outputDirectory: string, executable: string, environment: NodeJS.ProcessEnv): string {
+  const home = environment.HOME;
+  const authFiles = home === undefined ? [] : [join(home, ".codex/auth.json"), join(home, ".claude.json"), join(home, ".claude/.credentials.json")];
+  const subpaths = [snapshot].map((path) => `(subpath ${JSON.stringify(resolve(path))})`).join(" ");
+  const literals = [schemaPath, executable, ...authFiles].map((path) => `(literal ${JSON.stringify(resolve(path))})`).join(" ");
+  return `(version 1)\n(allow default)\n(deny file-read-data (subpath \"/Users\") (subpath \"/private/tmp\") (subpath \"/private/var/folders\") (subpath \"/Volumes\"))\n(allow file-read-data ${subpaths} ${literals})\n(deny file-write*)\n(allow file-write* (subpath ${JSON.stringify(outputDirectory)}) (literal \"/dev/null\"))\n`;
+}
+
+function toolCallsFrom(stdout: string): number | null {
+  try {
+    const parsed = record(JSON.parse(stdout));
+    const count = parsed?.tool_calls ?? parsed?.toolCalls;
+    return typeof count === "number" && Number.isInteger(count) && count >= 0 ? count : null;
+  } catch { return null; }
+}
+
 export async function runReasoningReview(request: ReasoningRequest, config: ReasoningConfig): Promise<ReasoningResult> {
   if (!Number.isInteger(request.timeoutMs) || request.timeoutMs < 1 || !Number.isInteger(request.tokenBudget) || request.tokenBudget < 1 || !Number.isInteger(request.toolBudget) || request.toolBudget < 1) throw new Error("reasoning limits must be positive integers");
   if (request.providerChargeUsd !== undefined && (!Number.isFinite(request.providerChargeUsd) || request.providerChargeUsd < 0)) throw new Error("providerChargeUsd must be non-negative and finite");
@@ -121,11 +151,24 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
   const outputDirectory = await mkdtemp(join(outputRoot, "reasoning-"));
   const outputPath = join(outputDirectory, "last-message.json");
   const chargeUsd = request.providerChargeUsd ?? null;
-  const base = { usage: null, chargeUsd, costStatus: chargeUsd === null ? "inconclusive" as const : "available" as const, attempts: 1, stdout: "", stderr: "" };
+  const emptyBase = { usage: null, usageStatus: "inconclusive" as const, chargeUsd, costStatus: chargeUsd === null ? "inconclusive" as const : "available" as const, attempts: 0, stdout: "", stderr: "" };
   try {
+    if ((config.platform ?? process.platform) !== "darwin") return failure("unsupported_platform", "snapshot-only filesystem isolation is unavailable on this platform", emptyBase);
+    if (request.evaluator === "terra" && request.mode === "controlled") return failure("budget_unverifiable", "controlled Terra cannot disable all repository tools with the frozen CLI", emptyBase);
+    const environment = minimalEnvironment(config);
+    const executable = config.executable ?? (request.evaluator === "terra" ? "codex" : "claude");
+    const version = await execute({ command: executable, args: ["--version"], cwd: request.snapshot }, "", request.timeoutMs, environment);
+    if (version.timedOut) return failure("timeout", "CLI version check timed out", { ...emptyBase, stderr: version.stderr });
+    if (version.spawnError !== null) return failure("spawn_error", version.spawnError.message, { ...emptyBase, stderr: version.stderr });
+    if (version.code !== 0) return failure("nonzero_exit", `CLI version check exited ${version.code}`, { ...emptyBase, stdout: version.stdout, stderr: version.stderr });
+    if (version.stdout.trim() !== expectedVersions[request.evaluator]) return failure("version_mismatch", `expected ${expectedVersions[request.evaluator]}, received ${version.stdout.trim() || "empty version"}`, { ...emptyBase, stdout: version.stdout, stderr: version.stderr });
     const compactSchema = JSON.stringify(JSON.parse(await readFile(resolve(request.schemaPath), "utf8")));
-    const processResult = await execute(command(request, config.executable ?? (request.evaluator === "terra" ? "codex" : "claude"), outputPath, compactSchema), request.prompt, request.timeoutMs, minimalEnvironment(config));
-    const resultBase = { ...base, usage: usageFrom(processResult.stdout), stdout: processResult.stdout, stderr: processResult.stderr };
+    const inner = command(request, await executablePath(executable, environment), outputPath, compactSchema);
+    const profilePath = join(outputDirectory, "filesystem.sb");
+    await writeFile(profilePath, sandboxProfile(await realpath(request.snapshot), await realpath(resolve(request.schemaPath)), await realpath(outputDirectory), inner.command, environment), { encoding: "utf8", mode: 0o600 });
+    const processResult = await execute({ command: "/usr/bin/sandbox-exec", args: ["-f", profilePath, inner.command, ...inner.args], cwd: inner.cwd }, request.prompt, request.timeoutMs, environment);
+    const observedUsage = usageFrom(processResult.stdout);
+    const resultBase = { ...emptyBase, usage: observedUsage, usageStatus: observedUsage === null ? "inconclusive" as const : "available" as const, attempts: 1, stdout: processResult.stdout, stderr: processResult.stderr };
     if (processResult.timedOut) return failure("timeout", `review exceeded ${request.timeoutMs}ms`, resultBase);
     if (processResult.spawnError !== null) return failure("spawn_error", processResult.spawnError.message, resultBase);
     if (processResult.code !== 0) return failure(reasonForFailure(processResult.stderr, processResult.code), `review exited ${processResult.code}`, resultBase);
@@ -133,6 +176,11 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
     try { text = await readFile(outputPath, "utf8"); } catch { /* Opus returns final output on stdout. */ }
     try {
       const output = finalOutput(text);
+      if (observedUsage === null) return failure("budget_unverifiable", "token usage is unavailable from the frozen CLI output", resultBase);
+      if (observedUsage.inputTokens + observedUsage.outputTokens > request.tokenBudget) return failure("budget_exhausted", `review used more than ${request.tokenBudget} tokens`, resultBase);
+      const toolCalls = request.mode === "controlled" ? 0 : toolCallsFrom(processResult.stdout);
+      if (toolCalls === null) return failure("budget_unverifiable", "tool-call usage is unavailable from the frozen CLI output", resultBase);
+      if (toolCalls > request.toolBudget) return failure("budget_exhausted", `review used more than ${request.toolBudget} tool calls`, resultBase);
       return { ...resultBase, finalOutcome: output.decision === "vulnerable" ? "alert" : output.decision === "safe" ? "no_alert" : "manual_review", output, error: null };
     } catch (error) {
       return failure("malformed_output", error instanceof Error ? error.message : "malformed structured output", resultBase);
