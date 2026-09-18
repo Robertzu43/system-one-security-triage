@@ -1,7 +1,9 @@
+import { createHash } from "node:crypto";
 import { performance } from "node:perf_hooks";
+import { basename } from "node:path";
 import type { TypeSafeClient } from "@typesafe-ai/sdk";
 import { deduplicateCandidates } from "./discover.js";
-import type { Candidate, JevJudgment, RouteOutcome, RouterConfig, SystemArm } from "./contracts.js";
+import type { Candidate, Family, JevJudgment, RouteOutcome, RouterConfig, SystemArm } from "./contracts.js";
 import { judgeWithJev } from "./jev.js";
 import { canonicalJson, writeJsonlExclusive } from "./jsonl.js";
 import { buildEvidencePacket, type EvidencePacket } from "./packets.js";
@@ -10,6 +12,7 @@ import { parseRouterConfig, route } from "./router.js";
 
 export type BenchmarkArm = SystemArm | "semgrep_raw" | "semgrep_to_jev";
 export type CacheSeries = "cold" | "warm";
+export interface ColdCacheEvidence { readonly verifier: string; readonly cleared: readonly string[]; }
 export interface RunRecord {
   readonly candidateId: string;
   readonly packetId: string;
@@ -23,19 +26,26 @@ export interface RunBundle {
   readonly arm: BenchmarkArm;
   readonly cacheSeries: CacheSeries;
   readonly primaryEligible: boolean;
+  readonly ineligibilityReasons: string[];
+  readonly coldCacheEvidence: ColdCacheEvidence | null;
   readonly discoveryMs: number;
   readonly packetMs: number;
   readonly backoffMs: number;
   readonly computeDurationMs: number;
-  readonly durationMs: number;
-  readonly p95LatencyMs: number;
   readonly modelAttempts: number;
   readonly escalations: number;
-  readonly usage: { inputTokens: number; outputTokens: number };
+  readonly usage: { status: "available"; inputTokens: number; outputTokens: number } | { status: "inconclusive"; inputTokens: null; outputTokens: null };
   readonly cost: { status: "available" | "inconclusive"; providerChargeUsd: number | null };
   readonly errors: Array<{ candidateId: string; kind: string; message: string }>;
   readonly records: RunRecord[];
 }
+export interface PublicationReceipt {
+  readonly artifact: string;
+  readonly artifactSha256: string;
+  readonly durationMs: number;
+  readonly p95LatencyMs: number;
+}
+export type PublishedRun = RunBundle & { readonly publication: PublicationReceipt };
 export interface RunArmInput {
   readonly runId: string;
   readonly arm: BenchmarkArm;
@@ -51,6 +61,7 @@ export interface RunArmInput {
   readonly tokenBudget: number;
   readonly toolBudget: number;
   readonly cacheSeries?: CacheSeries;
+  readonly verifyColdCache?: () => Promise<ColdCacheEvidence | null>;
   readonly providerChargeUsd?: number;
   readonly opusModel?: string;
   readonly reasoningConfig?: ReasoningConfig;
@@ -60,6 +71,7 @@ export interface RunArmInput {
 }
 export interface ControlledComparisonInput {
   readonly packet: EvidencePacket;
+  readonly family: Family;
   readonly emptySnapshot: string;
   readonly schemaPath: string;
   readonly timeoutMs: number;
@@ -67,18 +79,19 @@ export interface ControlledComparisonInput {
   readonly toolBudget: number;
   readonly opusModel?: string;
   readonly providerChargeUsd?: number;
-  readonly judgeJev?: (packetJson: string) => Promise<RouteOutcome>;
+  readonly judgeJev?: (packetJson: string) => Promise<{ readonly route: RouteOutcome; readonly family: Family; readonly evidence_span_ids: string[] }>;
   readonly jevJudge?: (packet: EvidencePacket) => Promise<JevJudgment>;
   readonly jevClient?: Pick<TypeSafeClient, "systemOne">;
   readonly routerConfig?: RouterConfig;
   readonly reasoningConfig?: ReasoningConfig;
   readonly runReasoning?: (request: ReasoningRequest, config: ReasoningConfig) => Promise<ReasoningResult>;
 }
+type StructuredDecision = { readonly decision: "vulnerable" | "safe" | "abstain"; readonly family: Family; readonly evidence_span_ids: string[] };
 export interface ControlledComparison {
   readonly packetJson: string;
-  readonly jev: { decision: "vulnerable" | "safe" | "abstain" };
-  readonly terra: { decision: "vulnerable" | "safe" | "abstain" };
-  readonly opus: { decision: "vulnerable" | "safe" | "abstain" } | null;
+  readonly jev: StructuredDecision;
+  readonly terra: StructuredDecision;
+  readonly opus: StructuredDecision | null;
 }
 
 function elapsed(start: number): number { return Math.round((performance.now() - start) * 1000) / 1000; }
@@ -107,7 +120,14 @@ async function jev(packet: EvidencePacket, input: Pick<RunArmInput, "jevJudge" |
   if (input.jevClient !== undefined) return judgeWithJev(packet, input.jevClient);
   return { kind: "abstain", error: { name: "Error", message: "Jev client not configured" } };
 }
-function controlledDecision(result: ReasoningResult): "vulnerable" | "safe" | "abstain" { return result.output?.decision ?? "abstain"; }
+function controlledDecision(result: ReasoningResult, family: Family): StructuredDecision {
+  return result.output ?? { decision: "abstain", family, evidence_span_ids: [] };
+}
+function familyFromJev(judgment: JevJudgment, fallback: Family): Family {
+  if (judgment.kind === "abstain") return fallback;
+  const values = [["injection", judgment.answers.is_injection.noul], ["broken_access_control", judgment.answers.is_broken_access_control.noul], ["ssrf", judgment.answers.is_ssrf.noul]] as const;
+  return values.reduce((best, value) => value[1] > best[1] ? value : best)[0];
+}
 
 export function mapJevRouteToDecision(outcome: RouteOutcome): "vulnerable" | "safe" | "abstain" {
   return outcome === "likely_vulnerability" ? "vulnerable" : outcome === "likely_safe" ? "safe" : "abstain";
@@ -118,7 +138,11 @@ export function p95Latency(values: readonly number[]): number {
   return ordered[Math.floor((ordered.length - 1) * 0.95)]!;
 }
 
-export async function runArm(input: RunArmInput): Promise<RunBundle> {
+export async function runArm(input: RunArmInput): Promise<PublishedRun> {
+  const cacheSeries = input.cacheSeries ?? "cold";
+  const verifiedCache = cacheSeries === "cold" && input.verifyColdCache !== undefined ? await input.verifyColdCache() : null;
+  const coldCacheEvidence = verifiedCache === null ? null : { verifier: verifiedCache.verifier, cleared: [...verifiedCache.cleared] };
+  const coldCacheVerified = coldCacheEvidence !== null && coldCacheEvidence.verifier.length > 0 && coldCacheEvidence.cleared.length > 0 && coldCacheEvidence.cleared.every((value) => value.length > 0);
   const started = performance.now();
   const discovered = input.discover === undefined ? input.candidates ?? [] : await input.discover();
   const discoveryMs = elapsed(started);
@@ -136,8 +160,11 @@ export async function runArm(input: RunArmInput): Promise<RunBundle> {
   let escalations = 0;
   let inputTokens = 0;
   let outputTokens = 0;
+  let usageAvailable = true;
   let costAvailable = true;
   let providerChargeUsd = 0;
+  const harnessFailures = new Set(["budget_unverifiable", "version_mismatch", "unsupported_platform"]);
+  const harnessIneligibility = new Set<string>();
   const errors: Array<{ candidateId: string; kind: string; message: string }> = [];
 
   for (const { candidate, packet } of packets) {
@@ -167,22 +194,30 @@ export async function runArm(input: RunArmInput): Promise<RunBundle> {
     if (!needsReasoning || model === null) throw new Error(`arm ${input.arm} cannot review candidate`);
     const result = await runner(reviewRequest(input, model, packet), reasoningConfig);
     modelAttempts += result.attempts;
-    if (result.usage !== null) { inputTokens += result.usage.inputTokens; outputTokens += result.usage.outputTokens; }
+    if (result.usageStatus === "inconclusive" || result.usage === null) usageAvailable = false;
+    else { inputTokens += result.usage.inputTokens; outputTokens += result.usage.outputTokens; }
     if (result.costStatus === "inconclusive" || result.chargeUsd === null) costAvailable = false;
     else providerChargeUsd += result.chargeUsd;
-    if (result.error !== null) errors.push({ candidateId: candidate.candidateId, kind: result.error.kind, message: result.error.message });
+    if (result.error !== null) {
+      errors.push({ candidateId: candidate.candidateId, kind: result.error.kind, message: result.error.message });
+      if (harnessFailures.has(result.error.kind)) harnessIneligibility.add(`reasoning_${result.error.kind}`);
+    }
     records.push({ candidateId: candidate.candidateId, packetId: packet.packetId, finalOutcome: result.finalOutcome, retainedAlert: result.finalOutcome !== "no_alert", route: routed, reasoning: result });
   }
 
   const computeDurationMs = elapsed(started);
+  const ineligibilityReasons = [...(cacheSeries === "cold" ? coldCacheVerified ? [] : ["cold_cache_unverified"] : ["warm_cache_series"]), ...harnessIneligibility];
   const bundle = {
-    runId: input.runId, arm: input.arm, cacheSeries: input.cacheSeries ?? "cold", primaryEligible: (input.cacheSeries ?? "cold") === "cold",
-    discoveryMs, packetMs, backoffMs: 0, computeDurationMs, durationMs: computeDurationMs, p95LatencyMs: p95Latency([computeDurationMs]),
-    modelAttempts, escalations, usage: { inputTokens, outputTokens }, cost: costAvailable && modelAttempts > 0 ? { status: "available" as const, providerChargeUsd } : { status: "inconclusive" as const, providerChargeUsd: null }, errors, records
+    runId: input.runId, arm: input.arm, cacheSeries, primaryEligible: ineligibilityReasons.length === 0, ineligibilityReasons, coldCacheEvidence,
+    discoveryMs, packetMs, backoffMs: 0, computeDurationMs,
+    modelAttempts, escalations, usage: usageAvailable ? { status: "available" as const, inputTokens, outputTokens } : { status: "inconclusive" as const, inputTokens: null, outputTokens: null }, cost: costAvailable && modelAttempts > 0 ? { status: "available" as const, providerChargeUsd } : { status: "inconclusive" as const, providerChargeUsd: null }, errors, records
   } satisfies RunBundle;
   await writeJsonlExclusive(input.artifactPath, [bundle]);
   const durationMs = elapsed(started);
-  return { ...bundle, durationMs, p95LatencyMs: p95Latency([durationMs]) };
+  const artifactContents = `${canonicalJson(bundle)}\n`;
+  const publication = { artifact: basename(input.artifactPath), artifactSha256: createHash("sha256").update(artifactContents).digest("hex"), durationMs, p95LatencyMs: p95Latency([durationMs]) } satisfies PublicationReceipt;
+  await writeJsonlExclusive(`${input.artifactPath}.receipt.jsonl`, [publication]);
+  return { ...bundle, publication };
 }
 
 export async function runControlledComparison(input: ControlledComparisonInput): Promise<ControlledComparison> {
@@ -190,9 +225,17 @@ export async function runControlledComparison(input: ControlledComparisonInput):
   const config = input.reasoningConfig ?? {};
   const runner = input.runReasoning ?? runReasoningReview;
   const routeConfig = input.routerConfig === undefined ? undefined : parseRouterConfig(input.routerConfig);
-  const jevRoute = input.judgeJev !== undefined ? await input.judgeJev(packetJson) : routeConfig === undefined ? "insufficient_context" : route(input.packet, await jev(input.packet, input), routeConfig);
+  let jevResult: StructuredDecision;
+  if (input.judgeJev !== undefined) {
+    const judged = await input.judgeJev(packetJson);
+    jevResult = { decision: mapJevRouteToDecision(judged.route), family: judged.family, evidence_span_ids: [...judged.evidence_span_ids] };
+  } else {
+    const judgment = await jev(input.packet, input);
+    const jevRoute = routeConfig === undefined ? "insufficient_context" : route(input.packet, judgment, routeConfig);
+    jevResult = { decision: mapJevRouteToDecision(jevRoute), family: familyFromJev(judgment, input.family), evidence_span_ids: [] };
+  }
   const base = { snapshot: input.emptySnapshot, schemaPath: input.schemaPath, timeoutMs: input.timeoutMs, tokenBudget: input.tokenBudget, toolBudget: input.toolBudget, prompt: "", ...(input.providerChargeUsd === undefined ? {} : { providerChargeUsd: input.providerChargeUsd }) };
   const terra = await runner(reviewRequest(base, "terra", input.packet, "controlled"), config);
   const opus = input.opusModel === undefined ? null : await runner(reviewRequest({ ...base, opusModel: input.opusModel }, "opus", input.packet, "controlled"), config);
-  return { packetJson, jev: { decision: mapJevRouteToDecision(jevRoute) }, terra: { decision: controlledDecision(terra) }, opus: opus === null ? null : { decision: controlledDecision(opus) } };
+  return { packetJson, jev: jevResult, terra: controlledDecision(terra, input.family), opus: opus === null ? null : controlledDecision(opus, input.family) };
 }
