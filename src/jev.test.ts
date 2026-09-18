@@ -65,3 +65,11 @@ test("Jev abstains on invalid distributions and exhausted SDK failures", async (
   const failedClient = { systemOne: async () => { throw new Error("service unavailable"); } } as unknown as TypeSafeClient;
   assert.deepEqual(await judgeWithJev(packet, failedClient), { kind: "abstain", error: { name: "Error", message: "service unavailable" } });
 });
+
+test("Jev abstains when a Score does not equal its probability-weighted mean", async () => {
+  const invalid = response();
+  invalid.answers.exploitability.score = 3;
+  invalid.answers.exploitability.probabilities = { 0: 1, 1: 0, 2: 0, 3: 0 };
+  const client = { systemOne: async () => invalid } as unknown as TypeSafeClient;
+  assert.deepEqual(await judgeWithJev(packet, client), { kind: "abstain", error: { name: "Error", message: "malformed Jev response" } });
+});

@@ -29,7 +29,8 @@ function noulAnswer(value: unknown): value is NoulAnswer { const answer = record
 function scoreAnswer(value: unknown): value is ScoreAnswer {
   const answer = record(value); const probabilities = record(answer?.probabilities); const legend = record(answer?.legend);
   const levels = ["0", "1", "2", "3"] as const;
-  return answer?.type === "score" && typeof answer.score === "number" && Number.isFinite(answer.score) && answer.score >= 0 && answer.score <= 3 && probability(answer.confidence) && probabilities !== undefined && legend !== undefined && levels.every((key) => probability(probabilities[key])) && Object.keys(probabilities).length === 4 && levels.every((key) => key in legend) && Math.abs(levels.reduce((sum, key) => sum + (probabilities[key] as number), 0) - 1) < 1e-9;
+  if (answer?.type !== "score" || typeof answer.score !== "number" || !Number.isFinite(answer.score) || answer.score < 0 || answer.score > 3 || !probability(answer.confidence) || probabilities === undefined || legend === undefined || !levels.every((key) => probability(probabilities[key])) || Object.keys(probabilities).length !== 4 || !levels.every((key) => key in legend) || Math.abs(levels.reduce((sum, key) => sum + (probabilities[key] as number), 0) - 1) >= 1e-9) return false;
+  return Math.abs(answer.score - levels.reduce((sum, key) => sum + Number(key) * (probabilities[key] as number), 0)) < 1e-9;
 }
 function answers(value: unknown): value is JevAnswers {
   const result = record(value);
