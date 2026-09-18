@@ -6,7 +6,7 @@ import { bootstrapPrimary, parseScoreInput, scoreClaims } from "./scorer.js";
 function primaryFixture(cascadeHits: number, actualCostAvailable = true) {
   const repositories = ["repo-a", "repo-b"];
   const targets = repositories.map((repositoryId, index) => ({ targetId: `target-${index}`, repositoryId, family: "injection", cwe: "CWE-89", severity: "high", vulnerable: true, rawSemgrepMatched: true }));
-  const predictions = targets.flatMap((target) => ["terra_all", "jev_to_terra"].flatMap((arm) => [1, 2, 3, 4, 5].filter((repetition) => arm === "terra_all" || repetition <= cascadeHits).map((repetition) => ({ predictionId: `${arm}-${target.targetId}-${repetition}`, deduplicationId: `${arm}-${target.targetId}-${repetition}`, targetId: target.targetId, repositoryId: target.repositoryId, arm, repetition, finalOutcome: "alert", retainedAlert: true, adjudication: "confirmed" }))));
+  const predictions = [...targets.flatMap((target) => ["terra_all", "jev_to_terra"].flatMap((arm) => [1, 2, 3, 4, 5].filter((repetition) => arm === "terra_all" || repetition <= cascadeHits).map((repetition) => ({ predictionId: `${arm}-${target.targetId}-${repetition}`, deduplicationId: `${arm}-${target.targetId}-${repetition}`, targetId: target.targetId, repositoryId: target.repositoryId, arm, repetition, finalOutcome: "alert", retainedAlert: true, adjudication: "confirmed" })))), { predictionId: "semgrep-alert", deduplicationId: "semgrep-alert", targetId: "target-0", repositoryId: "repo-a", arm: "semgrep_to_jev", repetition: 1, finalOutcome: "alert", retainedAlert: true, adjudication: "confirmed" }];
   const efficiency = repositories.flatMap((repositoryId) => ["terra_all", "jev_to_terra"].flatMap((arm) => [1, 2, 3, 4, 5].map((repetition) => ({ repositoryId, arm, repetition, costUsd: arm === "terra_all" ? 2 : 1, coldLatencyMs: arm === "terra_all" ? 2 : 1 }))));
   const controlled = ["jev", "terra", "opus"].map((evaluator) => ({ packetId: evaluator, evaluator, repetition: 1, decision: "vulnerable", family: "injection", evidenceSpanIds: ["span"], matchedTargetId: "target-0" }));
   return parseScoreInput({ targets, predictions, efficiency, discoveryMatches: [], controlled, validGroundTruth: true, actualCostAvailable });
@@ -51,7 +51,23 @@ test("rejects duplicate, mismatched, and invalid measurement records", () => {
   const prediction = input.predictions[0]!;
   const measurement = input.efficiency[0]!;
   assert.throws(() => parseScoreInput({ ...input, predictions: [...input.predictions, { ...prediction }] }), /duplicate/);
-  assert.throws(() => parseScoreInput({ ...input, predictions: [{ ...prediction, repositoryId: "wrong-repository" }] }), /mismatch/);
+  assert.throws(() => parseScoreInput({ ...input, predictions: [{ ...prediction, repositoryId: "repo-b" }] }), /mismatch/);
   assert.throws(() => parseScoreInput({ ...input, efficiency: [{ ...measurement, costUsd: -1 }] }), /non-negative/);
   assert.throws(() => parseScoreInput({ ...input, efficiency: [{ ...measurement, repetition: 6 }] }), /1\.\.5/);
+});
+
+test("rejects a zero denominator for filtered precision", () => {
+  const input = primaryFixture(5);
+  assert.throws(() => scoreClaims({ ...input, predictions: input.predictions.filter((prediction) => prediction.arm !== "semgrep_to_jev") }), /zero denominator/);
+});
+
+test("rejects an empty controlled evaluator", () => {
+  const input = primaryFixture(5);
+  assert.throws(() => scoreClaims({ ...input, controlled: [] }), /zero denominator/);
+});
+
+test("rejects unmatched predictions from unknown repositories", () => {
+  const input = primaryFixture(5);
+  const alert = input.predictions[0]!;
+  assert.throws(() => parseScoreInput({ ...input, predictions: [...input.predictions, { ...alert, predictionId: "unknown-repository", deduplicationId: "unknown-repository", targetId: null, repositoryId: "unknown-repository" }] }), /unknown repository/);
 });

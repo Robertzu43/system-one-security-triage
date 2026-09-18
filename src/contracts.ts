@@ -40,10 +40,12 @@ export function parseScoreInput(value: unknown): ScoreInput {
   });
   const targetById = new Map(targets.map((target) => [target.targetId, target]));
   if (targetById.size !== targets.length) throw new Error("targetId must be unique");
+  const repositoryIds = new Set(targets.map((target) => target.repositoryId));
   const predictions = array(root.predictions, "predictions").map((value, index) => {
     const row = object(value, `predictions[${index}]`);
     const targetId = row.targetId === null ? null : string(row.targetId, "targetId");
     const prediction = { predictionId: string(row.predictionId, "predictionId"), deduplicationId: string(row.deduplicationId, "deduplicationId"), targetId, repositoryId: string(row.repositoryId, "repositoryId"), arm: oneOf(row.arm, arms, "arm"), repetition: repetition(row.repetition, "repetition"), finalOutcome: oneOf(row.finalOutcome, outcomes, "finalOutcome"), retainedAlert: boolean(row.retainedAlert, "retainedAlert"), adjudication: oneOf(row.adjudication, adjudications, "adjudication") };
+    if (!repositoryIds.has(prediction.repositoryId)) throw new Error("prediction has unknown repository");
     if (targetId !== null && targetById.get(targetId)?.repositoryId !== prediction.repositoryId) throw new Error("prediction target/repository mismatch");
     return prediction;
   });
@@ -54,7 +56,7 @@ export function parseScoreInput(value: unknown): ScoreInput {
     const costUsd = number(row.costUsd, "costUsd"); const coldLatencyMs = number(row.coldLatencyMs, "coldLatencyMs");
     if (costUsd < 0 || coldLatencyMs < 0) throw new Error("cost and latency must be non-negative");
     const repositoryId = string(row.repositoryId, "repositoryId");
-    if (!targets.some((target) => target.repositoryId === repositoryId)) throw new Error("efficiency record has unknown repository");
+    if (!repositoryIds.has(repositoryId)) throw new Error("efficiency record has unknown repository");
     return { repositoryId, arm: oneOf(row.arm, systemArms, "arm"), repetition: repetition(row.repetition, "repetition"), costUsd, coldLatencyMs };
   });
   const efficiencyKeys = new Set(efficiency.map((row) => `${row.repositoryId}\u0000${row.arm}\u0000${row.repetition}`));
