@@ -1,0 +1,176 @@
+[
+  {
+    "sourceCaseId": "CVE-2020-15152",
+    "repositoryUrl": "https://github.com/autovance/ftp-srv.git",
+    "vulnerableCommit": "296573ae017d137a0b4268a96ea45b753bd66305",
+    "fixedCommit": "e449e75219d918c400dec65b4b0759f60476abca",
+    "languages": ["JavaScript"],
+    "family": "ssrf",
+    "cwe": ["CWE-918"],
+    "upstreamLicenseSpdx": "MIT",
+    "licenseEvidenceUrl": "https://github.com/autovance/ftp-srv/blob/e449e75219d918c400dec65b4b0759f60476abca/LICENSE",
+    "reproductionCommand": "bin/cli run --tool <configured-tool-id> CVE-2020-15152",
+    "verificationStatus": "metadata_verified",
+    "blocker": "Vulnerable and fixed commits and upstream license are directly evidenced; no network-disabled local reproduction was run.",
+    "sourceUrls": [
+      "https://github.com/ossf-cve-benchmark/ossf-cve-benchmark/blob/91c59fd54b2b768c0f310bb0027d2ac59cdf74d4/CVEs/CVE-2020-15152.json",
+      "https://github.com/autovance/ftp-srv/commit/296573ae017d137a0b4268a96ea45b753bd66305",
+      "https://github.com/autovance/ftp-srv/commit/e449e75219d918c400dec65b4b0759f60476abca"
+    ]
+  },
+  {
+    "sourceCaseId": "CVE-2020-8205",
+    "repositoryUrl": "https://github.com/transloadit/uppy.git",
+    "vulnerableCommit": "ab88612dff3ce24b001acb3b626516f0e2f7fd0c",
+    "fixedCommit": "740ba1d5b31d946b83c8624d51eedbd9b4e612f0",
+    "languages": ["JavaScript"],
+    "family": "ssrf",
+    "cwe": ["CWE-918"],
+    "upstreamLicenseSpdx": "MIT",
+    "licenseEvidenceUrl": "https://github.com/transloadit/uppy/blob/740ba1d5b31d946b83c8624d51eedbd9b4e612f0/LICENSE",
+    "reproductionCommand": "bin/cli run --tool <configured-tool-id> CVE-2020-8205",
+    "verificationStatus": "metadata_verified",
+    "blocker": "Vulnerable and fixed commits and upstream license are directly evidenced; no network-disabled local reproduction was run.",
+    "sourceUrls": [
+      "https://github.com/ossf-cve-benchmark/ossf-cve-benchmark/blob/91c59fd54b2b768c0f310bb0027d2ac59cdf74d4/CVEs/CVE-2020-8205.json",
+      "https://github.com/transloadit/uppy/commit/ab88612dff3ce24b001acb3b626516f0e2f7fd0c",
+      "https://github.com/transloadit/uppy/commit/740ba1d5b31d946b83c8624d51eedbd9b4e612f0"
+    ]
+  },
+  {
+    "sourceCaseId": "CVE-2017-18352",
+    "repositoryUrl": "https://github.com/GoogleChrome/rendertron.git",
+    "vulnerableCommit": "16ade3208c80c3de8f8e36a05ad8242af1eeb7f4",
+    "fixedCommit": "324ac99732c943d7b16aead2fceaa8b31a458eaa",
+    "languages": ["JavaScript"],
+    "family": "injection",
+    "cwe": ["CWE-79", "CWE-116"],
+    "upstreamLicenseSpdx": "Apache-2.0",
+    "licenseEvidenceUrl": "https://github.com/GoogleChrome/rendertron/blob/324ac99732c943d7b16aead2fceaa8b31a458eaa/LICENSE",
+    "reproductionCommand": "bin/cli run --tool <configured-tool-id> CVE-2017-18352",
+    "verificationStatus": "metadata_verified",
+    "blocker": "Shares one repository and commit pair with CVE-2017-18353 and CVE-2017-18354; group before any split. No network-disabled local reproduction was run.",
+    "relationshipGroup": "rendertron-16ade320-to-324ac997",
+    "sourceUrls": [
+      "https://github.com/ossf-cve-benchmark/ossf-cve-benchmark/blob/91c59fd54b2b768c0f310bb0027d2ac59cdf74d4/CVEs/CVE-2017-18352.json",
+      "https://github.com/GoogleChrome/rendertron/commit/16ade3208c80c3de8f8e36a05ad8242af1eeb7f4",
+      "https://github.com/GoogleChrome/rendertron/commit/324ac99732c943d7b16aead2fceaa8b31a458eaa"
+    ]
+  },
+  {
+    "sourceCaseId": "CVE-2017-18353",
+    "repositoryUrl": "https://github.com/GoogleChrome/rendertron.git",
+    "vulnerableCommit": "16ade3208c80c3de8f8e36a05ad8242af1eeb7f4",
+    "fixedCommit": "324ac99732c943d7b16aead2fceaa8b31a458eaa",
+    "languages": ["JavaScript"],
+    "family": "injection",
+    "cwe": ["CWE-79", "CWE-116"],
+    "upstreamLicenseSpdx": "Apache-2.0",
+    "licenseEvidenceUrl": "https://github.com/GoogleChrome/rendertron/blob/324ac99732c943d7b16aead2fceaa8b31a458eaa/LICENSE",
+    "reproductionCommand": "bin/cli run --tool <configured-tool-id> CVE-2017-18353",
+    "verificationStatus": "metadata_verified",
+    "blocker": "Shares one repository and commit pair with CVE-2017-18352 and CVE-2017-18354; group before any split. No network-disabled local reproduction was run.",
+    "relationshipGroup": "rendertron-16ade320-to-324ac997",
+    "sourceUrls": [
+      "https://github.com/ossf-cve-benchmark/ossf-cve-benchmark/blob/91c59fd54b2b768c0f310bb0027d2ac59cdf74d4/CVEs/CVE-2017-18353.json",
+      "https://github.com/GoogleChrome/rendertron/commit/16ade3208c80c3de8f8e36a05ad8242af1eeb7f4",
+      "https://github.com/GoogleChrome/rendertron/commit/324ac99732c943d7b16aead2fceaa8b31a458eaa"
+    ]
+  },
+  {
+    "sourceCaseId": "CVE-2017-18354",
+    "repositoryUrl": "https://github.com/GoogleChrome/rendertron.git",
+    "vulnerableCommit": "16ade3208c80c3de8f8e36a05ad8242af1eeb7f4",
+    "fixedCommit": "324ac99732c943d7b16aead2fceaa8b31a458eaa",
+    "languages": ["JavaScript"],
+    "family": "ssrf",
+    "cwe": ["CWE-918"],
+    "upstreamLicenseSpdx": "Apache-2.0",
+    "licenseEvidenceUrl": "https://github.com/GoogleChrome/rendertron/blob/324ac99732c943d7b16aead2fceaa8b31a458eaa/LICENSE",
+    "reproductionCommand": "bin/cli run --tool <configured-tool-id> CVE-2017-18354",
+    "verificationStatus": "metadata_verified",
+    "blocker": "Shares one repository and commit pair with CVE-2017-18352 and CVE-2017-18353; group before any split. No network-disabled local reproduction was run.",
+    "relationshipGroup": "rendertron-16ade320-to-324ac997",
+    "sourceUrls": [
+      "https://github.com/ossf-cve-benchmark/ossf-cve-benchmark/blob/91c59fd54b2b768c0f310bb0027d2ac59cdf74d4/CVEs/CVE-2017-18354.json",
+      "https://github.com/GoogleChrome/rendertron/commit/16ade3208c80c3de8f8e36a05ad8242af1eeb7f4",
+      "https://github.com/GoogleChrome/rendertron/commit/324ac99732c943d7b16aead2fceaa8b31a458eaa"
+    ]
+  },
+  {
+    "sourceCaseId": "CVE-2020-7752",
+    "repositoryUrl": "https://github.com/sebhildebrandt/systeminformation.git",
+    "vulnerableCommit": "147550532ab11cac4b609844a519a1d945f5c103",
+    "fixedCommit": "bad372e654cdd549e7d786acbba0035ded54c607",
+    "languages": ["JavaScript"],
+    "family": "injection",
+    "cwe": ["CWE-78", "CWE-88"],
+    "upstreamLicenseSpdx": "MIT",
+    "licenseEvidenceUrl": "https://github.com/sebhildebrandt/systeminformation/blob/bad372e654cdd549e7d786acbba0035ded54c607/LICENSE",
+    "reproductionCommand": "bin/cli run --tool <configured-tool-id> CVE-2020-7752",
+    "verificationStatus": "metadata_verified",
+    "blocker": "Vulnerable and fixed commits and upstream license are directly evidenced; no network-disabled local reproduction was run.",
+    "sourceUrls": [
+      "https://github.com/ossf-cve-benchmark/ossf-cve-benchmark/blob/91c59fd54b2b768c0f310bb0027d2ac59cdf74d4/CVEs/CVE-2020-7752.json",
+      "https://github.com/sebhildebrandt/systeminformation/commit/147550532ab11cac4b609844a519a1d945f5c103",
+      "https://github.com/sebhildebrandt/systeminformation/commit/bad372e654cdd549e7d786acbba0035ded54c607"
+    ]
+  },
+  {
+    "sourceCaseId": "CVE-2020-5251",
+    "repositoryUrl": "https://github.com/parse-community/parse-server.git",
+    "vulnerableCommit": "bde8ab6d55e4da556d0e77eb29d4953ca34eeace",
+    "fixedCommit": "3a3a5eee5ffa48da1352423312cb767de14de269",
+    "languages": ["JavaScript"],
+    "family": "injection",
+    "cwe": ["CWE-89"],
+    "upstreamLicenseSpdx": "BSD-3-Clause",
+    "licenseEvidenceUrl": "https://github.com/parse-community/parse-server/blob/3a3a5eee5ffa48da1352423312cb767de14de269/LICENSE",
+    "reproductionCommand": "bin/cli run --tool <configured-tool-id> CVE-2020-5251",
+    "verificationStatus": "metadata_verified",
+    "blocker": "Vulnerable and fixed commits and upstream license are directly evidenced; no network-disabled local reproduction was run.",
+    "sourceUrls": [
+      "https://github.com/ossf-cve-benchmark/ossf-cve-benchmark/blob/91c59fd54b2b768c0f310bb0027d2ac59cdf74d4/CVEs/CVE-2020-5251.json",
+      "https://github.com/parse-community/parse-server/commit/bde8ab6d55e4da556d0e77eb29d4953ca34eeace",
+      "https://github.com/parse-community/parse-server/commit/3a3a5eee5ffa48da1352423312cb767de14de269"
+    ]
+  },
+  {
+    "sourceCaseId": "CVE-2020-15123",
+    "repositoryUrl": "https://github.com/codecov/codecov-node.git",
+    "vulnerableCommit": "5f6cc62d4f83bf3a75c973868259798814cd231e",
+    "fixedCommit": "c0711c656686e902af2cd92d6aecc8074de4d83d",
+    "languages": ["JavaScript"],
+    "family": "injection",
+    "cwe": ["CWE-78", "CWE-88"],
+    "upstreamLicenseSpdx": "MIT",
+    "licenseEvidenceUrl": "https://github.com/codecov/codecov-node/blob/c0711c656686e902af2cd92d6aecc8074de4d83d/LICENSE",
+    "reproductionCommand": "bin/cli run --tool <configured-tool-id> CVE-2020-15123",
+    "verificationStatus": "metadata_verified",
+    "blocker": "Vulnerable and fixed commits and upstream license are directly evidenced; no network-disabled local reproduction was run.",
+    "sourceUrls": [
+      "https://github.com/ossf-cve-benchmark/ossf-cve-benchmark/blob/91c59fd54b2b768c0f310bb0027d2ac59cdf74d4/CVEs/CVE-2020-15123.json",
+      "https://github.com/codecov/codecov-node/commit/5f6cc62d4f83bf3a75c973868259798814cd231e",
+      "https://github.com/codecov/codecov-node/commit/c0711c656686e902af2cd92d6aecc8074de4d83d"
+    ]
+  },
+  {
+    "sourceCaseId": "CVE-2019-10778",
+    "repositoryUrl": "https://github.com/guybedford/devcert.git",
+    "vulnerableCommit": "651bb8ebb97a029be13656c0476d48db85887451",
+    "fixedCommit": "571f4e6d077f7f21c6aed655ae380d85a7a5d3b8",
+    "languages": ["TypeScript"],
+    "family": "injection",
+    "cwe": ["CWE-78", "CWE-88"],
+    "upstreamLicenseSpdx": "MIT",
+    "licenseEvidenceUrl": "https://github.com/guybedford/devcert/blob/571f4e6d077f7f21c6aed655ae380d85a7a5d3b8/package.json",
+    "reproductionCommand": "bin/cli run --tool <configured-tool-id> CVE-2019-10778",
+    "verificationStatus": "metadata_verified",
+    "blocker": "License is evidenced by the package manifest because that revision has no root LICENSE file; no network-disabled local reproduction was run.",
+    "sourceUrls": [
+      "https://github.com/ossf-cve-benchmark/ossf-cve-benchmark/blob/91c59fd54b2b768c0f310bb0027d2ac59cdf74d4/CVEs/CVE-2019-10778.json",
+      "https://github.com/guybedford/devcert/commit/651bb8ebb97a029be13656c0476d48db85887451",
+      "https://github.com/guybedford/devcert/commit/571f4e6d077f7f21c6aed655ae380d85a7a5d3b8"
+    ]
+  }
+]
