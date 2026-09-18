@@ -113,8 +113,18 @@ adjudicated as possible new instances and then deduplicated by root cause.
 Known target instances that produce no candidate remain in the recall denominator
 and count as false negatives. A model abstention or final `manual_review` outcome on
 a known vulnerable instance also remains in the denominator and counts as a false
-negative for automated recall. Abstentions and manual-review outcomes are reported
-separately and never disappear from scoring.
+negative for automated detection recall. Abstentions and manual-review outcomes are
+reported separately and never disappear from scoring.
+
+Claim 2 uses a different, explicitly named metric: retained-alert recall. Its
+denominator is the set of deduplicated known vulnerable target instances matched by
+at least one raw Semgrep finding. A target instance is retained when at least one of
+its matching findings remains an alert after Jev filtering, including an unresolved
+finding sent to review. It is a false negative for retained-alert recall only when
+Jev suppresses every matching Semgrep finding. Retention does not imply automated
+detection; unresolved retained findings contribute to review workload, not automated
+detection recall. The scorer implements these as separate metrics with separate
+outcome mappings.
 
 Two security reviewers label real findings as `confirmed`, `not_vulnerable`, or
 `insufficient_evidence` while blinded to the system that produced them. A third
@@ -194,6 +204,14 @@ The evidence builder assigns neutral span identifiers and emits the smallest use
 packet. It removes CVE IDs, challenge names, solution comments, commit messages,
 scanner verdicts, vulnerable/fixed filenames, and other label-bearing metadata.
 
+Agentic review uses a sanitized repository snapshot, not the original checkout. The
+snapshot excludes answer-bearing tests, advisories, challenge metadata, solution
+material, vulnerable/fixed labels, and Git history while preserving executable code
+needed for analysis. Reproduction inputs, regression proofs, patches used as labels,
+and the private matching ledger remain available only to validators. Record the
+sanitization manifest and snapshot content hash. Terra-all and Jev-to-Terra receive
+the identical snapshot; apply the same rule to both Opus arms.
+
 One-hop context is a starting budget, not evidence that omitted controls do not
 exist. The packet records whether route middleware, upstream data flow, sanitizers,
 and authorization checks were resolved. If evidence needed for a decision lies
@@ -269,10 +287,11 @@ Build one combined Semgrep-plus-AST candidate pool, then run these arms:
 - later, the equivalent all-Opus and Jev-to-Opus arms.
 
 Terra receives identical agentic permissions and per-candidate budgets in the
-Terra-all and Jev-to-Terra arms: the same read-only repository snapshot, network
-policy, command allowlist, tool-call limit, token budget, and wall-clock cap. Only
-the set of candidates sent to Terra differs. Apply the same rule to Opus. This is a
-system comparison, not a claim that Jev and a tool-using LLM perform the same task.
+Terra-all and Jev-to-Terra arms: the same sanitized, read-only repository snapshot,
+network policy, command allowlist, tool-call limit, token budget, and wall-clock cap.
+Only the set of candidates sent to Terra differs. Apply the same rule to Opus. This
+is a system comparison, not a claim that Jev and a tool-using LLM perform the same
+task.
 
 ### Claim 2: Semgrep false-alert reduction
 
@@ -285,12 +304,18 @@ Use only the frozen raw Semgrep findings as the candidate pool and compare:
 
 Do not include AST-only candidates in this comparison. The combined Semgrep-plus-AST
 pipeline is reported separately and cannot isolate filtering of Semgrep false alerts.
+Score this claim with retained-alert recall and retained-alert precision. Report the
+number and rate of unresolved retained alerts as review workload. Do not reuse the
+automated detection recall mapping from Claim 1.
 
 ### Claim 3: validated yield beyond Semgrep
 
-Run the frozen AST inventory alongside Semgrep. Any confirmed target instance from
-an AST-only candidate is reported as validated yield missed by the exact frozen
-Semgrep configuration, subject to the ground-truth and adjudication rules above.
+Run the frozen AST inventory alongside Semgrep. An AST-only candidate is not itself
+Semgrep-missed yield: Semgrep may flag the same deduplicated target instance at a
+different location. Report a confirmed instance as additional validated yield only
+when the frozen matching ledger shows that no Semgrep finding matches that target
+instance anywhere in the repository. Apply the ground-truth and adjudication rules
+above before counting it.
 
 Pin exact model snapshots, SDKs, prompts, schemas, scanner versions, rules,
 containers, concurrency, retry policies, and run dates. Do not use moving aliases in
@@ -302,9 +327,11 @@ Report:
 
 - candidate-generation coverage, with known no-candidate instances counted as false
   negatives in end-to-end recall;
-- vulnerability-level recall;
+- automated detection recall for Claim 1;
+- retained-alert recall and retained-alert precision for Claim 2;
 - alert precision and verified false alerts per repository and KLOC;
-- abstention, manual-review, insufficient-context, and escalation rates;
+- abstention, manual-review, insufficient-context, escalation, and unresolved-review
+  workload rates;
 - recall lost at the router gate;
 - analyst success conditional on escalation;
 - validated yield missed by the frozen Semgrep configuration;
@@ -313,7 +340,7 @@ Report:
 - cold and warm end-to-end p50/p95 latency at fixed concurrency.
 
 The preregistered primary hypothesis is that Jev-to-Terra loses no more than two
-percentage points of vulnerability-level recall versus Terra-all while reducing
+percentage points of automated detection recall versus Terra-all while reducing
 fully loaded cost and end-to-end latency. Fix that two-point margin before assessing
 sample size. Then determine whether the available repository count and vulnerable
 instance count can detect it with adequate power; do not widen the margin after
@@ -327,6 +354,30 @@ the result is inconclusive—not “recall preserved.” Select thresholds and e
 budgets only on calibration data. Use paired, repository-clustered confidence
 intervals. Keep recall and precision separate rather than presenting F1 as the
 headline metric.
+
+Freeze the efficiency measurements before the holdout:
+
+- The cost unit is fully loaded USD per repository. It is the actual model/API spend
+  plus discovery and packet-construction compute valued at one preregistered cloud
+  runner's hourly price. Include all retries, backoff time, and reasoning-model
+  escalations. Exclude one-time corpus download, dependency installation, container
+  image construction, private validation, and report rendering from both arms.
+- The primary latency statistic is median cold end-to-end wall-clock time per
+  repository. Timing starts immediately before Semgrep and AST discovery and ends
+  after the final `no_alert`, `alert`, or `manual_review` records are durably written.
+  It includes discovery, packet construction, model requests, retries, backoff, and
+  escalations.
+- Run five timed repetitions of each arm for each repository in randomized,
+  interleaved order at the same fixed concurrency. Start each repetition from the
+  same preinstalled sanitized snapshot with local result/tool caches cleared. Do not
+  use provider batch APIs or prompt caching for the primary measurement. Report p95
+  latency and warm-cache behavior only as secondary diagnostics.
+- For each repository, average fully loaded cost and take the median latency across
+  its five repetitions. The cost criterion passes only when the one-sided 95%
+  repository-clustered bootstrap upper bound for
+  `cost(Jev-to-Terra) / cost(Terra-all)` is below `1.0`. The latency criterion uses
+  the same rule for the ratio of per-repository median latencies. Both criteria and
+  the recall criterion must pass; otherwise the primary claim is inconclusive.
 
 ## Report and dashboard
 
@@ -365,11 +416,15 @@ Automated checks cover:
 - split contamination;
 - vulnerable/patched pair grouping;
 - target-instance matching and prediction deduplication;
+- AST/Semgrep overlap, where an AST-only candidate maps to a target instance already
+  matched by a Semgrep finding and therefore adds no Claim 3 yield;
 - router thresholds and boundary cases;
 - forced escalation for missing middleware, sanitizer, authorization, or call-path
   context;
 - known vulnerable and safe fixtures for all three families;
 - recall accounting for no-candidate, abstained, and manual-review positives;
+- separate retained-alert and automated-detection outcome mappings;
+- sanitized-snapshot exclusion and content-hash checks;
 - model-output parsing and failure classification;
 - metric calculations and confidence-interval inputs;
 - agreement between CLI results, report, and dashboard.
