@@ -1,0 +1,10 @@
+{
+  "contextMin": 0.70,
+  "safeRiskMax": 0.20,
+  "highRiskMin": 0.80,
+  "pathMin": 0.70,
+  "controlEffectiveMin": 0.80,
+  "controlAbsentMax": 0.20,
+  "impactMin": 0.70,
+  "directExploitabilityMin": 2.50
+}

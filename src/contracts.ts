@@ -7,6 +7,27 @@ export type Decision = "supported" | "contradicted" | "inconclusive";
 export type Repetition = 1 | 2 | 3 | 4 | 5;
 export type Interval = readonly [lower: number, upper: number];
 export type ContextResolution = Record<"middleware" | "upstreamDataFlow" | "sanitizers" | "authorization" | "callPath", "resolved" | "unresolved">;
+export type RouteOutcome = "likely_safe" | "likely_vulnerability" | "needs_deep_review" | "insufficient_context";
+
+export interface NoulAnswer { readonly type: "noul"; readonly noul: number; }
+export interface ScoreAnswer { readonly type: "score"; readonly score: number; readonly confidence: number; readonly legend: Readonly<Record<string, unknown>>; readonly probabilities: Readonly<Record<"0" | "1" | "2" | "3", number>>; }
+export interface JevAnswers {
+  readonly untrusted_influence: NoulAnswer;
+  readonly reaches_sensitive_operation: NoulAnswer;
+  readonly validation_blocks_attack: NoulAnswer;
+  readonly crosses_authorization_boundary: NoulAnswer;
+  readonly authorization_enforced: NoulAnswer;
+  readonly security_impact: NoulAnswer;
+  readonly is_injection: NoulAnswer;
+  readonly is_broken_access_control: NoulAnswer;
+  readonly is_ssrf: NoulAnswer;
+  readonly enough_context: NoulAnswer;
+  readonly exploitability: ScoreAnswer;
+}
+export interface JevResult { readonly kind: "judgment"; readonly model: string; readonly usage: { readonly input_tokens: number; readonly output_tokens: number }; readonly answers: JevAnswers; }
+export interface JevAbstention { readonly kind: "abstain"; readonly error: { readonly name: string; readonly message: string }; }
+export type JevJudgment = JevResult | JevAbstention;
+export interface RouterConfig { readonly contextMin: number; readonly safeRiskMax: number; readonly highRiskMin: number; readonly pathMin: number; readonly controlEffectiveMin: number; readonly controlAbsentMax: number; readonly impactMin: number; readonly directExploitabilityMin: number; }
 
 export interface Candidate {
   candidateId: string;
