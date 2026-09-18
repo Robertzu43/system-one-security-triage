@@ -10,8 +10,9 @@ showing how Jev can triage security candidates before expensive reasoning models
 investigate them.
 
 The repository name is `system-one-security-triage`. The public demo may use the
-competitive framing **Jev vs Opus vs Terra**. The eventual publication title will
-be chosen after the measurements reveal the strongest defensible result.
+competitive framing **Jev vs Opus vs Terra**. Claim 1 below is the preregistered
+primary claim. The eventual publication title may emphasize a supported result but
+must not replace, broaden, or obscure that primary claim after results are known.
 
 ## Scope
 
@@ -43,8 +44,9 @@ everything missed by security scanners generally.
 
 ### OWASP Juice Shop
 
-Use a frozen, redacted Juice Shop revision for development, prompt design,
-threshold calibration, dashboard examples, and qualitative case studies.
+Use a frozen, redacted Juice Shop revision only for development, prompt design,
+dashboard examples, and qualitative case studies. Do not use Juice Shop to select
+thresholds or escalation budgets.
 
 Juice Shop is not the sole or primary holdout because it is public training
 software. Challenge identifiers, solutions, marker comments, tests, and tutorial
@@ -52,18 +54,35 @@ material can reveal expected answers and may have appeared in model training dat
 Remove those artifacts from model inputs while retaining a private mapping to the
 underlying vulnerability root causes.
 
+### Calibration repositories
+
+Reserve separate JavaScript/TypeScript repositories for calibration. They must be
+repository-disjoint from Juice Shop and the final holdout. Use them to select
+thresholds and escalation budgets after prompts, packet construction, and routing
+logic have been developed on Juice Shop.
+
 ### OpenSSF CVE Benchmark
 
 Use pinned, real vulnerable and patched JavaScript/TypeScript revisions from the
-OpenSSF CVE Benchmark as the untouched public holdout. Verify the language,
-localization, build requirements, reproduction, and upstream license of every
-selected case.
+OpenSSF CVE Benchmark for calibration and holdout, partitioned by repository before
+any calibration run. Verify the language, localization, build requirements,
+reproduction, and upstream license of every selected case.
+
+The holdout is untouched by this experiment, not contamination-free. OpenSSF is a
+public CVE corpus, so its code, advisories, and patches may have appeared in model
+training data. Report that limitation explicitly and do not interpret the split as
+proof of model unfamiliarity.
 
 ### Safe controls
 
 Include patched counterparts and representative non-vulnerable routes, sinks, and
-authorization checks. An absence of generated candidates is not proof that code is
-safe; candidate-generation coverage is measured separately.
+authorization checks. A patch establishes that its target vulnerability was removed;
+it does not establish that the entire route, file, or repository is safe. Label the
+patched example as negative only for that target instance. Adjudicate unrelated
+findings as separate instances.
+
+An absence of generated candidates is not proof that code is safe;
+candidate-generation coverage is measured separately.
 
 Split development, calibration, and holdout data by repository and underlying
 vulnerability root cause. Vulnerable/patched pairs and related examples must remain
@@ -81,6 +100,21 @@ line, file, or Juice Shop challenge. A record contains:
 - vulnerable and patched locations;
 - a safe reproduction or regression test;
 - provenance and independent reviewer decisions.
+
+Before the holdout run, freeze a private matching ledger that maps every known
+evidence-packet ID to zero or more target-instance IDs. A prediction matches a known
+instance only when it comes from a mapped packet, selects the correct vulnerability
+family, and identifies a labeled vulnerable span or the labeled source-to-sink or
+authorization path. Multiple alerts matching the same target instance count as one
+true positive. One alert cannot satisfy multiple target instances unless the frozen
+ledger explicitly records that shared root cause. Unmatched predictions are
+adjudicated as possible new instances and then deduplicated by root cause.
+
+Known target instances that produce no candidate remain in the recall denominator
+and count as false negatives. A model abstention or final `manual_review` outcome on
+a known vulnerable instance also remains in the denominator and counts as a false
+negative for automated recall. Abstentions and manual-review outcomes are reported
+separately and never disappear from scoring.
 
 Two security reviewers label real findings as `confirmed`, `not_vulnerable`, or
 `insufficient_evidence` while blinded to the system that produced them. A third
@@ -105,28 +139,37 @@ Pinned repository revision
                     Evidence packets
             code slice + one-hop context + metadata
                            |
-            +--------------+--------------+
-            |                             |
-            v                             v
-     Controlled evaluators          Jev security judgments
-     Terra / Opus later             batched atomic questions
-            |                             |
-            +--------------+--------------+
-                           v
-                Deterministic router
-          likely_safe / likely_vulnerability /
-                    needs_deep_review
-                           |
-                           v
-               Agentic Terra/Opus review
-                   for escalations only
-                           |
-                           v
-                Ground-truth validation
-                           |
-               +-----------+-----------+
-               v                       v
-        Benchmark report       Interactive dashboard
+             +-------------+-------------+
+             |                           |
+             v                           v
+   Controlled Jev/Terra/Opus      Jev security judgments
+       without tools              batched atomic questions
+             |                           |
+             |                           v
+             |                Deterministic router
+             |             +-------------+-------------+
+             |             |             |             |
+             |             v             v             v
+             |        likely_safe      likely_     needs_deep_review or
+             |          suppress    vulnerability  insufficient_context
+             |             |              |             |
+             |             |              |             v
+             |             |              |    Agentic Terra/Opus review
+             |             |              |             |
+             |             |              +------+------+
+             |             |                     |
+             +-------------+---------------------+
+                                   |
+                                   v
+                     Final no_alert / alert /
+                            manual_review
+                                   |
+                                   v
+                        Ground-truth validation
+                                   |
+                       +-----------+-----------+
+                       v                       v
+                Benchmark report       Interactive dashboard
 ```
 
 One TypeScript CLI performs discovery, packet construction, evaluator invocation,
@@ -151,6 +194,12 @@ The evidence builder assigns neutral span identifiers and emits the smallest use
 packet. It removes CVE IDs, challenge names, solution comments, commit messages,
 scanner verdicts, vulnerable/fixed filenames, and other label-bearing metadata.
 
+One-hop context is a starting budget, not evidence that omitted controls do not
+exist. The packet records whether route middleware, upstream data flow, sanitizers,
+and authorization checks were resolved. If evidence needed for a decision lies
+outside the packet or cannot be resolved, the outcome is `insufficient_context` and
+must escalate. “Not shown” never means “not enforced,” “unsanitized,” or “safe.”
+
 ## Jev judgments
 
 Jev receives one packet once and answers independent questions together:
@@ -162,6 +211,8 @@ Jev receives one packet once and answers independent questions together:
 - Is the required authorization actually enforced?
 - Could the behavior violate confidentiality, integrity, or availability?
 - Does the packet support injection, broken access control, or SSRF?
+- Does the packet contain enough source, middleware, sanitizer, authorization, and
+  call-path evidence to make the relevant judgment?
 - On a concrete ordered rubric, is exploitation unreachable, theoretical,
   constrained, or direct?
 
@@ -171,8 +222,23 @@ probabilities are retained. Code combines them into routing outcomes; Jev does n
 own the control flow.
 
 Thresholds are tuned only on calibration data and frozen before the holdout.
-High-impact or uncertain cases escalate. The implementation must not compare Jev's
-probabilities directly with an LLM's self-reported confidence.
+High-impact, uncertain, or context-incomplete cases escalate. Any required evidence
+dimension marked unresolved forces `insufficient_context`, regardless of other
+probabilities. The implementation must not compare Jev's probabilities directly
+with an LLM's self-reported confidence.
+
+Routing outcomes have fixed operational meanings:
+
+- `likely_safe`: suppress the candidate. Any hidden known vulnerability counts as a
+  false negative.
+- `likely_vulnerability`: emit a final machine alert without reasoning-model review.
+- `needs_deep_review`: send the candidate to the configured reasoning model.
+- `insufficient_context`: always send the candidate to the configured reasoning
+  model with repository access.
+
+The reasoning model returns `alert`, `no_alert`, or `manual_review`. A final
+`manual_review` is visible in results and counts as undetected for automated recall;
+it is not silently converted to either safe or vulnerable.
 
 ## Experiments
 
@@ -193,19 +259,38 @@ native structured-output mechanism. Only the bounded decision, family, and evide
 localization are compared. Prose quality and LLM self-confidence are not benchmark
 targets.
 
-### End-to-end cascade
+### Claim 1: cascade efficiency at matched recall
 
-Run these arms:
+Build one combined Semgrep-plus-AST candidate pool, then run these arms:
 
-- frozen scanner alone;
-- Jev on every generated candidate;
-- Terra on every candidate;
-- Jev routing to Terra for escalated cases;
-- later, Opus on every candidate and Jev routing to Opus.
+- Terra reviewing every candidate;
+- Jev routing the identical candidate pool, with Terra reviewing only
+  `needs_deep_review` and `insufficient_context` outcomes;
+- later, the equivalent all-Opus and Jev-to-Opus arms.
 
-For agentic review, use the same read-only repository snapshot, network policy,
-command allowlist, tool-call limit, token budget, and wall-clock cap. This is a
+Terra receives identical agentic permissions and per-candidate budgets in the
+Terra-all and Jev-to-Terra arms: the same read-only repository snapshot, network
+policy, command allowlist, tool-call limit, token budget, and wall-clock cap. Only
+the set of candidates sent to Terra differs. Apply the same rule to Opus. This is a
 system comparison, not a claim that Jev and a tool-using LLM perform the same task.
+
+### Claim 2: Semgrep false-alert reduction
+
+Use only the frozen raw Semgrep findings as the candidate pool and compare:
+
+- raw Semgrep, where every Semgrep finding is an alert;
+- Semgrep-to-Jev, where Jev suppresses only `likely_safe`, emits
+  `likely_vulnerability`, and retains `needs_deep_review` or
+  `insufficient_context` as unresolved alerts requiring review.
+
+Do not include AST-only candidates in this comparison. The combined Semgrep-plus-AST
+pipeline is reported separately and cannot isolate filtering of Semgrep false alerts.
+
+### Claim 3: validated yield beyond Semgrep
+
+Run the frozen AST inventory alongside Semgrep. Any confirmed target instance from
+an AST-only candidate is reported as validated yield missed by the exact frozen
+Semgrep configuration, subject to the ground-truth and adjudication rules above.
 
 Pin exact model snapshots, SDKs, prompts, schemas, scanner versions, rules,
 containers, concurrency, retry policies, and run dates. Do not use moving aliases in
@@ -215,10 +300,11 @@ headline results.
 
 Report:
 
-- candidate-generation coverage;
+- candidate-generation coverage, with known no-candidate instances counted as false
+  negatives in end-to-end recall;
 - vulnerability-level recall;
 - alert precision and verified false alerts per repository and KLOC;
-- abstention and escalation rates;
+- abstention, manual-review, insufficient-context, and escalation rates;
 - recall lost at the router gate;
 - analyst success conditional on escalation;
 - validated yield missed by the frozen Semgrep configuration;
@@ -226,10 +312,21 @@ Report:
 - actual tokens and fully loaded cost, including retries and escalations;
 - cold and warm end-to-end p50/p95 latency at fixed concurrency.
 
-Pre-register a recall non-inferiority margin after auditing the available sample
-size. Select thresholds and escalation budgets only on calibration data. Use paired,
-repository-clustered confidence intervals. Keep recall and precision separate rather
-than presenting F1 as the headline metric.
+The preregistered primary hypothesis is that Jev-to-Terra loses no more than two
+percentage points of vulnerability-level recall versus Terra-all while reducing
+fully loaded cost and end-to-end latency. Fix that two-point margin before assessing
+sample size. Then determine whether the available repository count and vulnerable
+instance count can detect it with adequate power; do not widen the margin after
+seeing the corpus or results.
+
+The primary recall claim passes only when the one-sided 95% confidence bound for
+`recall(Jev-to-Terra) - recall(Terra-all)` is above `-0.02`. Cost and latency must
+also favor the cascade under their preregistered comparisons. If the corpus is too
+small, the confidence bound crosses the margin, or ground truth remains insufficient,
+the result is inconclusive—not “recall preserved.” Select thresholds and escalation
+budgets only on calibration data. Use paired, repository-clustered confidence
+intervals. Keep recall and precision separate rather than presenting F1 as the
+headline metric.
 
 ## Report and dashboard
 
@@ -267,8 +364,12 @@ Automated checks cover:
 - label-leakage scanning;
 - split contamination;
 - vulnerable/patched pair grouping;
+- target-instance matching and prediction deduplication;
 - router thresholds and boundary cases;
+- forced escalation for missing middleware, sanitizer, authorization, or call-path
+  context;
 - known vulnerable and safe fixtures for all three families;
+- recall accounting for no-candidate, abstained, and manual-review positives;
 - model-output parsing and failure classification;
 - metric calculations and confidence-interval inputs;
 - agreement between CLI results, report, and dashboard.
