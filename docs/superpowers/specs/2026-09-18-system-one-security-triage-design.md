@@ -346,14 +346,24 @@ sample size. Then determine whether the available repository count and vulnerabl
 instance count can detect it with adequate power; do not widen the margin after
 seeing the corpus or results.
 
-The primary recall claim passes only when the one-sided 95% confidence bound for
-`recall(Jev-to-Terra) - recall(Terra-all)` is above `-0.02`. Cost and latency must
-also favor the cascade under their preregistered comparisons. If the corpus is too
-small, the confidence bound crosses the margin, or ground truth remains insufficient,
-the result is inconclusive—not “recall preserved.” Select thresholds and escalation
-budgets only on calibration data. Use paired, repository-clustered confidence
-intervals. Keep recall and precision separate rather than presenting F1 as the
-headline metric.
+Use 10,000 paired, repository-clustered percentile-bootstrap resamples with seed
+`20260918`. The two-sided 90% interval provides the lower and upper one-sided 95%
+bounds used for the preregistered decisions. Classify each component separately:
+
+- Recall is `supported` when the lower bound for
+  `recall(Jev-to-Terra) - recall(Terra-all)` is above `-0.02`, `contradicted` when
+  its upper bound is at or below `-0.02`, and `inconclusive` otherwise.
+- Cost or latency reduction is `supported` when the upper bound for its cascade/all
+  ratio is below `1.0`, `contradicted` when the lower bound is at or above `1.0`,
+  and `inconclusive` otherwise.
+- The primary hypothesis is `supported` only when all three components are
+  supported, `contradicted` when any component is contradicted, and `inconclusive`
+  otherwise. An invalid evaluation or insufficient ground truth is also
+  inconclusive; a valid interval entirely beyond the recall-loss margin is a
+  contradiction, not uncertainty.
+
+Select thresholds and escalation budgets only on calibration data. Keep recall and
+precision separate rather than presenting F1 as the headline metric.
 
 Freeze the efficiency measurements before the holdout:
 
@@ -361,7 +371,11 @@ Freeze the efficiency measurements before the holdout:
   plus discovery and packet-construction compute valued at one preregistered cloud
   runner's hourly price. Include all retries, backoff time, and reasoning-model
   escalations. Exclude one-time corpus download, dependency installation, container
-  image construction, private validation, and report rendering from both arms.
+  image construction, private validation, and report rendering from both arms. A
+  subscription-backed call with no defensible per-call allocation is not free: it may
+  be used for development or calibration, but the primary cost component is
+  inconclusive unless every included model call has an actual provider charge or a
+  preregistered allocation backed by billing records.
 - The primary latency statistic is median cold end-to-end wall-clock time per
   repository. Timing starts immediately before Semgrep and AST discovery and ends
   after the final `no_alert`, `alert`, or `manual_review` records are durably written.
@@ -372,12 +386,27 @@ Freeze the efficiency measurements before the holdout:
   same preinstalled sanitized snapshot with local result/tool caches cleared. Do not
   use provider batch APIs or prompt caching for the primary measurement. Report p95
   latency and warm-cache behavior only as secondary diagnostics.
-- For each repository, average fully loaded cost and take the median latency across
-  its five repetitions. The cost criterion passes only when the one-sided 95%
-  repository-clustered bootstrap upper bound for
-  `cost(Jev-to-Terra) / cost(Terra-all)` is below `1.0`. The latency criterion uses
-  the same rule for the ratio of per-repository median latencies. Both criteria and
-  the recall criterion must pass; otherwise the primary claim is inconclusive.
+- For recall, deduplicate predictions within each repetition first. For each target
+  instance and arm, average its five binary run outcomes, then average those
+  target-level detection rates across the unique target instances in the
+  denominator. A known instance with no candidate contributes zero in every
+  repetition. Exhausted model or tool failures use the frozen abstention mapping and
+  are not dropped. The five observations estimate one instance's repeated-run
+  detection rate; they never become five independent vulnerabilities. Apply the same
+  nesting to retained-alert recall for Claim 2.
+- For each arm and repository, average fully loaded cost and take the median latency
+  across its five repetitions. The primary cost ratio is the arithmetic mean of the
+  cascade repositories' mean costs divided by the arithmetic mean of the Terra-all
+  repositories' mean costs. The primary latency ratio is the arithmetic mean of the
+  cascade repositories' median latencies divided by the arithmetic mean of the
+  Terra-all repositories' median latencies. Neither estimand is the mean of
+  repository-level ratios.
+- Every bootstrap draw samples paired repositories with replacement. A sampled
+  repository carries both arms, all of its target instances, and all five
+  repetitions; the scorer then recomputes the nested recall aggregates, repository
+  cost means, repository latency medians, and ratio-of-means statistics. Apply the
+  three-outcome decision rules above rather than collapsing a contradicted result
+  into inconclusive.
 
 ## Report and dashboard
 
