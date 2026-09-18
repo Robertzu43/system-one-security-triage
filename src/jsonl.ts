@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { lstat, open, readFile, rename, rm } from "node:fs/promises";
+import { link, lstat, open, readFile, rm, unlink } from "node:fs/promises";
+import { dirname } from "node:path";
 
 function canonicalValue(value: unknown, ancestors = new Set<object>()): unknown {
   if (value === null || typeof value === "string" || typeof value === "boolean") return value;
@@ -45,6 +46,18 @@ async function assertMissing(path: string): Promise<void> {
   throw new Error(`artifact already exists: ${path}`);
 }
 
+async function syncDirectory(path: string): Promise<void> {
+  let handle: Awaited<ReturnType<typeof open>> | undefined;
+  try {
+    handle = await open(path, "r");
+    await handle.sync();
+  } catch (error: unknown) {
+    if (!new Set(["EINVAL", "ENOTSUP", "EISDIR", "EPERM"]).has((error as NodeJS.ErrnoException).code ?? "")) throw error;
+  } finally {
+    await handle?.close();
+  }
+}
+
 export async function readJsonl<T>(path: string, parse: (value: unknown) => T): Promise<T[]> {
   const text = await readFile(path, "utf8");
   if (text === "") return [];
@@ -66,9 +79,10 @@ export async function writeJsonlExclusive(path: string, values: readonly unknown
     } finally {
       await handle.close();
     }
-    await assertMissing(path);
-    await rename(temporary, path);
+    await link(temporary, path);
+    await unlink(temporary);
     created = false;
+    await syncDirectory(dirname(path));
   } finally {
     if (created) await rm(temporary, { force: true });
   }

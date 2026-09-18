@@ -3,17 +3,22 @@ import { copyFile, lstat, mkdir, readFile, readdir } from "node:fs/promises";
 import { dirname, resolve, sep } from "node:path";
 import { stableHash } from "./jsonl.js";
 
-const excludedSegments = new Set([".git", "test", "tests", "__tests__", "advisories", "solutions", "challenges", "writeups", "patches"]);
+const excludedSegments = new Set([".git", "test", "tests", "__tests__", "advisories", "solutions", "challenges", "writeups", "patches", "private"]);
 const excludedSuffixes = [".patch", ".diff"];
 const forbiddenText = [/\bCVE-\d{4}-\d+\b/i, /vuln-code-snippet/i, /\bchallenge\b/i, /known vulnerable/i, /patched version/i];
+const sensitivePathTerms = ["vulnerable", "patched", "challenge", "solution", "advisory", "writeup"];
 
 export interface SanitizationPolicy { sourceCommit: string; }
 export interface SnapshotFile { path: string; sha256: string; }
 export interface SnapshotManifest { sourceCommit: string; policyHash: string; files: SnapshotFile[]; contentHash: string; }
 
-const policyHash = stableHash({ excludedSegments: [...excludedSegments].sort(), excludedSuffixes, forbiddenText: forbiddenText.map((pattern) => pattern.toString()) });
+const policyHash = stableHash({ excludedSegments: [...excludedSegments].sort(), excludedSuffixes, forbiddenText: forbiddenText.map((pattern) => pattern.toString()), sensitivePathTerms, excludedFilenamePatterns: ["*.test.*", "*.spec.*", "_test.*", ".env", ".env.*", "CVE-<year>-<id>"] });
 
-function excluded(path: string): boolean { return path.split("/").some((segment) => excludedSegments.has(segment)) || excludedSuffixes.some((suffix) => path.endsWith(suffix)); }
+function sensitiveSegment(segment: string): boolean {
+  const lower = segment.toLowerCase();
+  return excludedSegments.has(lower) || lower === ".env" || lower.startsWith(".env.") || lower.includes(".test.") || lower.includes(".spec.") || lower.startsWith("_test.") || /\bCVE-\d{4}-\d+\b/i.test(segment) || sensitivePathTerms.some((term) => lower.includes(term));
+}
+function excluded(path: string): boolean { return path.split("/").some(sensitiveSegment) || excludedSuffixes.some((suffix) => path.toLowerCase().endsWith(suffix)); }
 function rejectLabels(path: string, content: Buffer): void {
   const text = content.toString("utf8");
   if (forbiddenText.some((pattern) => pattern.test(text))) throw new Error(`label leakage in ${path}`);
@@ -39,7 +44,7 @@ async function assertSafeTree(root: string, current = ""): Promise<void> {
 async function walk(source: string, destination: string, current = "", files?: SnapshotFile[]): Promise<SnapshotFile[]> {
   const output = files ?? [];
   const entries = await readdir(resolve(source, current), { withFileTypes: true });
-  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+  for (const entry of entries.sort((left, right) => left.name < right.name ? -1 : left.name > right.name ? 1 : 0)) {
     const path = current === "" ? entry.name : `${current}/${entry.name}`;
     if (entry.isSymbolicLink()) throw new Error(`symbolic link rejected: ${path}`);
     if (excluded(path)) continue;

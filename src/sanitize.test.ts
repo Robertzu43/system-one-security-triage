@@ -34,6 +34,32 @@ test("snapshot copies code bytes and excludes label-bearing repository material"
   }
 });
 
+test("snapshot excludes sensitive filenames even when their contents are safe", async () => {
+  const { root, source, destination } = await checkout();
+  try {
+    const manifest = await createSanitizedSnapshot(source, destination, policy);
+    const sensitive = ["src/route.test.ts", "src/route.spec.ts", "src/_test.ts", "src/.env", "src/.env.local", "src/CVE-2025-0001.ts", "src/known-vulnerable.ts", "src/patched-route.ts", "src/challenge-route.ts", "src/solution-route.ts", "src/advisory-route.ts", "src/writeup-route.ts", "private/secret.ts"];
+    assert.deepEqual(manifest.files.map((file) => file.path), ["src/route.ts"]);
+    for (const path of sensitive) assert.equal(manifest.files.some((file) => file.path === path), false);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("snapshot file ordering and aggregate hash use deterministic code-unit order", async () => {
+  const { root, source, destination } = await checkout();
+  try {
+    await writeFile(join(source, "src", "Z.ts"), "export const upper = true;");
+    await writeFile(join(source, "src", "a.ts"), "export const lower = true;");
+    const first = await createSanitizedSnapshot(source, destination, policy);
+    const second = await createSanitizedSnapshot(source, join(root, "snapshot-again"), policy);
+    assert.deepEqual(first.files.map((file) => file.path), ["src/Z.ts", "src/a.ts", "src/route.ts"]);
+    assert.equal(first.contentHash, second.contentHash);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("snapshot rejects a symbolic link instead of following it", async () => {
   const { root, source, destination } = await checkout();
   try {

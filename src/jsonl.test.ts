@@ -19,3 +19,21 @@ test("atomic JSONL uses sorted compact JSON and refuses replacement", async () =
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test("atomic JSONL concurrent writers publish exactly one unchanged winner", async () => {
+  const root = await mkdtemp(join(tmpdir(), "jsonl-race-test-"));
+  const target = join(root, "records.jsonl");
+  try {
+    const outcomes = await Promise.allSettled([
+      writeJsonlExclusive(target, [{ writer: "first" }]),
+      writeJsonlExclusive(target, [{ writer: "second" }])
+    ]);
+    assert.equal(outcomes.filter((outcome) => outcome.status === "fulfilled").length, 1);
+    const winner = await readFile(target, "utf8");
+    assert.ok(['{"writer":"first"}\n', '{"writer":"second"}\n'].includes(winner));
+    await assert.rejects(writeJsonlExclusive(target, [{ writer: "later" }]), /already exists/);
+    assert.equal(await readFile(target, "utf8"), winner);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

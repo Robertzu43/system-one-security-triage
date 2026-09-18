@@ -82,6 +82,7 @@ export function buildEvidencePacket(candidate: PacketCandidate, _index: number):
     relationships: related.map((value, index) => ({ from: "s1", to: `s${index + 2}`, kind: value.relationship })),
     contextResolution: context(input.contextResolution)
   };
-  if (Buffer.byteLength(canonicalJson(state), "utf8") > maxPacketStateBytes) throw new Error("packet state exceeds 32,000 bytes");
-  return { ...state, packetId: stableHash(state) };
+  const packet = { ...state, packetId: stableHash(state) };
+  if (Buffer.byteLength(canonicalJson(packet), "utf8") > maxPacketStateBytes) throw new Error("packet state exceeds 32,000 bytes");
+  return packet;
 }

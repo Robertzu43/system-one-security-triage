@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { canonicalJson } from "./jsonl.js";
 import { buildEvidencePacket, type PacketCandidate } from "./packets.js";
 
 function candidate(text = "db.query(name)"): PacketCandidate {
@@ -30,6 +31,14 @@ test("packet IDs ignore object key insertion order", () => {
 
 test("packet ID changes when a code span changes", () => {
   assert.notEqual(buildEvidencePacket(candidate("db.query(name)"), 0).packetId, buildEvidencePacket(candidate("db.query(email)"), 0).packetId);
+});
+
+test("packet ceiling includes its visible packet ID at the exact boundary", () => {
+  const baselineBytes = Buffer.byteLength(canonicalJson(buildEvidencePacket(candidate("x"), 0)), "utf8");
+  const text = "x".repeat(32_000 - baselineBytes + 1);
+  const atLimit = buildEvidencePacket(candidate(text), 0);
+  assert.equal(Buffer.byteLength(canonicalJson(atLimit), "utf8"), 32_000);
+  assert.throws(() => buildEvidencePacket(candidate(`${text}x`), 0), /32,000/);
 });
 
 test("packet construction rejects unsafe evidence", () => {
