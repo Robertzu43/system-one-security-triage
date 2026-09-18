@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { lstat, readFile, readdir } from "node:fs/promises";
 import { basename, dirname, extname, posix, resolve, sep } from "node:path";
 import * as ts from "typescript";
@@ -37,14 +38,14 @@ export function deduplicateCandidates(candidates: Candidate[]): Candidate[] {
     const key = id(row.repositoryId, row.familyHint, row.rootOperation, row.primarySpan);
     const current = result.get(key);
     if (current === undefined) {
-      result.set(key, { ...row, candidateId: key, sources: [...new Set(row.sources)].sort(compare) as Candidate["sources"], relatedSpans: [...row.relatedSpans] });
+      result.set(key, { ...row, candidateId: key, primarySpan: { ...row.primarySpan }, sources: [...new Set(row.sources)].sort(compare) as Candidate["sources"], relatedSpans: row.relatedSpans.map((span) => ({ ...span })), contextResolution: { ...row.contextResolution } });
       continue;
     }
     current.sources = [...new Set([...current.sources, ...row.sources])].sort(compare) as Candidate["sources"];
     const related = new Map(current.relatedSpans.map((span) => [relatedKey(span), span]));
     for (const span of row.relatedSpans) related.set(relatedKey(span), span);
     current.relatedSpans = [...related.values()].sort((left, right) => compare(relatedKey(left), relatedKey(right)));
-    for (const name of contextKeys) if (row.contextResolution[name] === "unresolved") current.contextResolution[name] = "unresolved";
+    for (const name of contextKeys) current.contextResolution[name] = current.contextResolution[name] === "resolved" || row.contextResolution[name] === "resolved" ? "resolved" : "unresolved";
   }
   return [...result.values()].sort((left, right) => compare(left.candidateId, right.candidateId));
 }
@@ -54,6 +55,21 @@ async function directory(path: string): Promise<string> {
   const entry = await lstat(fullPath);
   if (entry.isSymbolicLink() || !entry.isDirectory()) throw new Error(`snapshot must be a directory: ${path}`);
   return fullPath;
+}
+async function snapshotId(snapshot: string): Promise<string> {
+  const files: Array<{ path: string; sha256: string }> = [];
+  async function walk(current = ""): Promise<void> {
+    const entries = await readdir(resolve(snapshot, current), { withFileTypes: true });
+    for (const entry of entries.sort((left, right) => compare(left.name, right.name))) {
+      const path = current === "" ? entry.name : `${current}/${entry.name}`;
+      if (entry.isSymbolicLink()) throw new Error(`symbolic link rejected: ${path}`);
+      if (entry.isDirectory()) await walk(path);
+      else if (entry.isFile()) files.push({ path, sha256: createHash("sha256").update(await readFile(resolve(snapshot, ...path.split("/")))).digest("hex") });
+      else throw new Error(`unsupported file type: ${path}`);
+    }
+  }
+  await walk();
+  return stableHash(files);
 }
 async function ruleFile(path: string): Promise<string> {
   const fullPath = resolve(path);
@@ -108,7 +124,8 @@ export async function parseSemgrepResults(output: string, snapshot: string): Pro
   try { parsed = JSON.parse(output); } catch { throw new Error("Semgrep output must be valid JSON"); }
   const root = record(parsed, "Semgrep output");
   if (!Array.isArray(root.results)) throw new Error("Semgrep results must be an array");
-  const repositoryId = stableHash({ snapshot: resolve(snapshot) });
+  const source = await directory(snapshot);
+  const repositoryId = await snapshotId(source);
   const candidates: Candidate[] = [];
   for (const [index, value] of root.results.entries()) {
     const result = record(value, `Semgrep result ${index}`);
@@ -118,7 +135,7 @@ export async function parseSemgrepResults(output: string, snapshot: string): Pro
     const extra = record(result.extra, "Semgrep extra");
     record(extra.metavars, "Semgrep metavariables");
     const rule = rules[result.check_id]!;
-    candidates.push(candidate(repositoryId, "semgrep", rule.familyHint, rule.rootOperation, await fileSpan(resolve(snapshot), scannerPath(result.path), line(start.line, "Semgrep start"), line(end.line, "Semgrep end"))));
+    candidates.push(candidate(repositoryId, "semgrep", rule.familyHint, rule.rootOperation, await fileSpan(source, scannerPath(result.path), line(start.line, "Semgrep start"), line(end.line, "Semgrep end"))));
   }
   return deduplicateCandidates(candidates);
 }
@@ -175,9 +192,10 @@ function requestProperty(node: ts.PropertyAccessExpression): boolean {
 }
 function contains(parent: ts.Node, child: ts.Node): boolean { return parent.pos <= child.pos && child.end <= parent.end; }
 function owner(node: ts.Node): ts.FunctionLikeDeclaration | undefined { for (let current: ts.Node | undefined = node; current !== undefined; current = current.parent) if (isFunction(current)) return current; return undefined; }
-function pathArgument(call: ts.CallExpression): string | undefined { const argument = call.arguments[0]; return argument !== undefined && (ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument)) ? argument.text : undefined; }
-function route(call: ts.CallExpression): boolean { return /\.(get|post|put|patch|delete|all|use)$/i.test(callee(call.expression) ?? "") && (pathArgument(call)?.includes(":") ?? false); }
+function route(call: ts.CallExpression): boolean { return /\.(get|post|put|patch|delete|all|use)$/i.test(callee(call.expression) ?? ""); }
+function routeArguments(call: ts.CallExpression): readonly ts.Expression[] { const first = call.arguments[0]; return first !== undefined && (ts.isStringLiteral(first) || ts.isNoSubstitutionTemplateLiteral(first)) ? call.arguments.slice(1) : call.arguments; }
 function guard(node: ts.Expression): boolean { return /(?:owner|auth|permission|access)/i.test(node.getText()); }
+function validation(call: ts.CallExpression): boolean { return /(?:allow|validate|sanitize|escape|check)/i.test(callee(call.expression) ?? ""); }
 function parameterized(call: ts.CallExpression): boolean { return call.arguments.length > 1 && /\.(query|execute|run)$/i.test(callee(call.expression) ?? ""); }
 function sink(call: ts.CallExpression): { familyHint: Family; rootOperation: string } | undefined {
   const name = callee(call.expression) ?? "";
@@ -191,7 +209,7 @@ function sink(call: ts.CallExpression): { familyHint: Family; rootOperation: str
 
 export async function inventoryAst(snapshot: string): Promise<Candidate[]> {
   const source = await directory(snapshot);
-  const repositoryId = stableHash({ snapshot: source });
+  const repositoryId = await snapshotId(source);
   const files = await units(source);
   const functions = new Map<string, { unit: Unit; node: ts.FunctionLikeDeclaration }>();
   const calls: Array<{ unit: Unit; node: ts.CallExpression }> = [];
@@ -205,6 +223,7 @@ export async function inventoryAst(snapshot: string): Promise<Candidate[]> {
     };
     visit(unit.source);
   }
+  const routeCalls = calls.filter((item) => route(item.node));
   const candidates: Candidate[] = [];
   for (const call of calls) {
     const details = sink(call.node);
@@ -214,28 +233,38 @@ export async function inventoryAst(snapshot: string): Promise<Candidate[]> {
     const requestReads = enclosing === undefined ? [] : reads.filter((read) => read.unit === call.unit && contains(enclosing, read.node));
     for (const read of requestReads) related.push({ ...span(call.unit, read.node), relationship: "flows_to" });
     const name = enclosing === undefined ? undefined : functionName(enclosing);
+    const linkedRoute = enclosing === undefined ? undefined : routeCalls.find((item) => routeArguments(item.node).some((argument) => argument === enclosing || (name !== undefined && ts.isIdentifier(argument) && argument.text === name)));
+    const validations = enclosing === undefined ? [] : calls.filter((other) => other.unit === call.unit && other.node !== call.node && contains(enclosing, other.node) && validation(other.node));
+    for (const check of validations) related.push({ ...span(call.unit, check.node), relationship: "guards" });
+    let caller: { unit: Unit; node: ts.CallExpression } | undefined;
     if (enclosing !== undefined && name !== undefined) {
       related.push({ ...span(call.unit, enclosing), relationship: "calls" });
-      const caller = calls.find((other) => other.unit === call.unit && other.node !== call.node && callee(other.node.expression) === name && !contains(enclosing, other.node));
+      caller = linkedRoute === undefined ? calls.find((other) => other.unit === call.unit && other.node !== call.node && callee(other.node.expression) === name && !contains(enclosing, other.node)) : undefined;
       if (caller !== undefined) related.push({ ...span(call.unit, caller.node), relationship: "calls" });
+    }
+    if (linkedRoute !== undefined) {
+      related.push({ ...span(linkedRoute.unit, linkedRoute.node), relationship: "calls" });
+      for (const middleware of routeArguments(linkedRoute.node).filter(guard)) related.push({ ...span(linkedRoute.unit, middleware), relationship: "guards" });
     }
     const context = emptyContext();
     context.upstreamDataFlow = requestReads.length > 0 ? "resolved" : "unresolved";
-    context.sanitizers = parameterized(call.node) ? "resolved" : "unresolved";
-    context.callPath = enclosing === undefined || name === undefined || related.some((item) => item.relationship === "calls") ? "resolved" : "unresolved";
+    context.sanitizers = parameterized(call.node) || validations.length > 0 ? "resolved" : "unresolved";
+    context.middleware = linkedRoute !== undefined && routeArguments(linkedRoute.node).some(guard) ? "resolved" : "unresolved";
+    context.authorization = context.middleware;
+    context.callPath = linkedRoute !== undefined || caller !== undefined ? "resolved" : "unresolved";
     candidates.push(candidate(repositoryId, "ast", details.familyHint, details.rootOperation, span(call.unit, call.node), related, context));
   }
-  for (const call of calls.filter((item) => route(item.node))) {
-    const handler = call.node.arguments.slice(1).find((argument) => isFunction(argument) || (ts.isIdentifier(argument) && !guard(argument)));
-    const handlerNode = handler !== undefined && isFunction(handler) ? handler : handler !== undefined && ts.isIdentifier(handler) ? functions.get(handler.text)?.node : undefined;
-    const related: Related[] = call.node.arguments.slice(1).filter(guard).map((item) => ({ ...span(call.unit, item), relationship: "guards" }));
-    const requestReads = handlerNode === undefined ? [] : reads.filter((read) => read.unit === call.unit && contains(handlerNode, read.node));
+  for (const call of routeCalls) {
+    const handler = routeArguments(call.node).find((argument) => isFunction(argument) || (ts.isIdentifier(argument) && !guard(argument)));
+    const handlerInfo = handler !== undefined && isFunction(handler) ? { unit: call.unit, node: handler } : handler !== undefined && ts.isIdentifier(handler) ? functions.get(handler.text) : undefined;
+    const related: Related[] = routeArguments(call.node).filter(guard).map((item) => ({ ...span(call.unit, item), relationship: "guards" }));
+    const requestReads = handlerInfo === undefined ? [] : reads.filter((read) => read.unit === handlerInfo.unit && contains(handlerInfo.node, read.node));
     for (const read of requestReads) related.push({ ...span(call.unit, read.node), relationship: "flows_to" });
     const context = emptyContext();
     context.middleware = related.some((item) => item.relationship === "guards") ? "resolved" : "unresolved";
     context.authorization = context.middleware;
     context.upstreamDataFlow = requestReads.length > 0 ? "resolved" : "unresolved";
-    context.callPath = handlerNode === undefined ? "unresolved" : "resolved";
+    context.callPath = handlerInfo === undefined ? "unresolved" : "resolved";
     candidates.push(candidate(repositoryId, "ast", "broken_access_control", "route", span(call.unit, call.node), related, context));
   }
   return deduplicateCandidates(candidates);

@@ -6,6 +6,12 @@ declare const router: {
 };
 declare const db: { query(sql: string, values?: unknown[]): void };
 declare function requireOwner(...args: unknown[]): void;
+const allowedHosts = new Set(["api.example.test"]);
+
+function requireAllowedHost(url: string): string {
+  if (!allowedHosts.has(new URL(url).hostname)) throw new Error("host not allowed");
+  return url;
+}
 
 function executeCommand(command: string) {
   child_process.exec(command);
@@ -31,6 +37,16 @@ router.get("/lookup", async (req: { query: { url: string } }) => {
 });
 
 fetch("https://allowed.example.test");
+
+router.get("/proxy", async (req: { query: { url: string } }) => {
+  return fetch(requireAllowedHost(req.query.url));
+});
+
+function namedLookup(req: { query: { url: string } }) {
+  return fetch(req.query.url);
+}
+
+router.get("/named-lookup", requireOwner, namedLookup);
 
 router.get("/users/:id", (req: { params: { id: string } }) => {
   return db.query("SELECT * FROM users WHERE id = " + req.params.id);
