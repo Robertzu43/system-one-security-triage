@@ -24,7 +24,7 @@ test("snapshot copies code bytes and excludes label-bearing repository material"
     await writeFile(join(source, "notes.diff"), "known vulnerable");
     const manifest = await createSanitizedSnapshot(source, destination, policy);
     assert.deepEqual(await readFile(join(destination, "src", "route.ts")), await readFile(join(source, "src", "route.ts")));
-    assert.deepEqual(manifest.files.map((file) => file.path), ["src/route.ts"]);
+    assert.deepEqual(manifest.files.map((file) => file.path), ["src/private-api.ts", "src/route.ts"]);
     assert.match(manifest.files[0]!.sha256, /^[a-f0-9]{64}$/);
     assert.match(manifest.contentHash, /^[a-f0-9]{64}$/);
     assert.equal(manifest.sourceCommit, policy.sourceCommit);
@@ -39,8 +39,20 @@ test("snapshot excludes sensitive filenames even when their contents are safe", 
   try {
     const manifest = await createSanitizedSnapshot(source, destination, policy);
     const sensitive = ["src/route.test.ts", "src/route.spec.ts", "src/_test.ts", "src/.env", "src/.env.local", "src/CVE-2025-0001.ts", "src/known-vulnerable.ts", "src/patched-route.ts", "src/challenge-route.ts", "src/solution-route.ts", "src/advisory-route.ts", "src/writeup-route.ts", "private/secret.ts"];
-    assert.deepEqual(manifest.files.map((file) => file.path), ["src/route.ts"]);
+    assert.deepEqual(manifest.files.map((file) => file.path), ["src/private-api.ts", "src/route.ts"]);
     for (const path of sensitive) assert.equal(manifest.files.some((file) => file.path === path), false);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("snapshot excludes key artifacts and label-marker filenames with safe contents", async () => {
+  const { root, source, destination } = await checkout();
+  try {
+    const manifest = await createSanitizedSnapshot(source, destination, policy);
+    const sensitive = ["src/vuln-code-snippet.ts", "src/private-key.ts", "src/private_key.ts", "src/secret-key.ts", "src/secret_key.ts", "src/certificate.key", "src/certificate.pem", "src/archive.p12", "src/archive.pfx"];
+    for (const path of sensitive) assert.equal(manifest.files.some((file) => file.path === path), false);
+    assert.equal(manifest.files.some((file) => file.path === "src/private-api.ts"), true);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -53,7 +65,7 @@ test("snapshot file ordering and aggregate hash use deterministic code-unit orde
     await writeFile(join(source, "src", "a.ts"), "export const lower = true;");
     const first = await createSanitizedSnapshot(source, destination, policy);
     const second = await createSanitizedSnapshot(source, join(root, "snapshot-again"), policy);
-    assert.deepEqual(first.files.map((file) => file.path), ["src/Z.ts", "src/a.ts", "src/route.ts"]);
+    assert.deepEqual(first.files.map((file) => file.path), ["src/Z.ts", "src/a.ts", "src/private-api.ts", "src/route.ts"]);
     assert.equal(first.contentHash, second.contentHash);
   } finally {
     await rm(root, { recursive: true, force: true });

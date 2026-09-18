@@ -7,16 +7,17 @@ const excludedSegments = new Set([".git", "test", "tests", "__tests__", "advisor
 const excludedSuffixes = [".patch", ".diff"];
 const forbiddenText = [/\bCVE-\d{4}-\d+\b/i, /vuln-code-snippet/i, /\bchallenge\b/i, /known vulnerable/i, /patched version/i];
 const sensitivePathTerms = ["vulnerable", "patched", "challenge", "solution", "advisory", "writeup"];
+const privateKeyExtensions = [".key", ".pem", ".p12", ".pfx"];
 
 export interface SanitizationPolicy { sourceCommit: string; }
 export interface SnapshotFile { path: string; sha256: string; }
 export interface SnapshotManifest { sourceCommit: string; policyHash: string; files: SnapshotFile[]; contentHash: string; }
 
-const policyHash = stableHash({ excludedSegments: [...excludedSegments].sort(), excludedSuffixes, forbiddenText: forbiddenText.map((pattern) => pattern.toString()), sensitivePathTerms, excludedFilenamePatterns: ["*.test.*", "*.spec.*", "_test.*", ".env", ".env.*", "CVE-<year>-<id>"] });
+const policyHash = stableHash({ excludedSegments: [...excludedSegments].sort(), excludedSuffixes, forbiddenText: forbiddenText.map((pattern) => pattern.toString()), sensitivePathTerms, excludedFilenamePatterns: ["*.test.*", "*.spec.*", "_test.*", ".env", ".env.*", "CVE-<year>-<id>", "vuln-code-snippet", "private-key", "secret-key", ...privateKeyExtensions] });
 
 function sensitiveSegment(segment: string): boolean {
   const lower = segment.toLowerCase();
-  return excludedSegments.has(lower) || lower === ".env" || lower.startsWith(".env.") || lower.includes(".test.") || lower.includes(".spec.") || lower.startsWith("_test.") || /\bCVE-\d{4}-\d+\b/i.test(segment) || sensitivePathTerms.some((term) => lower.includes(term));
+  return excludedSegments.has(lower) || lower === ".env" || lower.startsWith(".env.") || lower.includes(".test.") || lower.includes(".spec.") || lower.startsWith("_test.") || lower.includes("vuln-code-snippet") || /(?:^|[._-])(?:private|secret)[_-]key(?:[._-]|$)/.test(lower) || privateKeyExtensions.some((extension) => lower.endsWith(extension)) || /\bCVE-\d{4}-\d+\b/i.test(segment) || sensitivePathTerms.some((term) => lower.includes(term));
 }
 function excluded(path: string): boolean { return path.split("/").some(sensitiveSegment) || excludedSuffixes.some((suffix) => path.toLowerCase().endsWith(suffix)); }
 function rejectLabels(path: string, content: Buffer): void {
