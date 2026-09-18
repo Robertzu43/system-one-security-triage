@@ -34,7 +34,7 @@
     }
     a { color: inherit; text-underline-offset: .18em; }
     button, select { font: inherit; }
-    :focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
+    :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
     .fixture-banner {
       display: flex;
@@ -106,6 +106,9 @@
     .decision--supported { color: var(--green); }
     .decision--contradicted { color: var(--red); }
     .decision--inconclusive { color: var(--blue); }
+    .decision--alert { color: var(--red); }
+    .decision--no_alert { color: var(--green); }
+    .decision--manual_review { color: var(--blue); }
     .legend { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: .7rem 0 0; padding: 0; list-style: none; font-size: .78rem; }
 
     .notice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
@@ -163,6 +166,11 @@
           <thead><tr><th scope="col">Strategy</th><th scope="col">Recall</th><th scope="col">Cost</th><th scope="col">Latency</th></tr></thead>
           <tbody id="strategy-rows"></tbody>
         </table>
+        <table>
+          <caption>Illustrative preregistered claim decisions shown beside their intervals.</caption>
+          <thead><tr><th scope="col">Claim</th><th scope="col">Interval</th><th scope="col">Decision</th></tr></thead>
+          <tbody id="claim-rows"></tbody>
+        </table>
       </section>
 
       <section class="panel semgrep" aria-labelledby="semgrep-heading">
@@ -170,7 +178,7 @@
         <h2 id="semgrep-heading">Semgrep signal</h2>
         <table>
           <caption>Raw Semgrep compared with alerts retained after Jev routing.</caption>
-          <thead><tr><th scope="col">Stage</th><th scope="col">Alerts</th><th scope="col">Retained</th></tr></thead>
+          <thead><tr><th scope="col">Metric</th><th scope="col">Estimate</th><th scope="col">Interpretation</th></tr></thead>
           <tbody id="semgrep-rows"></tbody>
         </table>
         <p><strong>Raw Semgrep</strong> establishes the fixture baseline. <strong>Retained after Jev</strong> is a routing estimate, not measured production performance.</p>
@@ -191,9 +199,9 @@
           <output id="case-count" aria-live="polite"></output>
         </form>
         <ul class="legend" aria-label="Decision state legend">
-          <li>● supported</li>
-          <li>◆ contradicted</li>
-          <li>▲ inconclusive</li>
+          <li>● alert</li>
+          <li>◆ no alert</li>
+          <li>▲ manual review</li>
         </ul>
         <div class="case-grid" id="case-grid"></div>
       </section>
@@ -224,15 +232,26 @@
     "snapshot": "TRIAGE-FX-0918",
     "filters": { "families": ["all", "injection", "broken-access-control", "ssrf"], "corpora": ["all", "public", "private"] },
     "strategies": [
-      { "id": "jev-terra", "label": "Jev → Terra", "recall": { "estimate": "84%", "interval": "78–89% interval" }, "cost": { "estimate": "$0.14", "interval": "$0.11–$0.18 / 1k candidates" }, "latency": { "estimate": "1.8 s", "interval": "1.4–2.5 s p50 range" } },
-      { "id": "terra-all", "label": "Terra all", "recall": { "estimate": "88%", "interval": "82–92% interval" }, "cost": { "estimate": "$0.63", "interval": "$0.55–$0.74 / 1k candidates" }, "latency": { "estimate": "6.7 s", "interval": "5.6–8.1 s p50 range" } }
+      { "id": "jev-terra", "label": "Jev → Terra", "recall": { "estimate": "84%", "interval": "78–89% interval" }, "cost": { "estimate": "$1.40", "interval": "$1.10–$1.80", "unit": "fully loaded USD / repository" }, "latency": { "estimate": "18 s", "interval": "14–25 s", "unit": "median cold end-to-end / repository" } },
+      { "id": "terra-all", "label": "Terra all", "recall": { "estimate": "88%", "interval": "82–92% interval" }, "cost": { "estimate": "$6.30", "interval": "$5.50–$7.40", "unit": "fully loaded USD / repository" }, "latency": { "estimate": "67 s", "interval": "56–81 s", "unit": "median cold end-to-end / repository" } }
     ],
-    "semgrep": { "raw": { "label": "Raw Semgrep", "alerts": 1240, "rate": "100%" }, "retained": { "label": "Retained after Jev", "alerts": 286, "rate": "23.1%" } },
+    "claims": [
+      { "label": "Recall non-inferiority", "interval": "−4.0 to +2.0 pp", "decision": "supported" },
+      { "label": "Cost reduction", "interval": "−$4.90 to −$3.10 / repository", "decision": "contradicted" },
+      { "label": "Latency reduction", "interval": "−58 to −34 s / repository", "decision": "inconclusive" }
+    ],
+    "semgrep": {
+      "raw": { "label": "Raw Semgrep", "value": "1,240", "detail": "baseline alerts", "metric": "raw alerts" },
+      "retained": { "label": "Retained after Jev", "value": "286", "detail": "23.1% of raw alerts", "metric": "retained proportion" },
+      "retainedAlertRecall": { "label": "Retained-alert recall", "value": "96.0%", "detail": "target instances retained", "metric": "retained-alert recall" },
+      "retainedAlertPrecision": { "label": "Retained-alert precision", "value": "18.5%", "detail": "retained alerts matching targets", "metric": "retained-alert precision" },
+      "unresolvedReviewWorkload": { "label": "Unresolved-review workload", "value": "72", "detail": "manual-review alerts", "metric": "unresolved-review workload" }
+    },
     "waterfall": { "candidate": 1240, "routed": 286, "escalated": 72, "finalAlert": 29, "manualReview": 11 },
     "cases": [
-      { "caseId": "CASE-7C2A", "spanId": "span_cmd_014", "family": "injection", "corpus": "public", "decision": "supported", "finding": "Unsanitized value reaches a command boundary.", "evidence": "Two independent spans preserve the same data-flow path." },
-      { "caseId": "CASE-91FD", "spanId": "span_acl_203", "family": "broken-access-control", "corpus": "private", "decision": "contradicted", "finding": "Object access appears to bypass an ownership check.", "evidence": "A dominating authorization branch rejects the reported path." },
-      { "caseId": "CASE-B480", "spanId": "span_ssrf_077", "family": "ssrf", "corpus": "public", "decision": "inconclusive", "finding": "A user-controlled host may reach the outbound client.", "evidence": "The fixture omits runtime allow-list configuration." }
+      { "caseId": "CASE-7C2A", "spanId": "span_cmd_014", "family": "injection", "corpus": "public", "outcome": "alert", "finding": "Unsanitized value reaches a command boundary.", "evidence": "Two independent spans preserve the same data-flow path." },
+      { "caseId": "CASE-91FD", "spanId": "span_acl_203", "family": "broken-access-control", "corpus": "private", "outcome": "no_alert", "finding": "Object access appears to bypass an ownership check.", "evidence": "A dominating authorization branch rejects the reported path." },
+      { "caseId": "CASE-B480", "spanId": "span_ssrf_077", "family": "ssrf", "corpus": "public", "outcome": "manual_review", "finding": "A user-controlled host may reach the outbound client.", "evidence": "The fixture omits runtime allow-list configuration." }
     ]
   }
   </script>

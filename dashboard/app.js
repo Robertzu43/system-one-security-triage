@@ -14,7 +14,7 @@ const labels = {
   manualReview: "Manual review"
 };
 
-const marks = { supported: "●", contradicted: "◆", inconclusive: "▲" };
+const marks = { supported: "●", contradicted: "◆", inconclusive: "▲", alert: "●", no_alert: "◆", manual_review: "▲" };
 
 function renderStrategies() {
   const body = document.querySelector("#strategy-rows");
@@ -31,8 +31,30 @@ function renderStrategies() {
         interval.textContent = value.interval;
         cell.append(strong, interval);
       }
-      row.append(cell);
+      if (typeof value === "string" && row.children.length === 0) {
+        const heading = document.createElement("th");
+        heading.scope = "row";
+        heading.textContent = value;
+        row.append(heading);
+      } else row.append(cell);
     }
+    return row;
+  }));
+}
+
+function renderClaims() {
+  const body = document.querySelector("#claim-rows");
+  body.replaceChildren(...fixture.claims.map((claim) => {
+    const row = document.createElement("tr");
+    const heading = document.createElement("th");
+    heading.scope = "row";
+    heading.textContent = claim.label;
+    const interval = document.createElement("td");
+    interval.textContent = claim.interval;
+    const decision = document.createElement("td");
+    decision.className = `decision--${claim.decision}`;
+    decision.textContent = `${marks[claim.decision]} ${claim.decision}`;
+    row.append(heading, interval, decision);
     return row;
   }));
 }
@@ -41,8 +63,9 @@ function renderSemgrep() {
   const body = document.querySelector("#semgrep-rows");
   body.replaceChildren(...Object.values(fixture.semgrep).map((metric) => {
     const row = document.createElement("tr");
-    for (const value of [metric.label, metric.alerts.toLocaleString(), metric.rate]) {
-      const cell = document.createElement("td");
+    for (const [index, value] of [metric.label, metric.value, metric.detail].entries()) {
+      const cell = document.createElement(index === 0 ? "th" : "td");
+      if (index === 0) cell.scope = "row";
       cell.textContent = value;
       row.append(cell);
     }
@@ -94,8 +117,8 @@ function caseCard(entry) {
   card.dataset.family = entry.family;
   card.dataset.corpus = entry.corpus;
   heading.textContent = entry.caseId;
-  badge.className = `decision decision--${entry.decision}`;
-  badge.textContent = `${marks[entry.decision]} ${entry.decision}`;
+  badge.className = `decision decision--${entry.outcome}`;
+  badge.textContent = `${marks[entry.outcome]} ${entry.outcome.replace("_", " ")}`;
   meta.className = "case-meta";
   meta.textContent = `${entry.spanId} · ${labels[entry.family]} · ${labels[entry.corpus]}`;
   finding.textContent = entry.finding;
@@ -117,6 +140,7 @@ function renderCases() {
 }
 
 renderStrategies();
+renderClaims();
 renderSemgrep();
 renderWaterfall();
 fillFilter("#family-filter", fixture.filters.families);

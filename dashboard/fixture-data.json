@@ -10,20 +10,28 @@
       "id": "jev-terra",
       "label": "Jev → Terra",
       "recall": { "estimate": "84%", "interval": "78–89% interval" },
-      "cost": { "estimate": "$0.14", "interval": "$0.11–$0.18 / 1k candidates" },
-      "latency": { "estimate": "1.8 s", "interval": "1.4–2.5 s p50 range" }
+      "cost": { "estimate": "$1.40", "interval": "$1.10–$1.80", "unit": "fully loaded USD / repository" },
+      "latency": { "estimate": "18 s", "interval": "14–25 s", "unit": "median cold end-to-end / repository" }
     },
     {
       "id": "terra-all",
       "label": "Terra all",
       "recall": { "estimate": "88%", "interval": "82–92% interval" },
-      "cost": { "estimate": "$0.63", "interval": "$0.55–$0.74 / 1k candidates" },
-      "latency": { "estimate": "6.7 s", "interval": "5.6–8.1 s p50 range" }
+      "cost": { "estimate": "$6.30", "interval": "$5.50–$7.40", "unit": "fully loaded USD / repository" },
+      "latency": { "estimate": "67 s", "interval": "56–81 s", "unit": "median cold end-to-end / repository" }
     }
   ],
+  "claims": [
+    { "label": "Recall non-inferiority", "interval": "−4.0 to +2.0 pp", "decision": "supported" },
+    { "label": "Cost reduction", "interval": "−$4.90 to −$3.10 / repository", "decision": "contradicted" },
+    { "label": "Latency reduction", "interval": "−58 to −34 s / repository", "decision": "inconclusive" }
+  ],
   "semgrep": {
-    "raw": { "label": "Raw Semgrep", "alerts": 1240, "rate": "100%" },
-    "retained": { "label": "Retained after Jev", "alerts": 286, "rate": "23.1%" }
+    "raw": { "label": "Raw Semgrep", "value": "1,240", "detail": "baseline alerts", "metric": "raw alerts" },
+    "retained": { "label": "Retained after Jev", "value": "286", "detail": "23.1% of raw alerts", "metric": "retained proportion" },
+    "retainedAlertRecall": { "label": "Retained-alert recall", "value": "96.0%", "detail": "target instances retained", "metric": "retained-alert recall" },
+    "retainedAlertPrecision": { "label": "Retained-alert precision", "value": "18.5%", "detail": "retained alerts matching targets", "metric": "retained-alert precision" },
+    "unresolvedReviewWorkload": { "label": "Unresolved-review workload", "value": "72", "detail": "manual-review alerts", "metric": "unresolved-review workload" }
   },
   "waterfall": {
     "candidate": 1240,
@@ -38,7 +46,7 @@
       "spanId": "span_cmd_014",
       "family": "injection",
       "corpus": "public",
-      "decision": "supported",
+      "outcome": "alert",
       "finding": "Unsanitized value reaches a command boundary.",
       "evidence": "Two independent spans preserve the same data-flow path."
     },
@@ -47,7 +55,7 @@
       "spanId": "span_acl_203",
       "family": "broken-access-control",
       "corpus": "private",
-      "decision": "contradicted",
+      "outcome": "no_alert",
       "finding": "Object access appears to bypass an ownership check.",
       "evidence": "A dominating authorization branch rejects the reported path."
     },
@@ -56,7 +64,7 @@
       "spanId": "span_ssrf_077",
       "family": "ssrf",
       "corpus": "public",
-      "decision": "inconclusive",
+      "outcome": "manual_review",
       "finding": "A user-controlled host may reach the outbound client.",
       "evidence": "The fixture omits runtime allow-list configuration."
     }
