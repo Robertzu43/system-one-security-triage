@@ -1,5 +1,8 @@
 import { posix } from "node:path";
+import type { ContextResolution } from "./contracts.js";
 import { canonicalJson, stableHash } from "./jsonl.js";
+
+export type { ContextResolution } from "./contracts.js";
 
 const sources = ["semgrep", "ast"] as const;
 const entryKinds = ["route", "handler", "call"] as const;
@@ -12,9 +15,6 @@ const maxPacketStateBytes = 32_000;
 type CandidateSource = (typeof sources)[number];
 type EntryKind = (typeof entryKinds)[number];
 type RelationshipKind = (typeof relationshipKinds)[number];
-type ContextKey = (typeof contextKeys)[number];
-type ContextStatus = (typeof statuses)[number];
-export type ContextResolution = Record<ContextKey, ContextStatus>;
 export interface SpanInput { path: string; startLine: number; endLine: number; text: string; }
 export interface RelatedSpan extends SpanInput { relationship: RelationshipKind; }
 export interface PacketCandidate {

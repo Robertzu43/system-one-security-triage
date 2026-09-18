@@ -6,6 +6,18 @@ export type FinalOutcome = "alert" | "no_alert" | "manual_review";
 export type Decision = "supported" | "contradicted" | "inconclusive";
 export type Repetition = 1 | 2 | 3 | 4 | 5;
 export type Interval = readonly [lower: number, upper: number];
+export type ContextResolution = Record<"middleware" | "upstreamDataFlow" | "sanitizers" | "authorization" | "callPath", "resolved" | "unresolved">;
+
+export interface Candidate {
+  candidateId: string;
+  repositoryId: string;
+  sources: Array<"semgrep" | "ast">;
+  familyHint: Family;
+  rootOperation: string;
+  primarySpan: { path: string; startLine: number; endLine: number; text: string };
+  relatedSpans: Array<{ path: string; startLine: number; endLine: number; text: string; relationship: "calls" | "flows_to" | "guards" }>;
+  contextResolution: ContextResolution;
+}
 
 export interface TargetInstance { targetId: string; repositoryId: string; family: Family; cwe: string; severity: "low" | "medium" | "high" | "critical"; vulnerable: boolean; rawSemgrepMatched: boolean; }
 export interface ControlledPrediction { packetId: string; evaluator: ControlledEvaluator; repetition: Repetition; decision: "vulnerable" | "safe" | "abstain"; family: Family; evidenceSpanIds: string[]; matchedTargetId: string | null; }

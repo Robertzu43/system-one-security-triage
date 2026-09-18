@@ -1,0 +1,36 @@
+rules:
+  - id: inventory.sql-string-query
+    languages: [javascript, typescript]
+    severity: INFO
+    message: inventory.sql-string-query
+    pattern-either:
+      - pattern: $DB.query($SQL + $VALUE, ...)
+      - pattern: $DB.query(`...${$VALUE}...`, ...)
+  - id: inventory.eval
+    languages: [javascript, typescript]
+    severity: INFO
+    message: inventory.eval
+    pattern: eval($VALUE)
+  - id: inventory.process-request-input
+    languages: [javascript, typescript]
+    severity: INFO
+    message: inventory.process-request-input
+    pattern-either:
+      - pattern: $PROCESS.exec($CMD)
+      - pattern: exec($CMD)
+  - id: inventory.network-request-input
+    languages: [javascript, typescript]
+    severity: INFO
+    message: inventory.network-request-input
+    pattern-either:
+      - pattern: fetch($REQ.query.$FIELD)
+      - pattern: fetch($REQ.body.$FIELD)
+  - id: inventory.identifier-route
+    languages: [javascript, typescript]
+    severity: INFO
+    message: inventory.identifier-route
+    patterns:
+      - pattern: $APP.$METHOD($PATH, ...)
+      - metavariable-regex:
+          metavariable: $PATH
+          regex: ".*:.+.*"
