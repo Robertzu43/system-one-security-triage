@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["decision", "family", "evidence_span_ids"],
+  "properties": {
+    "decision": { "enum": ["vulnerable", "safe", "abstain"] },
+    "family": { "enum": ["injection", "broken_access_control", "ssrf"] },
+    "evidence_span_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^s[1-9][0-9]*$" },
+      "uniqueItems": true
+    }
+  }
+}

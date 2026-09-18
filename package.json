@@ -7,6 +7,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test dist/src/*.test.js",
+    "triage": "npm run build --silent && node dist/src/cli.js",
+    "test:e2e": "npm run build --silent && node dist/src/cli.js run --fixture test/fixtures/repository/candidates --evaluator fixture",
     "check": "npm test && git diff --check"
   },
   "dependencies": {
