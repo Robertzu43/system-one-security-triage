@@ -46,6 +46,44 @@ broken access control vulnerabilities while finding 12 of 12 injection and 9 of
 ones. Whether that pattern survives on a label-neutral corpus is the first thing
 the re-recording will show.
 
+## What the first label-neutral recording showed (v4, Jev and Terra only)
+
+Jev and Terra were recorded on the label-neutral corpus before Opus. The run was
+not completed or committed because it exposed a ground-truth defect, but the
+numbers are worth keeping:
+
+| Metric | Jev | Terra |
+| --- | ---: | ---: |
+| Accuracy | 58 / 100 | 74 / 100 |
+| Vulnerable recall | 16 / 34 | 24 / 34 |
+| Safe recall | 10 / 33 | 25 / 33 |
+| Insufficient-context recall | 32 / 33 | 25 / 33 |
+| Safe called vulnerable | 3 | 1 |
+| Vulnerable called safe | 0 | 0 |
+| Broken access control vulnerable found | 1 / 11 | 2 / 11 |
+
+On the leaking corpus the same models scored 71 (v3 Jev) and 92 (v2 Terra).
+
+**Both models called almost every broken access control vulnerability
+`insufficient_context`, and by the rubric they were right.** Those cases were a
+single line such as `invoices.findById(req.params.invoiceId)`. Nothing in the
+span ruled out an authorization middleware upstream, and the instructions say
+missing code is not evidence that a control is absent. In v2 and v3 the case was
+decidable only because the context flag said middleware was resolved. Once the
+flag was removed, 10 of the 11 vulnerable access-control cases were
+indistinguishable from the insufficient ones. That is a labeling defect, not a
+model failure. Injection and SSRF did not have it because source and sink are
+both in the span.
+
+The fix: every broken access control case now shows two spans, the route
+registration with its middleware chain and the handler body. A vulnerable case
+shows authentication but no authorization on a request-controlled id. A safe case
+shows the authorization decision in full, including the body of any middleware
+it relies on. An insufficient case delegates authorization to a helper or policy
+whose body is not shown. Span counts are uniform within the family so structure
+does not leak the label. The corpus hash changed again; v4 is superseded and was
+never committed.
+
 ## What changed
 
 ### Fixture (`test/fixtures/demo-cases.json`)
@@ -109,9 +147,10 @@ direct-choice design is retained.
 These items decide whether the comparison is valid in the field. None can be
 done from fixture data.
 
-1. **Re-record all three evaluators on the label-neutral corpus** under one run
-   ID. The v2 Terra and Opus artifacts cannot be reused as controls because the
-   corpus hash changed.
+1. **Re-record all three evaluators on the current corpus** under one run ID.
+   No earlier artifact can be reused as a control because the corpus hash
+   changed twice: once to remove the label leak, once to make access-control
+   cases decidable.
 2. **Real corpus.** Vulnerable and patched pairs from the OpenSSF CVE Benchmark
    JavaScript and TypeScript cases, Semgrep false positives from the same
    repositories, and deliberate false-positive traps. Repository-disjoint
