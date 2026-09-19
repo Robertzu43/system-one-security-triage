@@ -18,11 +18,11 @@
   <main id="main">
     <section class="hero" aria-labelledby="page-title">
       <div>
-        <p class="eyebrow">100 synthetic cases · recorded model results</p>
+        <p class="eyebrow">100 synthetic cases × 5 passes · 1,500 recorded decisions</p>
         <h1 id="page-title">Decisions,<br><em>under inspection.</em></h1>
       </div>
       <div class="hero-copy">
-        <p class="lede">A reproducible look at how three AI models classified the same security evidence. These are saved outputs—not live browser inference.</p>
+        <p class="lede">A reproducible look at how three AI models classified the same security evidence, five times each. These are saved outputs—not live browser inference.</p>
         <dl class="model-definitions">
           <div><dt>Jev</dt><dd>TypeSafe System One decision model</dd></div>
           <div><dt>Terra</dt><dd>OpenAI model through Codex CLI</dd></div>
@@ -101,7 +101,8 @@
         <p>Jev answers one five-way typed Choice and its full probability distribution is recorded; the selected option is scored exactly as Terra's and Opus's structured answers are scored. No threshold changes Jev's selection. Vulnerability recall counts vulnerable cases labeled vulnerable with any family; recall with the family required, family accuracy, and precision are in the data.</p>
         <p>Model latency is the time around the model request only; end-to-end CLI time is recorded separately. Token counts for Claude include cache reads and writes. Jev probabilities are not compared with any frontier-model confidence value.</p>
         <p>This is a descriptive demo, not a statistical benchmark. Replay only reveals the recorded results again; it never calls a model, changes a decision, or sends data elsewhere.</p>
-        <p><strong>Known limits.</strong> The expected labels were written by one author and have not been checked by a second independent reviewer, so an arguable label is possible and would move these numbers. Each evaluator answered each case once, so nothing here separates a real difference between models from run-to-run variation. At 100 cases a difference smaller than roughly fifteen points is not distinguishable from noise, and per-class figures rest on about thirty cases each. The corpus is balanced by construction across the three outcomes; real code is overwhelmingly not vulnerable, so precision here does not transfer to production. Cases are hand-written rather than drawn from real repositories, which removes any chance a model memorised them and equally removes the messiness that makes real triage hard.</p>
+        <p>Every case was put to every evaluator five times. Each pass is kept, so a model that gives a different answer to identical evidence is visible rather than averaged away, and the accuracy figures are taken over all five hundred answers per model rather than one pass.</p>
+        <p><strong>Known limits.</strong> The expected labels were written by one author and have not been checked by a second independent reviewer, so an arguable label is possible and would move these numbers. At 100 cases a difference smaller than roughly fifteen points is not distinguishable from noise, and per-class figures rest on about thirty cases each. The corpus is balanced by construction across the three outcomes; real code is overwhelmingly not vulnerable, so precision here does not transfer to production. Cases are hand-written rather than drawn from real repositories, which removes any chance a model memorised them and equally removes the messiness that makes real triage hard. Latency compares Jev&rsquo;s API against frontier models driven through agentic command-line tools, so it reflects how each is actually operated here, not a like-for-like inference-speed measurement.</p>
       </div>
     </section>
 
