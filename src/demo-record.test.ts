@@ -21,6 +21,7 @@ function validRecordedRunFixture(cases: readonly DemoCase[]): RecordedDemoRun {
     decision: item.expected,
     correct: true,
     latencyMs: 1,
+    modelLatencyMs: 1,
     error: null
   }));
   const body = {
@@ -76,4 +77,16 @@ test("recorded run parser rejects incomplete, duplicate, unknown, and path-beari
   assert.throws(() => parseRecordedDemoRun({ ...base, results: [{ ...base.results[0]!, error: "runner wrote /tmp/session/output.json" }, ...base.results.slice(1)] }, cases), /local path/);
   assert.throws(() => parseRecordedDemoRun({ ...base, results: [{ ...base.results[0]!, error: "C:\\Users\\alice\\secret" }, ...base.results.slice(1)] }, cases), /local path/);
   assert.throws(() => parseRecordedDemoRun({ ...base, runnerVersion: "OPENAI_API_KEY=secret" }, cases), /secret text/);
+});
+
+test("recorded run parser accepts artifacts without model latency and rejects invalid values", async () => {
+  const cases = await loadDemoCases("test/fixtures/demo-cases.json");
+  const base = validRecordedRunFixture(cases);
+  const rehash = (results: unknown[]) => {
+    const { artifactSha256: _hash, ...body } = { ...base, results };
+    return { ...body, artifactSha256: stableHash(body) };
+  };
+  const legacy = base.results.map(({ modelLatencyMs: _latency, ...rest }) => rest);
+  assert.equal(parseRecordedDemoRun(rehash(legacy), cases).results[0]!.modelLatencyMs, null);
+  assert.throws(() => parseRecordedDemoRun(rehash([{ ...base.results[0]!, modelLatencyMs: -1 }, ...base.results.slice(1)]), cases), /modelLatencyMs is invalid/);
 });

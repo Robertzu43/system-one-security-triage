@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { access, copyFile, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { delimiter, isAbsolute, join, resolve, sep } from "node:path";
+import { performance } from "node:perf_hooks";
 
 export type ReasoningEvaluator = "terra" | "opus";
 export type ReasoningMode = "agentic" | "controlled" | "demo";
@@ -34,6 +35,8 @@ export interface ReasoningResult {
   readonly chargeUsd: number | null;
   readonly costStatus: "available" | "inconclusive";
   readonly attempts: number;
+  /** Wall time around the model CLI invocation only; excludes version checks, sandbox setup, and cleanup. */
+  readonly modelLatencyMs: number | null;
   readonly stdout: string;
   readonly stderr: string;
   readonly error: { kind: ReasoningFailureKind; message: string } | null;
@@ -49,9 +52,12 @@ export const reasoningRunnerVersions: Readonly<Record<ReasoningEvaluator, string
 function record(value: unknown): Record<string, unknown> | null { return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null; }
 function usage(value: unknown): ReasoningResult["usage"] {
   const root = record(value); const parsed = record(root?.usage);
-  const input = parsed?.input_tokens ?? parsed?.inputTokens;
+  const direct = parsed?.input_tokens ?? parsed?.inputTokens;
   const output = parsed?.output_tokens ?? parsed?.outputTokens;
-  return typeof input === "number" && Number.isInteger(input) && input >= 0 && typeof output === "number" && Number.isInteger(output) && output >= 0 ? { inputTokens: input, outputTokens: output } : null;
+  if (typeof direct !== "number" || !Number.isInteger(direct) || direct < 0 || typeof output !== "number" || !Number.isInteger(output) || output < 0) return null;
+  // Claude Code reports uncached input separately from cache reads and cache writes; all three were sent to the model.
+  const cached = [parsed?.cache_read_input_tokens, parsed?.cache_creation_input_tokens].map((value) => typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : 0);
+  return { inputTokens: direct + cached[0]! + cached[1]!, outputTokens: output };
 }
 function parseStructured(value: unknown): StructuredReview {
   const root = record(value);
@@ -163,7 +169,7 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
   const outputDirectory = await mkdtemp(join(outputRoot, "reasoning-"));
   const outputPath = join(outputDirectory, "last-message.json");
   const chargeUsd = request.providerChargeUsd ?? null;
-  const emptyBase = { usage: null, usageStatus: "inconclusive" as const, chargeUsd, costStatus: chargeUsd === null ? "inconclusive" as const : "available" as const, attempts: 0, stdout: "", stderr: "" };
+  const emptyBase = { usage: null, usageStatus: "inconclusive" as const, chargeUsd, costStatus: chargeUsd === null ? "inconclusive" as const : "available" as const, attempts: 0, modelLatencyMs: null, stdout: "", stderr: "" };
   try {
     if ((config.platform ?? process.platform) !== "darwin") return failure("unsupported_platform", "snapshot-only filesystem isolation is unavailable on this platform", emptyBase);
     if (request.evaluator === "terra" && request.mode === "controlled") return failure("budget_unverifiable", "controlled Terra cannot disable all repository tools with the frozen CLI", emptyBase);
@@ -190,9 +196,11 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
     const inner = command(request, await executablePath(executable, environment), outputPath, compactSchema);
     const profilePath = join(outputDirectory, "filesystem.sb");
     await writeFile(profilePath, sandboxProfile(await realpath(request.snapshot), await realpath(resolve(request.schemaPath)), await realpath(outputDirectory), inner.command, environment), { encoding: "utf8", mode: 0o600 });
+    const modelStarted = performance.now();
     const processResult = await execute({ command: "/usr/bin/sandbox-exec", args: ["-f", profilePath, inner.command, ...inner.args], cwd: inner.cwd }, request.prompt, request.timeoutMs, environment);
+    const modelLatencyMs = performance.now() - modelStarted;
     const observedUsage = usageFrom(processResult.stdout);
-    const resultBase = { ...emptyBase, usage: observedUsage, usageStatus: observedUsage === null ? "inconclusive" as const : "available" as const, attempts: 1, stdout: processResult.stdout, stderr: processResult.stderr };
+    const resultBase = { ...emptyBase, usage: observedUsage, usageStatus: observedUsage === null ? "inconclusive" as const : "available" as const, attempts: 1, modelLatencyMs, stdout: processResult.stdout, stderr: processResult.stderr };
     if (processResult.timedOut) return failure("timeout", `review exceeded ${request.timeoutMs}ms`, resultBase);
     if (processResult.spawnError !== null) return failure("spawn_error", processResult.spawnError.message, resultBase);
     if (processResult.code !== 0) return failure(reasonForFailure(processResult.stderr, processResult.code), `review exited ${processResult.code}`, resultBase);

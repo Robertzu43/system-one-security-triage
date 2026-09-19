@@ -77,9 +77,9 @@ function abstain(error: unknown): JevAbstention {
   return { kind: "abstain", error: { name: value.name, message: value.message } };
 }
 
-export async function judgeDemoWithJev(state: string, client: Pick<TypeSafeClient, "systemOne">): Promise<JevDemoJudgment> {
+export async function judgeDemoWithJev(state: string | Record<string, unknown>, client: Pick<TypeSafeClient, "systemOne">): Promise<JevDemoJudgment> {
   try {
-    const response: unknown = await client.systemOne({ state, model: jevModel, questions: demoQuestions });
+    const response: unknown = await client.systemOne({ state: state as EntryType, model: jevModel, questions: demoQuestions });
     const result = record(response); const usage = record(result?.usage); const answers = record(result?.answers); const answer = record(answers?.classification);
     if (typeof result?.model !== "string" || result.model.length === 0 || usage === undefined || !Number.isInteger(usage.input_tokens) || (usage.input_tokens as number) < 0 || !Number.isInteger(usage.output_tokens) || (usage.output_tokens as number) < 0) throw new Error("malformed Jev response: invalid envelope");
     if (answer?.type !== "choice") throw new Error("malformed Jev response: classification type is invalid");

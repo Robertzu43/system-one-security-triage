@@ -1,6 +1,6 @@
 import { lstat, mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { parseDemoDecision, type DemoCase, type DemoEvaluator, type DemoReport, type DemoResult, type EvaluatorMetadata } from "./demo.js";
+import { isCorrectDecision, parseDemoDecision, type DemoCase, type DemoEvaluator, type DemoReport, type DemoResult, type EvaluatorMetadata } from "./demo.js";
 import { stableHash, writeJsonlExclusive } from "./jsonl.js";
 
 export interface RecordedDemoRun {
@@ -64,29 +64,34 @@ function isoTimestamp(value: unknown): string {
   return timestamp;
 }
 
-function isCorrect(actual: DemoResult["decision"], expected: DemoCase["expected"]): boolean {
-  return actual !== null && actual.disposition === expected.disposition && (expected.disposition !== "vulnerable" || actual.family === expected.family);
+function latency(value: unknown, label: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) throw new Error(`${label} is invalid`);
+  return value;
 }
 
 function parseResult(value: unknown, index: number, evaluator: DemoEvaluator, item: DemoCase): DemoResult {
-  const row = record(value, `results[${index}]`);
-  const resultEvaluator = text(row.evaluator, `results[${index}].evaluator`) as DemoEvaluator;
-  if (!evaluators.has(resultEvaluator) || resultEvaluator !== evaluator) throw new Error(`results[${index}] evaluator mismatch`);
+  const label = `results[${index}]`;
+  const row = record(value, label);
+  const resultEvaluator = text(row.evaluator, `${label}.evaluator`) as DemoEvaluator;
+  if (!evaluators.has(resultEvaluator) || resultEvaluator !== evaluator) throw new Error(`${label} evaluator mismatch`);
   const status = row.status;
-  if (status !== "valid" && status !== "error") throw new Error(`results[${index}].status is invalid`);
-  if (typeof row.correct !== "boolean") throw new Error(`results[${index}].correct must be boolean`);
-  if (typeof row.latencyMs !== "number" || !Number.isFinite(row.latencyMs) || row.latencyMs < 0) throw new Error(`results[${index}].latencyMs is invalid`);
+  if (status !== "valid" && status !== "error") throw new Error(`${label}.status is invalid`);
+  if (typeof row.correct !== "boolean") throw new Error(`${label}.correct must be boolean`);
+  const latencyMs = latency(row.latencyMs, `${label}.latencyMs`);
+  // Older artifacts predate model-call timing; they parse with null rather than a fabricated zero.
+  const modelLatencyMs = row.modelLatencyMs === undefined || row.modelLatencyMs === null ? null : latency(row.modelLatencyMs, `${label}.modelLatencyMs`);
   if (status === "error") {
-    if (row.decision !== null || row.correct || typeof row.error !== "string" || row.error.length === 0) throw new Error(`results[${index}] has an invalid error outcome`);
-    return { caseId: item.caseId, evaluator, status, decision: null, correct: false, latencyMs: row.latencyMs, error: row.error };
+    if (row.decision !== null || row.correct || typeof row.error !== "string" || row.error.length === 0) throw new Error(`${label} has an invalid error outcome`);
+    return { caseId: item.caseId, evaluator, status, decision: null, correct: false, latencyMs, modelLatencyMs, error: row.error };
   }
-  if (row.error !== null) throw new Error(`results[${index}] has an error for a valid outcome`);
-  const decision = parseDemoDecision(row.decision, `results[${index}].decision`);
-  const correct = isCorrect(decision, item.expected);
-  if (row.correct !== correct) throw new Error(`results[${index}].correct is inconsistent`);
-  return { caseId: item.caseId, evaluator, status, decision, correct, latencyMs: row.latencyMs, error: null };
+  if (row.error !== null) throw new Error(`${label} has an error for a valid outcome`);
+  const decision = parseDemoDecision(row.decision, `${label}.decision`);
+  const correct = isCorrectDecision(decision, item.expected);
+  if (row.correct !== correct) throw new Error(`${label}.correct is inconsistent`);
+  return { caseId: item.caseId, evaluator, status, decision, correct, latencyMs, modelLatencyMs, error: null };
 }
 
+/** Hash over the model-visible corpus and its labels; private ledger metadata is excluded. */
 export function corpusHash(cases: readonly DemoCase[]): string {
   return stableHash(cases.map(({ caseId, family, state, expected }) => ({ caseId, family, state, expected })));
 }

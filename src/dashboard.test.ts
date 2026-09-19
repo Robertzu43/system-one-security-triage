@@ -29,6 +29,9 @@ test("builder derives metrics from case results including failures", async () =>
   const data = buildPublishedDemoData(cases, runs, "2026-09-18T13:00:00.000Z");
   assert.equal(data.summary.jev.accuracy, runs[0]!.results.filter((row) => row.correct).length / 100);
   assert.equal(data.summary.jev.errors, runs[0]!.results.filter((row) => row.status === "error").length);
+  assert.equal(typeof data.summary.terra.balancedAccuracy, "number");
+  assert.equal(typeof data.summary.terra.falsePositiveRate, "number");
+  assert.equal(data.warnings.some((warning) => /opus recorded 1 explicit error/.test(warning)), true);
 });
 
 test("builder preserves Jev Choice probabilities in published case data", async () => {
@@ -64,11 +67,36 @@ test("builder preserves Jev Choice probabilities in published case data", async 
   assert.deepEqual(data.cases[0]!.results.jev.decision?.choice, choice);
   assert.equal(data.provenance.kind, "direct-choice-mixed");
   assert.match(data.provenance.description, /Jev was rerun.*direct five-way Choice.*Terra and Opus.*retained/);
+  assert.equal(typeof data.summary.jev.brierScore, "number");
+
+  const sameRun = runs.map((run) => ({ ...run, runId: "2026-09-20-public-v4" }));
+  const single = buildPublishedDemoData(cases, sameRun, "2026-09-18T13:00:00.000Z");
+  assert.equal(single.provenance.kind, "direct-choice");
+  assert.match(single.provenance.description, /All three evaluators were recorded in one run/);
+});
+
+test("builder refuses a degenerate single-outcome run unless explicitly allowed, and publishes warnings", async () => {
+  const cases = await loadDemoCases("test/fixtures/demo-cases.json");
+  const runs = await loadFixtureRuns(cases);
+  const allAbstain: RecordedDemoRun = {
+    ...runs[0]!,
+    results: runs[0]!.results.map((row) => ({ ...row, status: "valid", decision: { disposition: "insufficient_context", family: null }, correct: cases.find((item) => item.caseId === row.caseId)!.expected.disposition === "insufficient_context", error: null }))
+  };
+  assert.throws(() => buildPublishedDemoData(cases, [allAbstain, runs[1]!, runs[2]!], "2026-09-18T13:00:00.000Z"), /degenerate run: jev returned a single outcome/);
+  const data = buildPublishedDemoData(cases, [allAbstain, runs[1]!, runs[2]!], "2026-09-18T13:00:00.000Z", { allowDegenerate: true });
+  assert.equal(data.summary.jev.degenerate, true);
+  assert.match(data.warnings.join("\n"), /jev returned a single outcome/);
+  assert.match(data.warnings.join("\n"), /terra did not report token usage/);
 });
 
 test("builder labels archived threshold-routed Jev data", async () => {
   const cases = await loadDemoCases("test/fixtures/demo-cases.json");
-  const runs = (await loadFixtureRuns(cases)).map((run) => ({ ...run, runId: "2026-09-19-public-v2" }));
+  // The fixture Jev run carries Choice data; strip it to simulate a threshold-routed artifact.
+  const runs = (await loadFixtureRuns(cases)).map((run) => ({
+    ...run,
+    runId: "2026-09-19-public-v2",
+    results: run.evaluator === "jev" ? run.results.map((row) => row.decision === null ? row : { ...row, decision: (({ choice: _choice, ...rest }) => rest)(row.decision) }) : run.results
+  }));
 
   const data = buildPublishedDemoData(cases, runs, "2026-09-18T13:00:00.000Z");
 
