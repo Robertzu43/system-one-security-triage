@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { access, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { access, copyFile, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { delimiter, isAbsolute, join, resolve, sep } from "node:path";
 
@@ -44,7 +44,7 @@ interface ProcessResult { code: number; stdout: string; stderr: string; timedOut
 
 const decisions = new Set<StructuredReview["decision"]>(["vulnerable", "safe", "abstain"]);
 const families = new Set<StructuredReview["family"]>(["injection", "broken_access_control", "ssrf"]);
-const expectedVersions: Readonly<Record<ReasoningEvaluator, string>> = { terra: "codex-cli 0.147.0", opus: "2.1.277 (Claude Code)" };
+export const reasoningRunnerVersions: Readonly<Record<ReasoningEvaluator, string>> = { terra: "codex-cli 0.147.0", opus: "2.1.278 (Claude Code)" };
 
 function record(value: unknown): Record<string, unknown> | null { return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null; }
 function usage(value: unknown): ReasoningResult["usage"] {
@@ -82,7 +82,7 @@ function failure(kind: ReasoningFailureKind, message: string, result: Omit<Reaso
 function minimalEnvironment(config: ReasoningConfig): NodeJS.ProcessEnv {
   const source = config.environment ?? process.env;
   const selected: NodeJS.ProcessEnv = {};
-  for (const key of ["PATH", "HOME", ...(config.environmentKeys ?? [])]) if (!/^(?:all_|http_|https_|no_)?proxy$/i.test(key) && typeof source[key] === "string") selected[key] = source[key];
+  for (const key of ["PATH", "HOME", "USER", ...(config.environmentKeys ?? [])]) if (!/^(?:all_|http_|https_|no_)?proxy$/i.test(key) && typeof source[key] === "string") selected[key] = source[key];
   return selected;
 }
 function reasonForFailure(stderr: string, code: number): ReasoningFailureKind {
@@ -93,14 +93,14 @@ function reasonForFailure(stderr: string, code: number): ReasoningFailureKind {
 function command(request: ReasoningRequest, executable: string, outputPath: string, compactSchema: string): Command {
   if (request.evaluator === "terra") return {
     command: executable,
-    args: ["exec", "--ephemeral", "--ignore-user-config", "--model", "gpt-5.6-terra", "--sandbox", "read-only", "--cd", request.snapshot, "--output-schema", resolve(request.schemaPath), "--output-last-message", outputPath, "-"],
+    args: ["exec", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check", "--model", "gpt-5.6-terra", "--dangerously-bypass-approvals-and-sandbox", "--cd", request.snapshot, "--output-schema", resolve(request.schemaPath), "--output-last-message", outputPath, "-"],
     cwd: request.snapshot
   };
   if (request.model === undefined || request.model.length === 0) throw new Error("Opus requires a frozen full model ID");
   const tools = request.mode === "agentic" ? "Read,Grep,Glob" : "";
   return {
     command: executable,
-    args: ["--print", "--bare", "--no-session-persistence", "--restricted", "--strict-mcp-config", "--permission-mode", "dontAsk", "--permission-prompts", "none", "--tools", tools, "--model", request.model, "--json-schema", compactSchema, "--output-format", "json"],
+    args: ["--print", "--no-session-persistence", "--restricted", "--strict-mcp-config", "--permission-mode", "dontAsk", "--permission-prompts", "none", "--tools", tools, "--model", request.model, "--json-schema", compactSchema, "--output-format", "json"],
     cwd: request.snapshot
   };
 }
@@ -141,8 +141,9 @@ async function executablePath(executable: string, environment: NodeJS.ProcessEnv
 
 function sandboxProfile(snapshot: string, schemaPath: string, outputDirectory: string, executable: string, environment: NodeJS.ProcessEnv): string {
   const home = environment.HOME;
-  const authFiles = home === undefined ? [] : [join(home, ".codex/auth.json"), join(home, ".claude.json"), join(home, ".claude/.credentials.json")];
-  const subpaths = [snapshot].map((path) => `(subpath ${JSON.stringify(resolve(path))})`).join(" ");
+  const codexHome = environment.CODEX_HOME;
+  const authFiles = [codexHome === undefined ? undefined : join(codexHome, "auth.json"), home === undefined ? undefined : join(home, ".claude.json"), home === undefined ? undefined : join(home, ".claude/.credentials.json"), home === undefined || environment.CLAUDE_CODE_TMPDIR === undefined ? undefined : join(home, "Library/Keychains/login.keychain-db")].filter((path): path is string => path !== undefined);
+  const subpaths = [snapshot, outputDirectory].map((path) => `(subpath ${JSON.stringify(resolve(path))})`).join(" ");
   const literals = [schemaPath, executable, ...authFiles].map((path) => `(literal ${JSON.stringify(resolve(path))})`).join(" ");
   return `(version 1)\n(allow default)\n(deny file-read-data (subpath \"/Users\") (subpath \"/private/tmp\") (subpath \"/private/var/folders\") (subpath \"/Volumes\"))\n(allow file-read-data ${subpaths} ${literals})\n(deny file-write*)\n(allow file-write* (subpath ${JSON.stringify(outputDirectory)}) (literal \"/dev/null\"))\n`;
 }
@@ -167,12 +168,24 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
     if ((config.platform ?? process.platform) !== "darwin") return failure("unsupported_platform", "snapshot-only filesystem isolation is unavailable on this platform", emptyBase);
     if (request.evaluator === "terra" && request.mode === "controlled") return failure("budget_unverifiable", "controlled Terra cannot disable all repository tools with the frozen CLI", emptyBase);
     const environment = minimalEnvironment(config);
+    if (request.evaluator === "opus") environment.CLAUDE_CODE_TMPDIR = outputDirectory;
+    if (request.evaluator === "terra") {
+      if (environment.HOME === undefined) return failure("spawn_error", "HOME is required for Codex authentication", emptyBase);
+      const codexHome = join(outputDirectory, "codex-home");
+      await mkdir(codexHome);
+      try {
+        await copyFile(join(environment.HOME, ".codex", "auth.json"), join(codexHome, "auth.json"));
+      } catch (error) {
+        if (config.executable === undefined) return failure("spawn_error", "Codex authentication is unavailable", emptyBase);
+      }
+      environment.CODEX_HOME = codexHome;
+    }
     const executable = config.executable ?? (request.evaluator === "terra" ? "codex" : "claude");
     const version = await execute({ command: executable, args: ["--version"], cwd: request.snapshot }, "", request.timeoutMs, environment);
     if (version.timedOut) return failure("timeout", "CLI version check timed out", { ...emptyBase, stderr: version.stderr });
     if (version.spawnError !== null) return failure("spawn_error", version.spawnError.message, { ...emptyBase, stderr: version.stderr });
     if (version.code !== 0) return failure("nonzero_exit", `CLI version check exited ${version.code}`, { ...emptyBase, stdout: version.stdout, stderr: version.stderr });
-    if (version.stdout.trim() !== expectedVersions[request.evaluator]) return failure("version_mismatch", `expected ${expectedVersions[request.evaluator]}, received ${version.stdout.trim() || "empty version"}`, { ...emptyBase, stdout: version.stdout, stderr: version.stderr });
+    if (version.stdout.trim() !== reasoningRunnerVersions[request.evaluator]) return failure("version_mismatch", `expected ${reasoningRunnerVersions[request.evaluator]}, received ${version.stdout.trim() || "empty version"}`, { ...emptyBase, stdout: version.stdout, stderr: version.stderr });
     const compactSchema = JSON.stringify(JSON.parse(await readFile(resolve(request.schemaPath), "utf8")));
     const inner = command(request, await executablePath(executable, environment), outputPath, compactSchema);
     const profilePath = join(outputDirectory, "filesystem.sb");

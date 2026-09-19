@@ -2,17 +2,29 @@ import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { loadDemoCases, runDemo, type DemoAdapter } from "./demo.js";
+import { loadDemoCases, runDemo, summarizeDemoResults, type DemoAdapter, type DemoResult } from "./demo.js";
 import { createJevDemoAdapter, createReasoningDemoAdapter } from "./demo-live.js";
+import { stableHash } from "./jsonl.js";
 
-test("nine-case fixture is balanced across families and dispositions", async () => {
+test("100-case fixture has the frozen family and disposition matrix", async () => {
   const cases = await loadDemoCases("test/fixtures/demo-cases.json");
-  assert.equal(cases.length, 9);
-  assert.deepEqual([...new Set(cases.map((item) => item.family))].sort(), ["broken_access_control", "injection", "ssrf"]);
-  assert.deepEqual(
-    Object.fromEntries(["vulnerable", "safe", "insufficient_context"].map((value) => [value, cases.filter((item) => item.expected.disposition === value).length])),
-    { vulnerable: 3, safe: 3, insufficient_context: 3 }
-  );
+  assert.equal(cases.length, 100);
+  const expected = {
+    injection: { vulnerable: 12, safe: 11, insufficient_context: 11 },
+    broken_access_control: { vulnerable: 11, safe: 11, insufficient_context: 11 },
+    ssrf: { vulnerable: 11, safe: 11, insufficient_context: 11 }
+  } as const;
+  for (const [family, dispositions] of Object.entries(expected)) {
+    for (const [disposition, count] of Object.entries(dispositions)) {
+      assert.equal(cases.filter((item) => item.family === family && item.expected.disposition === disposition).length, count, `${family}/${disposition}`);
+    }
+  }
+});
+
+test("100-case fixture uses unique IDs and distinct canonical evidence", async () => {
+  const cases = await loadDemoCases("test/fixtures/demo-cases.json");
+  assert.equal(new Set(cases.map((item) => item.caseId)).size, 100);
+  assert.equal(new Set(cases.map((item) => stableHash(item.state))).size, 100);
 });
 
 test("all evaluators receive identical canonical evidence and failures stay visible", async () => {
@@ -20,6 +32,7 @@ test("all evaluators receive identical canonical evidence and failures stay visi
   const seen = new Map<string, string[]>();
   const adapter = (name: "jev" | "terra" | "opus", fail = false): DemoAdapter => ({
     name,
+    metadata: { provider: "Fixture", modelId: name, runner: "fixture", runnerVersion: "1" },
     evaluate: async (stateJson, item) => {
       seen.set(item.caseId, [...(seen.get(item.caseId) ?? []), stateJson]);
       if (fail && item.caseId === cases[1]?.caseId) throw new Error("fixture failure");
@@ -39,11 +52,36 @@ test("all evaluators receive identical canonical evidence and failures stay visi
 
 test("triage accuracy scores disposition and vulnerable family", async () => {
   const item = (await loadDemoCases("test/fixtures/demo-cases.json"))[0]!;
-  const adapter: DemoAdapter = { name: "jev", evaluate: async () => ({ disposition: "vulnerable", family: "injection" }) };
+  const adapter: DemoAdapter = { name: "jev", metadata: { provider: "Fixture", modelId: "jev", runner: "fixture", runnerVersion: "1" }, evaluate: async () => ({ disposition: "vulnerable", family: "injection" }) };
   const report = await runDemo([item], [adapter], "fixture");
   assert.equal(report.results[0]?.correct, true);
   assert.equal(report.summary.jev!.vulnerabilityRecall, 1);
   assert.deepEqual(Object.keys(report.summary), ["jev"]);
+});
+
+test("summary keeps explicit errors in both denominators", async () => {
+  const cases = await loadDemoCases("test/fixtures/demo-cases.json");
+  const results: DemoResult[] = cases.map((item) => ({
+    caseId: item.caseId, evaluator: "jev", status: "valid", decision: item.expected,
+    correct: true, latencyMs: 1, error: null
+  }));
+  results[0] = { ...results[0]!, status: "error", decision: null, correct: false, error: "service unavailable" };
+  const summary = summarizeDemoResults(cases, results, ["jev"]);
+  assert.equal(summary.jev!.accuracy, 0.99);
+  assert.equal(summary.jev!.errors, 1);
+  assert.ok(summary.jev!.vulnerabilityRecall < 1);
+});
+
+test("live recording aborts an evaluator after three consecutive failures", async () => {
+  const cases = (await loadDemoCases("test/fixtures/demo-cases.json")).slice(0, 4);
+  let attempts = 0;
+  const adapter: DemoAdapter = {
+    name: "terra",
+    metadata: { provider: "Fixture", modelId: "terra", runner: "fixture", runnerVersion: "1" },
+    evaluate: async () => { attempts += 1; throw new Error("nonzero_exit: review exited 1"); }
+  };
+  await assert.rejects(() => runDemo(cases, [adapter], "live", 3), /terra aborted after 3 consecutive errors: nonzero_exit: review exited 1/);
+  assert.equal(attempts, 3);
 });
 
 test("fixture CLI prints an explicitly simulated three-model report", async () => {
@@ -57,7 +95,7 @@ test("fixture CLI prints an explicitly simulated three-model report", async () =
   const report = JSON.parse(result.stdout);
   assert.equal(report.mode, "fixture");
   assert.equal(report.disclaimer, "SIMULATED ADAPTERS — not model benchmark results");
-  assert.equal(report.caseCount, 9);
+  assert.equal(report.caseCount, 100);
   assert.equal("results" in report, false);
   assert.deepEqual(Object.keys(report.summary).sort(), ["jev", "opus", "terra"]);
   assert.equal((await readFile("test/fixtures/demo-cases.json", "utf8")).includes("expected"), true);
@@ -103,4 +141,16 @@ test("live adapters normalize native decisions while preserving the exact eviden
   assert.deepEqual(await jev.evaluate(stateJson, item), { disposition: "vulnerable", family: "injection", inputTokens: 7, outputTokens: 3 });
   assert.equal(jevState, stateJson);
   assert.deepEqual(await terra.evaluate(stateJson, item), { disposition: "safe", family: null });
+});
+
+test("reasoning adapters retain useful CLI failures without leaking paths or credentials", async () => {
+  const item = (await loadDemoCases("test/fixtures/demo-cases.json"))[0]!;
+  const terra = createReasoningDemoAdapter("terra", "/empty", async () => ({
+    finalOutcome: "manual_review", output: null, usage: null, usageStatus: "inconclusive", chargeUsd: null, costStatus: "inconclusive", attempts: 1,
+    stdout: "", stderr: "failed reading /Users/roberto/private/config; token apikey_secret123", error: { kind: "nonzero_exit", message: "review exited 1" }
+  }));
+  await assert.rejects(
+    () => terra.evaluate(JSON.stringify(item.state), item),
+    /nonzero_exit: review exited 1; stderr: failed reading \[local-path\]; token \[redacted\]/
+  );
 });
