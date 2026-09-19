@@ -81,3 +81,11 @@ test("Jev accepts harmless rounding in Score probabilities", async () => {
   const client = { systemOne: async () => rounded } as unknown as TypeSafeClient;
   assert.equal((await judgeWithJev(packet, client)).kind, "judgment");
 });
+
+test("Jev accepts independently rounded Score and weighted mean", async () => {
+  const rounded = response();
+  rounded.answers.exploitability.score = 2.29;
+  rounded.answers.exploitability.probabilities = { 0: 0, 1: 0, 2: 0.72, 3: 0.28 };
+  const client = { systemOne: async () => rounded } as unknown as TypeSafeClient;
+  assert.equal((await judgeWithJev(packet, client)).kind, "judgment");
+});

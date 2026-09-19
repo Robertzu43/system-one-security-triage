@@ -30,16 +30,17 @@ function noulAnswer(value: unknown): value is NoulAnswer { const answer = record
 function scoreAnswerError(value: unknown): string | null {
   const answer = record(value); const probabilities = record(answer?.probabilities); const legend = record(answer?.legend);
   const levels = ["0", "1", "2", "3"] as const;
-  const tolerance = 1e-5;
+  const probabilityTolerance = 0.02;
+  const scoreTolerance = 0.05;
   if (answer?.type !== "score") return "exploitability type is invalid";
   if (typeof answer.score !== "number" || !Number.isFinite(answer.score) || answer.score < 0 || answer.score > 3) return "exploitability score is invalid";
   if (!probability(answer.confidence)) return "exploitability confidence is invalid";
   if (probabilities === undefined || !levels.every((key) => probability(probabilities[key])) || Object.keys(probabilities).length !== 4) return "exploitability probabilities are invalid";
   if (legend === undefined || !levels.every((key) => key in legend)) return "exploitability legend is invalid";
   const sum = levels.reduce((total, key) => total + (probabilities[key] as number), 0);
-  if (Math.abs(sum - 1) >= tolerance) return `exploitability probabilities sum to ${sum}`;
+  if (Math.abs(sum - 1) > probabilityTolerance) return `exploitability probabilities sum to ${sum}`;
   const weightedMean = levels.reduce((total, key) => total + Number(key) * (probabilities[key] as number), 0);
-  return Math.abs(answer.score - weightedMean) < tolerance ? null : `exploitability score ${answer.score} differs from weighted mean ${weightedMean}`;
+  return Math.abs(answer.score - weightedMean) <= scoreTolerance ? null : `exploitability score ${answer.score} differs from weighted mean ${weightedMean}`;
 }
 function answersError(value: unknown): string | null {
   const result = record(value);
