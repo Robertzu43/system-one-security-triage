@@ -52,7 +52,7 @@ npm run demo:record -- --models jev,terra --run-id 2026-09-18-public
 npm run demo:record -- --models opus --run-id 2026-09-18-public
 
 # Validate and preview all three saved runs
-npm run dashboard:build -- --run-dir results/recorded/2026-09-18-public --output dashboard/data/latest.json
+npm run dashboard:build -- --run-dir results/recorded/2026-09-19-public-v2 --output dashboard/data/latest.json
 npm run dashboard:preview
 ```
 
@@ -61,9 +61,9 @@ The Opus command uses the repository's pinned, bounded Claude adapter; it does n
 Before committing, review all three files:
 
 ```text
-results/recorded/2026-09-18-public/jev.json
-results/recorded/2026-09-18-public/terra.json
-results/recorded/2026-09-18-public/opus.json
+results/recorded/2026-09-19-public-v2/jev.json
+results/recorded/2026-09-19-public-v2/terra.json
+results/recorded/2026-09-19-public-v2/opus.json
 ```
 
 They must contain the same corpus hash and complete coverage of all 100 cases. Artifacts are exclusive-write and reject credentials, absolute local paths, duplicates, missing cases, unknown cases, and invalid hashes.
