@@ -158,6 +158,9 @@ async function demoRecord(values: Values): Promise<unknown> {
   const fixture = required(values, "fixture");
   const selected = selectedEvaluators(values);
   const runId = required(values, "run-id");
+  // Repeated passes are how run-to-run variation becomes visible; one pass cannot show it.
+  const repetitions = values.repetitions === undefined ? 1 : Number(values.repetitions);
+  if (!Number.isInteger(repetitions) || repetitions < 1) throw new Error("--repetitions must be a positive integer");
   const outputRoot = required(values, "output");
   requireCredentials(selected);
   const cases = await loadDemoCases(fixture);
@@ -166,7 +169,7 @@ async function demoRecord(values: Values): Promise<unknown> {
   await mkdir(emptySnapshot);
   try {
     const adapters = await liveAdapters(selected, emptySnapshot, root);
-    const report = await runDemo(cases, adapters, "live", 3);
+    const report = await runDemo(cases, adapters, "live", { maxConsecutiveErrors: 3, repetitions });
     return writeRecordedDemoRuns({
       cases,
       report,
@@ -201,7 +204,7 @@ async function dashboardBuild(values: Values): Promise<unknown> {
 
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({ args: process.argv.slice(2), allowPositionals: true, strict: true, options: {
-    source: { type: "string" }, destination: { type: "string" }, commit: { type: "string" }, snapshot: { type: "string" }, input: { type: "string" }, output: { type: "string" }, fixture: { type: "string" }, evaluator: { type: "string" }, "run-id": { type: "string" }, "run-dir": { type: "string" }, live: { type: "boolean" }, models: { type: "string" }, details: { type: "boolean" }, "allow-degenerate": { type: "boolean" }
+    source: { type: "string" }, destination: { type: "string" }, commit: { type: "string" }, snapshot: { type: "string" }, input: { type: "string" }, output: { type: "string" }, fixture: { type: "string" }, evaluator: { type: "string" }, "run-id": { type: "string" }, "run-dir": { type: "string" }, live: { type: "boolean" }, models: { type: "string" }, details: { type: "boolean" }, "allow-degenerate": { type: "boolean" }, repetitions: { type: "string" }
   } });
   const command = positionals[0];
   const result = command === "sanitize" ? await sanitize(values) : command === "discover" ? await discover(values) : command === "score" ? await score(values) : command === "run" ? await runFixture(values) : command === "demo" ? await demo(values) : command === "demo-record" ? await demoRecord(values) : command === "dashboard-build" ? await dashboardBuild(values) : (() => { throw new Error("expected sanitize, discover, run, score, demo, demo-record, or dashboard-build"); })();

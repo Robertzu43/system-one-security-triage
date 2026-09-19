@@ -10,8 +10,9 @@
   "schemaVersion": 1,
   "promptSpecHash": "reasoning-prompt",
   "gitSha": "0000000000000000000000000000000000000000",
-  "corpusHash": "4ef7801ff54fc9139c879cfd6bcde78c3a16fd36d9d5f84df9d405c8377cc07d",
+  "corpusHash": "d029e855bcf51d490c37a5ecf1fa0c1ac0cb5de590a322cb0994a24c09c8cf28",
   "caseCount": 100,
+  "repetitions": 1,
   "results": [
     {
       "caseId": "injection-vulnerable",
@@ -26,7 +27,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe",
@@ -41,7 +43,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient",
@@ -51,7 +54,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": null,
-      "status": "error"
+      "status": "error",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable",
@@ -66,7 +70,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe",
@@ -81,7 +86,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient",
@@ -96,7 +102,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable",
@@ -111,7 +118,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe",
@@ -126,7 +134,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient",
@@ -141,7 +150,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-sql-order-sort",
@@ -156,7 +166,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-sql-report-filter",
@@ -171,7 +182,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-shell-export",
@@ -186,7 +198,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-shell-git-ref",
@@ -201,7 +214,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-eval-formula",
@@ -216,7 +230,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-vm-script",
@@ -231,7 +246,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-template-helper",
@@ -246,7 +262,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-template-name",
@@ -261,7 +278,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-path-archive",
@@ -276,7 +294,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-orm-order",
@@ -291,7 +310,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-graphql-raw-filter",
@@ -306,7 +326,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-sql-placeholder-email",
@@ -321,7 +342,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-query-builder-eq",
@@ -336,7 +358,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-shell-execfile-args",
@@ -351,7 +374,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-shell-command-allowlist",
@@ -366,7 +390,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-json-parse",
@@ -381,7 +406,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-template-autoescape",
@@ -396,7 +422,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-path-basename-root",
@@ -411,7 +438,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-path-resolve-root",
@@ -426,7 +454,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-orm-enum-sort",
@@ -441,7 +470,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-parser-schema-validation",
@@ -456,7 +486,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-sql-helper-hidden",
@@ -471,7 +502,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-db-wrapper-hidden",
@@ -486,7 +518,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-command-builder-hidden",
@@ -501,7 +534,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-process-service-hidden",
@@ -516,7 +550,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-expression-compiler-hidden",
@@ -531,7 +566,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-template-sanitizer-hidden",
@@ -546,7 +582,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-archive-path-guard-hidden",
@@ -561,7 +598,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-upload-normalizer-hidden",
@@ -576,7 +614,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-orm-filter-helper-hidden",
@@ -591,7 +630,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-parser-policy-hidden",
@@ -606,7 +646,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-invoice-read",
@@ -621,7 +662,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-profile-update",
@@ -636,7 +678,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-tenant-report",
@@ -651,7 +694,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-admin-export",
@@ -666,7 +710,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-project-delete",
@@ -681,7 +726,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-document-download",
@@ -696,7 +742,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-order-refund",
@@ -711,7 +758,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-team-invite",
@@ -726,7 +774,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-api-key-rotate",
@@ -741,7 +790,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-mass-assignment-role",
@@ -756,7 +806,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-invoice-owner-query",
@@ -771,7 +822,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-profile-self-id",
@@ -786,7 +838,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-tenant-scope-query",
@@ -801,7 +854,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-admin-middleware",
@@ -816,7 +870,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-project-owner-check",
@@ -831,7 +886,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-document-membership",
@@ -846,7 +902,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-refund-permission",
@@ -861,7 +918,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-team-owner-guard",
@@ -876,7 +934,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-api-key-session-user",
@@ -891,7 +950,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-mass-assignment-allowlist",
@@ -906,7 +966,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-invoice-policy-hidden",
@@ -921,7 +982,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-profile-auth-helper",
@@ -936,7 +998,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-tenant-context-hidden",
@@ -951,7 +1014,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-admin-middleware-hidden",
@@ -966,7 +1030,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-project-permission-service",
@@ -981,7 +1046,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-document-acl-hidden",
@@ -996,7 +1062,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-refund-policy-hidden",
@@ -1011,7 +1078,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-team-role-hidden",
@@ -1026,7 +1094,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-api-key-authorization-hidden",
@@ -1041,7 +1110,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-field-policy-hidden",
@@ -1056,7 +1126,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-avatar-url",
@@ -1071,7 +1142,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-webhook-test-url",
@@ -1086,7 +1158,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-pdf-render-url",
@@ -1101,7 +1174,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-redirect-follow",
@@ -1116,7 +1190,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-metadata-host",
@@ -1131,7 +1206,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-dns-rebind-host",
@@ -1146,7 +1222,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-proxy-destination",
@@ -1161,7 +1238,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-image-import-url",
@@ -1176,7 +1254,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-feed-fetch-url",
@@ -1191,7 +1270,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-oauth-jwks-url",
@@ -1206,7 +1286,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-avatar-host-allowlist",
@@ -1221,7 +1302,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-webhook-https-domain",
@@ -1236,7 +1318,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-pdf-fixed-origin",
@@ -1251,7 +1334,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-redirect-disabled",
@@ -1266,7 +1350,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-private-ip-block",
@@ -1281,7 +1366,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-dns-pin-check",
@@ -1296,7 +1382,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-proxy-service-enum",
@@ -1311,7 +1398,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-image-object-key",
@@ -1326,7 +1414,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-feed-registry",
@@ -1341,7 +1430,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-jwks-issuer-map",
@@ -1356,7 +1446,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-avatar-validator-hidden",
@@ -1371,7 +1462,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-webhook-policy-hidden",
@@ -1386,7 +1478,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-pdf-resolver-hidden",
@@ -1401,7 +1494,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-redirect-config-hidden",
@@ -1416,7 +1510,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-ip-filter-hidden",
@@ -1431,7 +1526,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-dns-cache-hidden",
@@ -1446,7 +1542,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-proxy-map-hidden",
@@ -1461,7 +1558,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-image-fetcher-hidden",
@@ -1476,7 +1574,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-feed-resolver-hidden",
@@ -1491,7 +1590,8 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-jwks-discovery-hidden",
@@ -1506,8 +1606,9 @@
       "evaluator": "opus",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     }
   ],
-  "artifactSha256": "fb9f277228b2733b5950e790dd0b30f36ecdef936b030925bcb1aeb5158405a9"
+  "artifactSha256": "f8a5f4a31f58c2adf8d91b8e067a018f8491f2b027fd72818f7891a34fa0d34d"
 }

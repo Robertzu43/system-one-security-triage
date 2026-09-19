@@ -16,6 +16,7 @@ const metadata = {
 function validRecordedRunFixture(cases: readonly DemoCase[]): RecordedDemoRun {
   const results: DemoResult[] = cases.map((item) => ({
     caseId: item.caseId,
+    repetition: 1,
     evaluator: "jev",
     status: "valid",
     decision: item.expected,
@@ -34,6 +35,7 @@ function validRecordedRunFixture(cases: readonly DemoCase[]): RecordedDemoRun {
     corpusHash: corpusHash(cases),
     caseCount: cases.length,
     gitSha: "0".repeat(40),
+    repetitions: 1,
     results
   };
   return { ...body, artifactSha256: stableHash(body) };

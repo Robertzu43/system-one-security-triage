@@ -57,6 +57,8 @@ export interface DemoAdapter {
 
 export interface DemoResult {
   caseId: string;
+  /** 1-based pass over the corpus. Repeats expose run-to-run variation that one pass hides. */
+  repetition: number;
   evaluator: DemoEvaluator;
   status: "valid" | "error";
   decision: DemoDecision | null;
@@ -105,6 +107,7 @@ export interface DemoReport {
   mode: "fixture" | "live";
   disclaimer: string;
   caseCount: number;
+  repetitions: number;
   results: DemoResult[];
   summary: Record<string, DemoSummary>;
 }
@@ -247,10 +250,39 @@ export function pathTokenSignals(cases: readonly DemoCase[], minimumCount = 3, m
   return signals.sort((left, right) => right.count - left.count);
 }
 
-/** Throws when a repeated model-visible path token concentrates in one label. */
-export function assertNoPathLabelSignal(cases: readonly DemoCase[]): void {
+/**
+ * Longest stretch of consecutive same-label cases when ordered by their path.
+ *
+ * Token concentration cannot see this: numbered paths share every letter, so a corpus authored in
+ * label order and then renamed `case-001..100` passes the token check while its ordinal still
+ * names the answer. Harmless for one-case-at-a-time grading, and a shortcut the moment cases are
+ * batched or few-shot together.
+ */
+export function longestPathOrderedLabelRun(cases: readonly DemoCase[]): number {
+  const ordered = [...cases].sort((left, right) => pathOf(left).localeCompare(pathOf(right)));
+  let best = 0;
+  let run = 0;
+  let previous: string | null = null;
+  for (const item of ordered) {
+    run = item.expected.disposition === previous ? run + 1 : 1;
+    previous = item.expected.disposition;
+    best = Math.max(best, run);
+  }
+  return best;
+}
+
+function pathOf(item: DemoCase): string {
+  const spans = item.state.spans as Array<{ path?: unknown }>;
+  const path = spans[0]?.path;
+  return typeof path === "string" ? path : "";
+}
+
+/** Throws when model-visible span paths predict the label, by wording or by ordering. */
+export function assertNoPathLabelSignal(cases: readonly DemoCase[], maximumRun = 6): void {
   const signals = pathTokenSignals(cases);
   if (signals.length > 0) throw new Error(`span path tokens predict the label: ${signals.map((signal) => `${signal.token} (${signal.count}x, ${(signal.share * 100).toFixed(0)}% ${signal.label})`).join(", ")}; rename them to carry no label signal`);
+  const run = longestPathOrderedLabelRun(cases);
+  if (run > maximumRun) throw new Error(`case ordering predicts the label: ${run} consecutive cases share one disposition when sorted by path; shuffle the numbering`);
 }
 
 export async function loadDemoCases(path: string): Promise<DemoCase[]> {
@@ -360,12 +392,21 @@ function modelLatency(value: number | null | undefined): number | null {
   return value;
 }
 
-export async function runDemo(cases: readonly DemoCase[], adapters: readonly DemoAdapter[], mode: DemoReport["mode"], maxConsecutiveErrors = Number.POSITIVE_INFINITY): Promise<DemoReport> {
+export interface RunDemoOptions {
+  maxConsecutiveErrors?: number;
+  /** Passes over the whole corpus. More than one lets the report show variation between passes. */
+  repetitions?: number;
+}
+
+export async function runDemo(cases: readonly DemoCase[], adapters: readonly DemoAdapter[], mode: DemoReport["mode"], options: RunDemoOptions = {}): Promise<DemoReport> {
+  const maxConsecutiveErrors = options.maxConsecutiveErrors ?? Number.POSITIVE_INFINITY;
+  const repetitions = options.repetitions ?? 1;
+  if (!Number.isInteger(repetitions) || repetitions < 1) throw new Error("repetitions must be a positive integer");
   if (cases.length === 0 || adapters.length === 0) throw new Error("demo needs cases and adapters");
   if (new Set(adapters.map((adapter) => adapter.name)).size !== adapters.length) throw new Error("demo evaluator names must be unique");
   const results: DemoResult[] = [];
   const consecutiveErrors = new Map<DemoEvaluator, number>();
-  for (const item of cases) {
+  for (const [pass, item] of cases.flatMap((entry) => Array.from({ length: repetitions }, (_value, index) => [index + 1, entry] as const))) {
     const stateJson = canonicalJson(item.state);
     for (const adapter of adapters) {
       const started = performance.now();
@@ -374,13 +415,13 @@ export async function runDemo(cases: readonly DemoCase[], adapters: readonly Dem
         const latencyMs = performance.now() - started;
         const decision = parseDemoDecision(returned, `${adapter.name} decision`);
         consecutiveErrors.set(adapter.name, 0);
-        results.push({ caseId: item.caseId, evaluator: adapter.name, status: "valid", decision, correct: isCorrectDecision(decision, item.expected), latencyMs, modelLatencyMs: modelLatency(modelLatencyMs), error: null });
+        results.push({ caseId: item.caseId, repetition: pass, evaluator: adapter.name, status: "valid", decision, correct: isCorrectDecision(decision, item.expected), latencyMs, modelLatencyMs: modelLatency(modelLatencyMs), error: null });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         const failures = (consecutiveErrors.get(adapter.name) ?? 0) + 1;
         consecutiveErrors.set(adapter.name, failures);
         if (failures >= maxConsecutiveErrors) throw new Error(`${adapter.name} aborted after ${failures} consecutive errors: ${message}`);
-        results.push({ caseId: item.caseId, evaluator: adapter.name, status: "error", decision: null, correct: false, latencyMs: performance.now() - started, modelLatencyMs: null, error: message });
+        results.push({ caseId: item.caseId, repetition: pass, evaluator: adapter.name, status: "error", decision: null, correct: false, latencyMs: performance.now() - started, modelLatencyMs: null, error: message });
       }
     }
   }
@@ -389,6 +430,7 @@ export async function runDemo(cases: readonly DemoCase[], adapters: readonly Dem
     mode,
     disclaimer: mode === "fixture" ? "SIMULATED ADAPTERS — not model benchmark results" : "SMALL DEMO — descriptive results, not a statistical benchmark",
     caseCount: cases.length,
+    repetitions,
     results,
     summary
   };

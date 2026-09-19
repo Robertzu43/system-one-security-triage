@@ -10,8 +10,9 @@
   "schemaVersion": 1,
   "promptSpecHash": "reasoning-prompt",
   "gitSha": "0000000000000000000000000000000000000000",
-  "corpusHash": "4ef7801ff54fc9139c879cfd6bcde78c3a16fd36d9d5f84df9d405c8377cc07d",
+  "corpusHash": "d029e855bcf51d490c37a5ecf1fa0c1ac0cb5de590a322cb0994a24c09c8cf28",
   "caseCount": 100,
+  "repetitions": 1,
   "results": [
     {
       "caseId": "injection-vulnerable",
@@ -24,7 +25,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe",
@@ -37,7 +39,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient",
@@ -50,7 +53,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable",
@@ -63,7 +67,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe",
@@ -76,7 +81,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient",
@@ -89,7 +95,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable",
@@ -102,7 +109,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe",
@@ -115,7 +123,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient",
@@ -128,7 +137,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-sql-order-sort",
@@ -141,7 +151,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-sql-report-filter",
@@ -154,7 +165,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-shell-export",
@@ -167,7 +179,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-shell-git-ref",
@@ -180,7 +193,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-eval-formula",
@@ -193,7 +207,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-vm-script",
@@ -206,7 +221,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-template-helper",
@@ -219,7 +235,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-template-name",
@@ -232,7 +249,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-path-archive",
@@ -245,7 +263,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-orm-order",
@@ -258,7 +277,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-graphql-raw-filter",
@@ -271,7 +291,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-sql-placeholder-email",
@@ -284,7 +305,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-query-builder-eq",
@@ -297,7 +319,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-shell-execfile-args",
@@ -310,7 +333,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-shell-command-allowlist",
@@ -323,7 +347,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-json-parse",
@@ -336,7 +361,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-template-autoescape",
@@ -349,7 +375,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-path-basename-root",
@@ -362,7 +389,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-path-resolve-root",
@@ -375,7 +403,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-orm-enum-sort",
@@ -388,7 +417,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-parser-schema-validation",
@@ -401,7 +431,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-sql-helper-hidden",
@@ -414,7 +445,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-db-wrapper-hidden",
@@ -427,7 +459,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-command-builder-hidden",
@@ -440,7 +473,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-process-service-hidden",
@@ -453,7 +487,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-expression-compiler-hidden",
@@ -466,7 +501,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-template-sanitizer-hidden",
@@ -479,7 +515,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-archive-path-guard-hidden",
@@ -492,7 +529,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-upload-normalizer-hidden",
@@ -505,7 +543,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-orm-filter-helper-hidden",
@@ -518,7 +557,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-parser-policy-hidden",
@@ -531,7 +571,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-invoice-read",
@@ -544,7 +585,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-profile-update",
@@ -557,7 +599,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-tenant-report",
@@ -570,7 +613,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-admin-export",
@@ -583,7 +627,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-project-delete",
@@ -596,7 +641,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-document-download",
@@ -609,7 +655,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-order-refund",
@@ -622,7 +669,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-team-invite",
@@ -635,7 +683,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-api-key-rotate",
@@ -648,7 +697,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-mass-assignment-role",
@@ -661,7 +711,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-invoice-owner-query",
@@ -674,7 +725,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-profile-self-id",
@@ -687,7 +739,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-tenant-scope-query",
@@ -700,7 +753,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-admin-middleware",
@@ -713,7 +767,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-project-owner-check",
@@ -726,7 +781,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-document-membership",
@@ -739,7 +795,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-refund-permission",
@@ -752,7 +809,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-team-owner-guard",
@@ -765,7 +823,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-api-key-session-user",
@@ -778,7 +837,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-mass-assignment-allowlist",
@@ -791,7 +851,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-invoice-policy-hidden",
@@ -804,7 +865,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-profile-auth-helper",
@@ -817,7 +879,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-tenant-context-hidden",
@@ -830,7 +893,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-admin-middleware-hidden",
@@ -843,7 +907,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-project-permission-service",
@@ -856,7 +921,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-document-acl-hidden",
@@ -869,7 +935,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-refund-policy-hidden",
@@ -882,7 +949,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-team-role-hidden",
@@ -895,7 +963,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-api-key-authorization-hidden",
@@ -908,7 +977,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-field-policy-hidden",
@@ -921,7 +991,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-avatar-url",
@@ -934,7 +1005,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-webhook-test-url",
@@ -947,7 +1019,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-pdf-render-url",
@@ -960,7 +1033,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-redirect-follow",
@@ -973,7 +1047,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-metadata-host",
@@ -986,7 +1061,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-dns-rebind-host",
@@ -999,7 +1075,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-proxy-destination",
@@ -1012,7 +1089,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-image-import-url",
@@ -1025,7 +1103,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-feed-fetch-url",
@@ -1038,7 +1117,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-oauth-jwks-url",
@@ -1051,7 +1131,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-avatar-host-allowlist",
@@ -1064,7 +1145,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-webhook-https-domain",
@@ -1077,7 +1159,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-pdf-fixed-origin",
@@ -1090,7 +1173,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-redirect-disabled",
@@ -1103,7 +1187,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-private-ip-block",
@@ -1116,7 +1201,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-dns-pin-check",
@@ -1129,7 +1215,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-proxy-service-enum",
@@ -1142,7 +1229,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-image-object-key",
@@ -1155,7 +1243,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-feed-registry",
@@ -1168,7 +1257,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-jwks-issuer-map",
@@ -1181,7 +1271,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-avatar-validator-hidden",
@@ -1194,7 +1285,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-webhook-policy-hidden",
@@ -1207,7 +1299,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-pdf-resolver-hidden",
@@ -1220,7 +1313,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-redirect-config-hidden",
@@ -1233,7 +1327,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-ip-filter-hidden",
@@ -1246,7 +1341,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-dns-cache-hidden",
@@ -1259,7 +1355,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-proxy-map-hidden",
@@ -1272,7 +1369,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-image-fetcher-hidden",
@@ -1285,7 +1383,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-feed-resolver-hidden",
@@ -1298,7 +1397,8 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-jwks-discovery-hidden",
@@ -1311,8 +1411,9 @@
       "evaluator": "terra",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     }
   ],
-  "artifactSha256": "f654393329c4525bb9d56d264a11bf22992a3e5f6910ad0dcf24a4b16339c54b"
+  "artifactSha256": "4022444480462f4688636fe4caf2a8956e832526707a9d6fb2f70e7995e4d9b6"
 }
