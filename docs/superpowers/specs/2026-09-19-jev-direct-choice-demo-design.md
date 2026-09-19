@@ -5,7 +5,7 @@ Date: 2026-09-19
 
 ## Objective
 
-Replace the published demo's threshold-routed Jev result with a direct, probability-based Jev classification over the same final label space used by Terra and Opus.
+Replace the published demo's threshold-routed Jev result with a direct, probability-based Jev classification over the same final label space used by Terra and Opus. Keep the existing recorded Terra and Opus results unchanged for this iteration and rerun only Jev over the same frozen 100 cases.
 
 The new run must answer one narrow question: given the frozen security rubric and the shown evidence, which of five mutually exclusive outcomes best describes the case? Jev supplies a typed Choice distribution; repository code maps the selected option to the existing disposition and family fields without applying risk thresholds.
 
@@ -19,9 +19,9 @@ That design measures Jev plus an uncalibrated routing policy while Terra and Opu
 
 ## Evaluation contract
 
-### Shared rubric
+### Jev rubric and comparison boundary
 
-A committed, versioned rubric defines the terms supplied to all three evaluators:
+A committed rubric defines the terms supplied to Jev:
 
 - **Vulnerable:** the shown evidence establishes an actor-controlled or otherwise untrusted influence, a path to security-sensitive behavior, no effective shown control for that path, and plausible security impact.
 - **Safe:** the relevant path is shown and an effective control prevents the tested vulnerability. Missing code is not evidence of safety.
@@ -30,7 +30,7 @@ A committed, versioned rubric defines the terms supplied to all three evaluators
 - **Broken access control:** an actor can perform an operation or access a resource without the authorization required for that actor, operation, or resource.
 - **SSRF:** an actor can influence a server-side request so it can reach an unintended destination or network resource without an effective destination restriction.
 
-The rubric is part of the canonical evaluator input. Its canonical hash is recorded with every artifact so a run cannot combine results produced under different definitions.
+The existing Terra and Opus runs used the same evidence corpus and the same three dispositions and vulnerability families, but they did not receive this exact Choice criteria object. Reusing them is an explicit interim scope decision, not a claim that all three provider requests were rerun under a new byte-identical rubric. The dashboard must disclose that only Jev was rerun.
 
 ### Final label space
 
@@ -60,15 +60,13 @@ The normalized result preserves:
 
 Validation requires the exact five probability keys, finite values from zero through one, a sum within `0.02` of one, confidence from zero through one, and a selected option whose probability is maximal. Invalid envelopes remain explicit errors.
 
-### Terra and Opus protocol
+### Terra and Opus controls
 
-Terra and Opus receive the same rubric, label definitions, and canonical case evidence. Their structured output schema remains disposition plus family, but the prompt states the same five semantic outcomes and mapping used by Jev.
-
-The systems do not need byte-identical provider requests because their interfaces differ. They must receive semantically identical evidence, definitions, and possible final outcomes. Provider-specific instructions may only express the frozen contract in the provider's required format.
+The committed Terra and Opus artifacts from `2026-09-19-public-v2` remain byte-for-byte unchanged. They continue to provide useful recorded controls over the same corpus, but they are not new observations from the Jev Choice run.
 
 ## Recorded artifacts
 
-The revised public artifact uses a new schema version and a new immutable run ID. Existing artifacts remain unchanged as historical evidence.
+The revised Jev artifact uses a new immutable run ID. Existing artifacts remain unchanged as historical evidence. The optional Jev `choice` field extends the existing schema without changing how the old Terra and Opus artifacts parse.
 
 Every result retains the existing normalized fields. Jev valid results additionally contain a public `choice` object:
 
@@ -88,7 +86,7 @@ Every result retains the existing normalized fields. Jev valid results additiona
 
 Terra and Opus results do not invent comparable probabilities. Their `choice` field is absent. Raw provider envelopes remain excluded from public artifacts.
 
-Each artifact records both the corpus hash and rubric hash. Dashboard generation rejects mixed schema versions, rubric hashes, corpus hashes, incomplete coverage, invalid probability distributions, or a Jev selected option inconsistent with its normalized disposition and family.
+Dashboard generation rejects corpus mismatches, incomplete coverage, invalid probability distributions, or a Jev selected option inconsistent with its normalized disposition and family. A publication bundle may contain the new Jev artifact beside exact copies of the existing Terra and Opus artifacts; their embedded run IDs and artifact hashes retain the true provenance.
 
 ## Scoring
 
@@ -101,12 +99,7 @@ The primary comparison remains identical for all three evaluators:
 - error count; and
 - recorded mean latency and available usage/cost.
 
-The Jev panel also reports probability-native diagnostics that are not presented as cross-provider confidence comparisons:
-
-- multiclass Brier score;
-- mean probability assigned to the correct option;
-- mean Choice confidence; and
-- per-case probability distribution.
+The case explorer reports Jev's probability distribution and Choice confidence. This iteration does not add aggregate probability metrics.
 
 No confidence cutoff changes the primary Jev prediction. The recorded selected option is scored exactly as Terra's and Opus's selected outcome is scored.
 
@@ -114,13 +107,13 @@ No confidence cutoff changes the primary Jev prediction. The recorded selected o
 
 The dashboard describes the result as a direct-classification demonstration, not a universal model benchmark. It explains that Jev is a System One decision model returning a typed Choice distribution, while Terra and Opus are reasoning/generative models returning structured final answers.
 
-The scoreboard gives all three evaluators equal weight for the shared primary metrics. Jev's card adds a clearly separated probability-quality section. The case explorer shows Jev's five probabilities and confidence beside the three final decisions.
+The scoreboard gives all three evaluators equal weight for the shared primary metrics. The case explorer shows Jev's five probabilities and confidence beside the three final decisions. A visible note says Jev was rerun with a direct Choice while Terra and Opus are retained from the earlier recording.
 
 The previous threshold-routed run must not remain the default comparison. It remains committed and traceable as an archived run, labeled `Jev + threshold router`, with a note that `needs_deep_review` was collapsed into `insufficient_context`.
 
 ## Recording and publication
 
-The recorder writes a new run directory; it never overwrites the existing `2026-09-19-public-v2` artifacts. Because the shared rubric changes, Jev, Terra, and Opus must all be recorded again against the same rubric and corpus hashes.
+The recorder writes only a new Jev artifact under a new run ID; it never overwrites `2026-09-19-public-v2`. After successful validation, the publication directory combines that new Jev artifact with byte-for-byte copies of the existing Terra and Opus artifacts. Their artifact hashes must remain identical to `2026-09-19-public-v2`.
 
 The static dashboard continues to replay saved artifacts only. Browser actions never invoke a provider. GitHub Pages publication continues to rebuild the generated dataset from committed artifacts without provider credentials.
 
@@ -130,7 +123,7 @@ The static dashboard continues to replay saved artifacts only. Browser actions n
 - Invalid Choice responses become explicit Jev errors rather than guessed decisions.
 - Low confidence remains valid recorded information and does not become an error or abstention.
 - Interrupted or incomplete recordings remain unpublishable.
-- A rubric or corpus mismatch prevents dashboard generation.
+- A corpus mismatch prevents dashboard generation.
 - Provider usage and cost remain unavailable when the provider does not supply defensible values; unavailable never means zero.
 
 ## Verification
@@ -138,28 +131,28 @@ The static dashboard continues to replay saved artifacts only. Browser actions n
 Automated checks cover:
 
 - exact five-option Jev Choice configuration;
-- shared rubric inclusion for Jev, Terra, and Opus;
-- deterministic rubric hashing;
 - Choice response parsing, probability sums, selected-option consistency, and malformed responses;
 - exact mapping from each Choice option to disposition and family;
 - absence of threshold routing from the direct Jev demo adapter;
 - preservation of low-confidence selected outcomes;
-- artifact schema and mixed-run rejection;
-- hand-calculated accuracy and Jev Brier-score fixtures;
-- probability rendering and accessible tabular fallback in the dashboard;
+- backward-compatible artifact parsing and corpus mismatch rejection;
+- preservation of Jev probabilities in generated dashboard data;
+- disclosure that only Jev was rerun;
 - archived-run labeling;
 - complete offline dashboard generation; and
 - full repository checks without paid provider calls.
+
+The dashboard case explorer is manually checked after the generated dataset is built to confirm that all five probabilities and Choice confidence render for a recorded Jev result.
 
 One explicit live smoke case is run before starting the paid 100-case recordings. The immutable public run is recorded only after the smoke result validates.
 
 ## Acceptance criteria
 
-1. All three evaluators receive the same frozen security rubric, evidence, and final semantic outcome definitions.
-2. Jev selects one of the five outcomes through a single typed Choice distribution.
-3. No threshold router modifies Jev's selected direct-classification outcome.
-4. Public Jev results preserve the complete validated probability distribution and confidence.
+1. Jev selects one of the five outcomes through a single typed Choice distribution over the unchanged 100-case corpus.
+2. No threshold router modifies Jev's selected direct-classification outcome.
+3. Public Jev results preserve the complete validated probability distribution and confidence.
+4. Terra and Opus retain their exact `2026-09-19-public-v2` artifact hashes and are not called again.
 5. Shared accuracy and recall metrics score the same five-outcome task for all evaluators.
-6. Jev-only probability diagnostics are visible but are not compared with unavailable LLM confidence values.
-7. The old threshold-routed run is archived and accurately labeled.
-8. A new complete three-evaluator run can be built and deployed reproducibly without changing historical artifacts.
+6. Jev probabilities are visible but are not compared with unavailable LLM confidence values.
+7. The dashboard discloses the mixed recording provenance and does not describe the result as a simultaneous rerun.
+8. The old threshold-routed Jev artifact remains committed and traceable.
