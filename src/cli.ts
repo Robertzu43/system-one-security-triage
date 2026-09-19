@@ -1,7 +1,8 @@
+import { execFile } from "node:child_process";
 import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
-import { parseArgs } from "node:util";
+import { parseArgs, promisify } from "node:util";
 import { TypeSafeClient } from "@typesafe-ai/sdk";
 import { inventoryAst } from "./discover.js";
 import type { Candidate, ControlledEvaluator, Repetition, ScoreInput } from "./contracts.js";
@@ -18,6 +19,15 @@ import { bootstrapPrimary, parseScoreInput, scoreClaims } from "./scorer.js";
 import { createSanitizedSnapshot } from "./sanitize.js";
 
 type Values = Record<string, string | boolean | undefined>;
+
+/** Commit that produced a recording. A run from a dirty tree is not reproducible, so refuse it. */
+async function headCommit(): Promise<string> {
+  const run = promisify(execFile);
+  const { stdout: sha } = await run("git", ["rev-parse", "HEAD"]);
+  const { stdout: dirty } = await run("git", ["status", "--porcelain"]);
+  if (dirty.trim().length > 0) throw new Error("refusing to record from a dirty working tree; commit first so the run can be reproduced");
+  return sha.trim();
+}
 
 function required(values: Values, name: string): string {
   const value = values[name];
@@ -138,7 +148,7 @@ async function demo(values: Values): Promise<unknown> {
   }
   const adapters = (["jev", "terra", "opus"] as const).map((name): DemoAdapter => ({
     name,
-    metadata: { provider: "Fixture", modelId: name, runner: "fixture", runnerVersion: "1" },
+    metadata: { provider: "Fixture", modelId: name, runner: "fixture", runnerVersion: "1", promptSpecHash: "fixture" },
     evaluate: async (_stateJson, item) => ({ ...item.expected, inputTokens: 0, outputTokens: 0, costUsd: 0, modelLatencyMs: 0 })
   }));
   return output(await runDemo(cases, adapters, "fixture"));
@@ -161,6 +171,7 @@ async function demoRecord(values: Values): Promise<unknown> {
       cases,
       report,
       metadata: Object.fromEntries(adapters.map((adapter) => [adapter.name, adapter.metadata])) as Partial<Record<DemoEvaluator, EvaluatorMetadata>>,
+      gitSha: await headCommit(),
       runId,
       recordedAt: new Date().toISOString(),
       outputRoot

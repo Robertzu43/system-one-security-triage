@@ -3,6 +3,7 @@ import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { assertNoFixtureLeakage, decisionForChoice, loadDemoCases, parseDemoDecision, runDemo, summarizeDemoResults, type DemoAdapter, type DemoCase, type DemoDecision, type DemoResult } from "./demo.js";
+import { demoCriteria } from "./jev.js";
 import { createJevDemoAdapter, createReasoningDemoAdapter } from "./demo-live.js";
 import { stableHash } from "./jsonl.js";
 
@@ -119,7 +120,7 @@ const validResult = (item: DemoCase, overrides: Partial<DemoResult> = {}): DemoR
 test("recall is reported with and without family; family accuracy and precision are separate", async () => {
   const cases = await loadDemoCases("test/fixtures/demo-cases.json");
   const vulnerable = cases.filter((item) => item.expected.disposition === "vulnerable");
-  const wrongFamily: DemoAdapter = { name: "jev", metadata: { provider: "Fixture", modelId: "jev", runner: "fixture", runnerVersion: "1" }, evaluate: async (_state, item) => ({ disposition: "vulnerable", family: item.family === "ssrf" ? "injection" : "ssrf" }) };
+  const wrongFamily: DemoAdapter = { name: "jev", metadata: { provider: "Fixture", modelId: "jev", runner: "fixture", runnerVersion: "1", promptSpecHash: "fixture" }, evaluate: async (_state, item) => ({ disposition: "vulnerable", family: item.family === "ssrf" ? "injection" : "ssrf" }) };
   const report = await runDemo(vulnerable, [wrongFamily], "fixture");
   assert.equal(report.summary.jev!.accuracy, 0);
   assert.equal(report.summary.jev!.vulnerabilityRecall, 1);
@@ -195,7 +196,7 @@ test("all evaluators receive identical canonical evidence and failures stay visi
   const seen = new Map<string, string[]>();
   const adapter = (name: "jev" | "terra" | "opus", fail = false): DemoAdapter => ({
     name,
-    metadata: { provider: "Fixture", modelId: name, runner: "fixture", runnerVersion: "1" },
+    metadata: { provider: "Fixture", modelId: name, runner: "fixture", runnerVersion: "1", promptSpecHash: "fixture" },
     evaluate: async (stateJson, item) => {
       seen.set(item.caseId, [...(seen.get(item.caseId) ?? []), stateJson]);
       if (fail && item.caseId === cases[1]?.caseId) throw new Error("fixture failure");
@@ -215,7 +216,7 @@ test("all evaluators receive identical canonical evidence and failures stay visi
 
 test("triage accuracy scores disposition and vulnerable family", async () => {
   const item = (await loadDemoCases("test/fixtures/demo-cases.json"))[0]!;
-  const adapter: DemoAdapter = { name: "jev", metadata: { provider: "Fixture", modelId: "jev", runner: "fixture", runnerVersion: "1" }, evaluate: async () => ({ disposition: "vulnerable", family: "injection" }) };
+  const adapter: DemoAdapter = { name: "jev", metadata: { provider: "Fixture", modelId: "jev", runner: "fixture", runnerVersion: "1", promptSpecHash: "fixture" }, evaluate: async () => ({ disposition: "vulnerable", family: "injection" }) };
   const report = await runDemo([item], [adapter], "fixture");
   assert.equal(report.results[0]?.correct, true);
   assert.equal(report.summary.jev!.vulnerabilityRecall, 1);
@@ -240,7 +241,7 @@ test("live recording aborts an evaluator after three consecutive failures", asyn
   let attempts = 0;
   const adapter: DemoAdapter = {
     name: "terra",
-    metadata: { provider: "Fixture", modelId: "terra", runner: "fixture", runnerVersion: "1" },
+    metadata: { provider: "Fixture", modelId: "terra", runner: "fixture", runnerVersion: "1", promptSpecHash: "fixture" },
     evaluate: async () => { attempts += 1; throw new Error("nonzero_exit: review exited 1"); }
   };
   await assert.rejects(() => runDemo(cases, [adapter], "live", 3), /terra aborted after 3 consecutive errors: nonzero_exit: review exited 1/);
@@ -294,7 +295,12 @@ test("live adapters normalize native decisions while preserving the exact eviden
   const terra = createReasoningDemoAdapter("terra", "/empty", async (request) => {
     assert.equal(request.mode, "demo");
     assert.equal(request.schemaPath, "config/demo-output.schema.json");
-    assert.match(request.prompt, /not evidence that a control is absent or that code is safe/);
+    // Prompt parity: the reasoning models must receive the same per-outcome definitions Jev is given,
+    // so a score gap measures the model rather than which evaluator got the better prompt.
+    for (const [outcome, definition] of Object.entries(demoCriteria)) {
+      assert.ok(request.prompt.includes(definition), `prompt is missing the ${outcome} criterion given to Jev`);
+    }
+    assert.match(request.prompt, /Do not infer that omitted code is safe or unsafe/);
     assert.equal(request.prompt.endsWith(stateJson), true);
     assert.equal(request.prompt.split(stateJson).length, 2);
     return { finalOutcome: "no_alert", output: { decision: "safe", family: "injection", evidence_span_ids: [] }, usage: null, usageStatus: "inconclusive", chargeUsd: null, costStatus: "inconclusive", attempts: 1, modelLatencyMs: 4_200, stdout: "", stderr: "", error: null };

@@ -50,15 +50,6 @@ const families = new Set<StructuredReview["family"]>(["injection", "broken_acces
 export const reasoningRunnerVersions: Readonly<Record<ReasoningEvaluator, string>> = { terra: "codex-cli 0.147.0", opus: "2.1.278 (Claude Code)" };
 
 function record(value: unknown): Record<string, unknown> | null { return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null; }
-function usage(value: unknown): ReasoningResult["usage"] {
-  const root = record(value); const parsed = record(root?.usage);
-  const direct = parsed?.input_tokens ?? parsed?.inputTokens;
-  const output = parsed?.output_tokens ?? parsed?.outputTokens;
-  if (typeof direct !== "number" || !Number.isInteger(direct) || direct < 0 || typeof output !== "number" || !Number.isInteger(output) || output < 0) return null;
-  // Claude Code reports uncached input separately from cache reads and cache writes; all three were sent to the model.
-  const cached = [parsed?.cache_read_input_tokens, parsed?.cache_creation_input_tokens].map((value) => typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : 0);
-  return { inputTokens: direct + cached[0]! + cached[1]!, outputTokens: output };
-}
 function parseStructured(value: unknown): StructuredReview {
   const root = record(value);
   if (root === null || Object.keys(root).length !== 3 || !("decision" in root) || !("family" in root) || !("evidence_span_ids" in root) || !decisions.has(root.decision as StructuredReview["decision"]) || !families.has(root.family as StructuredReview["family"]) || !Array.isArray(root.evidence_span_ids) || !root.evidence_span_ids.every((id) => typeof id === "string" && /^s[1-9][0-9]*$/.test(id)) || new Set(root.evidence_span_ids).size !== root.evidence_span_ids.length) throw new Error("malformed structured output");
@@ -99,7 +90,8 @@ function reasonForFailure(stderr: string, code: number): ReasoningFailureKind {
 function command(request: ReasoningRequest, executable: string, outputPath: string, compactSchema: string): Command {
   if (request.evaluator === "terra") return {
     command: executable,
-    args: ["exec", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check", "--model", "gpt-5.6-terra", "--dangerously-bypass-approvals-and-sandbox", "--cd", request.snapshot, "--output-schema", resolve(request.schemaPath), "--output-last-message", outputPath, "-"],
+    // --json makes Codex emit JSONL events, the only form in which it reports token usage.
+    args: ["exec", "--json", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check", "--model", "gpt-5.6-terra", "--dangerously-bypass-approvals-and-sandbox", "--cd", request.snapshot, "--output-schema", resolve(request.schemaPath), "--output-last-message", outputPath, "-"],
     cwd: request.snapshot
   };
   if (request.model === undefined || request.model.length === 0) throw new Error("Opus requires a frozen full model ID");
@@ -222,6 +214,46 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
   }
 }
 
+/** Token counts carried directly on one object, under any of the spellings the two CLIs use. */
+function tokenCounts(value: unknown): ReasoningResult["usage"] {
+  const parsed = record(value);
+  if (parsed === null) return null;
+  const input = parsed.input_tokens ?? parsed.inputTokens ?? parsed.prompt_tokens;
+  const output = parsed.output_tokens ?? parsed.outputTokens ?? parsed.completion_tokens;
+  if (typeof input !== "number" || !Number.isInteger(input) || input < 0 || typeof output !== "number" || !Number.isInteger(output) || output < 0) return null;
+  // Claude Code reports uncached input separately from cache reads and cache writes; all three were sent to the model.
+  const cached = [parsed.cache_read_input_tokens, parsed.cache_creation_input_tokens].map((entry) => typeof entry === "number" && Number.isInteger(entry) && entry >= 0 ? entry : 0);
+  return { inputTokens: input + cached[0]! + cached[1]!, outputTokens: output };
+}
+
+/**
+ * Largest token counts anywhere in a parsed payload.
+ *
+ * Claude Code returns one JSON object carrying `usage`; Codex `--json` streams JSONL events that
+ * report both a per-turn delta and a running total, nested at varying depths. Cumulative counters
+ * only grow, so taking the maximum picks the final total without depending on either CLI's event
+ * names — and returns null, as before, when a CLI reports no usage at all.
+ */
+function searchUsage(value: unknown): ReasoningResult["usage"] {
+  let best = tokenCounts(value);
+  if (value !== null && typeof value === "object") {
+    for (const child of Object.values(value as Record<string, unknown>)) {
+      const nested = searchUsage(child);
+      if (nested !== null && (best === null || nested.inputTokens + nested.outputTokens > best.inputTokens + best.outputTokens)) best = nested;
+    }
+  }
+  return best;
+}
+
 function usageFrom(stdout: string): ReasoningResult["usage"] {
-  try { return usage(JSON.parse(stdout)); } catch { return null; }
+  let best: ReasoningResult["usage"] = null;
+  for (const line of stdout.split("\n")) {
+    const trimmed = line.trim();
+    if (trimmed.length === 0) continue;
+    let parsed: unknown;
+    try { parsed = JSON.parse(trimmed); } catch { continue; }
+    const found = searchUsage(parsed);
+    if (found !== null && (best === null || found.inputTokens + found.outputTokens > best.inputTokens + best.outputTokens)) best = found;
+  }
+  return best;
 }
