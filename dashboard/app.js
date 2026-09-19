@@ -19,7 +19,11 @@ function renderMetadata(data) {
   byId("recorded-at").textContent = new Date(data.models[0].recordedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
   byId("case-count").textContent = `${data.caseCount} synthetic`;
   byId("provenance-note").textContent = data.provenance.description;
+  const warnings = byId("warnings");
+  warnings.replaceChildren(...(data.warnings ?? []).map((text) => element("li", "", text)));
+  warnings.parentElement.hidden = (data.warnings ?? []).length === 0;
 }
+const milliseconds = (value) => value === null || value === undefined ? "unavailable" : `${Math.round(value)} ms`;
 
 function renderScorecards(data) {
   const root = byId("scorecards");
@@ -30,10 +34,17 @@ function renderScorecards(data) {
     card.dataset.index = String(index + 1).padStart(2, "0");
     card.append(element("p", "model-kicker", model.provider), element("h3", "", names[model.evaluator]), element("p", "model-id", `${model.modelId} · ${model.runner} ${model.runnerVersion}`));
     const hero = element("div", "hero-metric");
-    hero.append(element("span", "metric-label", "Accuracy"), element("strong", "metric-value", percent(summary.accuracy)));
+    hero.append(element("span", "metric-label", "Balanced accuracy"), element("strong", "metric-value", percent(summary.balancedAccuracy)));
     card.append(hero);
     const metrics = element("div", "metric-grid");
-    for (const [label, value] of [["Vuln. recall", percent(summary.vulnerabilityRecall)], ["Errors", String(summary.errors)], ["Mean latency", `${Math.round(summary.meanLatencyMs)} ms`]]) {
+    for (const [label, value] of [
+      ["Accuracy", percent(summary.accuracy)],
+      ["Vuln. recall", percent(summary.vulnerabilityRecall)],
+      ["False positive rate", percent(summary.falsePositiveRate)],
+      ["False safe rate", percent(summary.falseSafeRate)],
+      ["Errors", String(summary.errors)],
+      ["Model latency p50", summary.modelLatencyP50Ms === null ? `${milliseconds(summary.latencyP50Ms)} end-to-end` : milliseconds(summary.modelLatencyP50Ms)]
+    ]) {
       const item = element("div");
       item.append(element("span", "metric-label", label), element("strong", "", value));
       metrics.append(item);
@@ -70,7 +81,7 @@ function renderComparisonBars(data) {
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
   svg.setAttribute("role", "img");
   svg.append(document.createElementNS(svg.namespaceURI, "title"));
-  svg.firstChild.textContent = "Accuracy and vulnerability recall by model";
+  svg.firstChild.textContent = "Balanced accuracy and vulnerability recall by model";
   for (let tick = 0; tick <= 4; tick += 1) {
     const x = 120 + tick * 90;
     const line = document.createElementNS(svg.namespaceURI, "line");
@@ -85,7 +96,7 @@ function renderComparisonBars(data) {
     const summary = data.summary[model.evaluator];
     const label = document.createElementNS(svg.namespaceURI, "text");
     label.setAttribute("x", "0"); label.setAttribute("y", String(y + 18)); label.textContent = names[model.evaluator]; svg.append(label);
-    [[summary.accuracy, "Accuracy", 0], [summary.vulnerabilityRecall, "Recall", 24]].forEach(([value, metric, offset]) => {
+    [[summary.balancedAccuracy, "Balanced accuracy", 0], [summary.vulnerabilityRecall, "Recall", 24]].forEach(([value, metric, offset]) => {
       const bar = document.createElementNS(svg.namespaceURI, "rect");
       bar.setAttribute("x", "120"); bar.setAttribute("y", String(y + offset)); bar.setAttribute("width", String(value * 360)); bar.setAttribute("height", "17"); bar.setAttribute("rx", "2"); bar.setAttribute("fill", `var(--${model.evaluator})`);
       const title = document.createElementNS(svg.namespaceURI, "title"); title.textContent = `${names[model.evaluator]} ${metric}: ${percent(value)}`; bar.append(title); svg.append(bar);
@@ -95,7 +106,8 @@ function renderComparisonBars(data) {
   const tbody = byId("comparison-table").querySelector("tbody");
   tbody.replaceChildren(...data.models.map((model) => {
     const row = element("tr");
-    row.append(element("th", "", names[model.evaluator]), element("td", "", percent(data.summary[model.evaluator].accuracy)), element("td", "", percent(data.summary[model.evaluator].vulnerabilityRecall)));
+    const summary = data.summary[model.evaluator];
+    row.append(element("th", "", names[model.evaluator]), element("td", "", percent(summary.balancedAccuracy)), element("td", "", percent(summary.vulnerabilityRecall)), element("td", "", percent(summary.falsePositiveRate)), element("td", "", percent(summary.falseSafeRate)));
     return row;
   }));
 }
@@ -197,7 +209,7 @@ async function start() {
     const response = await fetch("./data/latest.json");
     if (!response.ok) throw new Error(`data request failed: ${response.status}`);
     const data = await response.json();
-    if (data.schemaVersion !== 1 || data.recorded !== true || data.synthetic !== true || data.caseCount !== 100 || typeof data.provenance?.description !== "string") throw new Error("dashboard data contract is invalid");
+    if (data.schemaVersion !== 1 || data.recorded !== true || data.synthetic !== true || data.caseCount !== 100 || typeof data.provenance?.description !== "string" || !Array.isArray(data.warnings)) throw new Error("dashboard data contract is invalid");
     sourceData = data;
     renderMetadata(data); renderScorecards(data); renderDecisionGrid(data); renderComparisonBars(data); renderConfusionMatrices(data); renderCases(data, selectedFilters());
     byId("replay").addEventListener("click", () => replayRecordedRun(data));

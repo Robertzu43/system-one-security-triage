@@ -40,10 +40,15 @@
       <p id="replay-status" class="sr-only" aria-live="polite"></p>
     </section>
 
+    <section class="warnings" aria-labelledby="warnings-title" hidden>
+      <h2 id="warnings-title" class="sr-only">Data caveats</h2>
+      <ul id="warnings"></ul>
+    </section>
+
     <section class="primary-results" aria-labelledby="scoreboard-title">
       <div class="section-heading">
         <div><p class="section-number">01 / Scoreboard</p><h2 id="scoreboard-title">The run at a glance</h2></div>
-        <p>Errors stay in every denominator. Missing usage or cost stays unknown—not zero.</p>
+        <p>Errors stay in every denominator. Missing usage or cost stays unknown—not zero. Balanced accuracy is the mean of per-class recall over vulnerable, safe, and insufficient context.</p>
       </div>
       <div id="scorecards" class="scorecards" aria-live="polite"></div>
     </section>
@@ -64,10 +69,10 @@
 
     <div class="analysis-grid">
       <section class="panel" aria-labelledby="comparison-title">
-        <div class="section-heading compact"><div><p class="section-number">03 / Comparison</p><h2 id="comparison-title">Accuracy &amp; recall</h2></div></div>
+        <div class="section-heading compact"><div><p class="section-number">03 / Comparison</p><h2 id="comparison-title">Balanced accuracy &amp; recall</h2></div></div>
         <div id="comparison-bars" class="chart" aria-hidden="true"></div>
         <div class="table-scroll" tabindex="0" aria-label="Comparison chart values">
-          <table id="comparison-table"><caption>Model comparison values</caption><thead><tr><th>Model</th><th>Accuracy</th><th>Vulnerability recall</th></tr></thead><tbody></tbody></table>
+          <table id="comparison-table"><caption>Model comparison values</caption><thead><tr><th>Model</th><th>Balanced accuracy</th><th>Vulnerability recall</th><th>False positive rate</th><th>False safe rate</th></tr></thead><tbody></tbody></table>
         </div>
       </section>
 
@@ -81,7 +86,9 @@
       <p class="section-number">05 / Method</p>
       <h2 id="method-title">Same evidence in.<br>Saved decisions out.</h2>
       <div class="method-copy">
-        <p>Every evaluator received identical canonical evidence for 100 synthetic TypeScript/Node.js cases across injection, broken access control, and SSRF. The expected labels are part of the frozen corpus.</p>
+        <p>Every evaluator received identical canonical evidence for 100 synthetic TypeScript/Node.js cases across injection, broken access control, and SSRF. File paths and span text are label-neutral, and no context-resolution flags are shown to any model. The expected labels are part of the frozen corpus but never part of the evidence.</p>
+        <p>Jev answers one five-way typed Choice and its full probability distribution is recorded; the selected option is scored exactly as Terra's and Opus's structured answers are scored. No threshold changes Jev's selection. Vulnerability recall counts vulnerable cases labeled vulnerable with any family; recall with the family required, family accuracy, and precision are in the data.</p>
+        <p>Model latency is the time around the model request only; end-to-end CLI time is recorded separately. Token counts for Claude include cache reads and writes. Jev probabilities are not compared with any frontier-model confidence value.</p>
         <p>This is a descriptive demo, not a statistical benchmark. Replay only reveals the recorded results again; it never calls a model, changes a decision, or sends data elsewhere.</p>
       </div>
     </section>

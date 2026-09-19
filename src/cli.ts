@@ -27,7 +27,7 @@ function required(values: Values, name: string): string {
 function fixtureReview(): ReasoningResult {
   return {
     finalOutcome: "alert", output: { decision: "vulnerable", family: "injection", evidence_span_ids: ["s1"] }, usage: { inputTokens: 0, outputTokens: 0 },
-    usageStatus: "available", chargeUsd: null, costStatus: "inconclusive", attempts: 1, stdout: "", stderr: "", error: null
+    usageStatus: "available", chargeUsd: null, costStatus: "inconclusive", attempts: 1, modelLatencyMs: 0, stdout: "", stderr: "", error: null
   };
 }
 
@@ -113,7 +113,7 @@ async function liveAdapters(selected: readonly DemoEvaluator[], emptySnapshot: s
   const adapters: DemoAdapter[] = [];
   if (selected.includes("jev")) {
     const client = new TypeSafeClient({ timeout: 30_000, retry: { maxRetries: 0 }, logLevel: "off" });
-    adapters.push(createJevDemoAdapter((stateJson) => judgeDemoWithJev(stateJson, client)));
+    adapters.push(createJevDemoAdapter((state) => judgeDemoWithJev(state, client)));
   }
   if (selected.includes("terra")) adapters.push(createReasoningDemoAdapter("terra", emptySnapshot, undefined, { outputDirectory }));
   if (selected.includes("opus")) adapters.push(createReasoningDemoAdapter("opus", emptySnapshot, undefined, { outputDirectory }));
@@ -139,7 +139,7 @@ async function demo(values: Values): Promise<unknown> {
   const adapters = (["jev", "terra", "opus"] as const).map((name): DemoAdapter => ({
     name,
     metadata: { provider: "Fixture", modelId: name, runner: "fixture", runnerVersion: "1" },
-    evaluate: async (_stateJson, item) => ({ ...item.expected, inputTokens: 0, outputTokens: 0, costUsd: 0 })
+    evaluate: async (_stateJson, item) => ({ ...item.expected, inputTokens: 0, outputTokens: 0, costUsd: 0, modelLatencyMs: 0 })
   }));
   return output(await runDemo(cases, adapters, "fixture"));
 }
@@ -183,14 +183,14 @@ async function dashboardBuild(values: Values): Promise<unknown> {
     }
   }
   const generatedAt = runs.map((run) => run.recordedAt).sort().at(-1) ?? "1970-01-01T00:00:00.000Z";
-  const data = buildPublishedDemoData(cases, runs, generatedAt);
+  const data = buildPublishedDemoData(cases, runs, generatedAt, { allowDegenerate: values["allow-degenerate"] === true });
   await writePublishedDemoData(output, data);
   return { output: basename(output), corpusHash: data.corpusHash, sourceHashes: Object.fromEntries(data.sourceArtifacts.map(({ evaluator, artifactSha256 }) => [evaluator, artifactSha256])) };
 }
 
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({ args: process.argv.slice(2), allowPositionals: true, strict: true, options: {
-    source: { type: "string" }, destination: { type: "string" }, commit: { type: "string" }, snapshot: { type: "string" }, input: { type: "string" }, output: { type: "string" }, fixture: { type: "string" }, evaluator: { type: "string" }, "run-id": { type: "string" }, "run-dir": { type: "string" }, live: { type: "boolean" }, models: { type: "string" }, details: { type: "boolean" }
+    source: { type: "string" }, destination: { type: "string" }, commit: { type: "string" }, snapshot: { type: "string" }, input: { type: "string" }, output: { type: "string" }, fixture: { type: "string" }, evaluator: { type: "string" }, "run-id": { type: "string" }, "run-dir": { type: "string" }, live: { type: "boolean" }, models: { type: "string" }, details: { type: "boolean" }, "allow-degenerate": { type: "boolean" }
   } });
   const command = positionals[0];
   const result = command === "sanitize" ? await sanitize(values) : command === "discover" ? await discover(values) : command === "score" ? await score(values) : command === "run" ? await runFixture(values) : command === "demo" ? await demo(values) : command === "demo-record" ? await demoRecord(values) : command === "dashboard-build" ? await dashboardBuild(values) : (() => { throw new Error("expected sanitize, discover, run, score, demo, demo-record, or dashboard-build"); })();

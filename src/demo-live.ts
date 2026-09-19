@@ -1,8 +1,10 @@
+import { performance } from "node:perf_hooks";
 import { decisionForChoice, type DemoAdapter, type DemoEvaluator } from "./demo.js";
 import { jevModel, type JevDemoJudgment } from "./jev.js";
 import { reasoningRunnerVersions, type ReasoningConfig, type ReasoningRequest, type ReasoningResult, runReasoningReview } from "./reasoning.js";
 
-type JudgeJev = (stateJson: string) => Promise<JevDemoJudgment>;
+/** Jev receives the canonical evidence as a JSON object, the form TypeSafe documents for structured state. */
+type JudgeJev = (state: Record<string, unknown>) => Promise<JevDemoJudgment>;
 type RunReasoning = (request: ReasoningRequest, config: ReasoningConfig) => Promise<ReasoningResult>;
 
 const reasoningInstructions = "Classify the supplied code evidence as vulnerable, safe, or insufficient_context. For vulnerable, return exactly one family: injection, broken_access_control, or ssrf. For safe and insufficient_context, return family null. Missing code is not evidence that a control is absent or that code is safe; use insufficient_context whenever a required authorization, sanitization, middleware, upstream-flow, or call-path fact is not shown.";
@@ -20,14 +22,18 @@ export function createJevDemoAdapter(judge: JudgeJev): DemoAdapter {
   return {
     name: "jev",
     metadata: { provider: "TypeSafe", modelId: jevModel, runner: "@typesafe-ai/sdk", runnerVersion: "0.6.0" },
-    evaluate: async (stateJson, item) => {
-      const judgment = await judge(stateJson);
+    evaluate: async (stateJson) => {
+      const state = JSON.parse(stateJson) as Record<string, unknown>;
+      const started = performance.now();
+      const judgment = await judge(state);
+      const modelLatencyMs = performance.now() - started;
       if (judgment.kind === "abstain") throw new Error(`${judgment.error.name}: ${judgment.error.message}`);
       return {
         ...decisionForChoice(judgment.choice.selected),
         choice: judgment.choice,
         inputTokens: judgment.usage.input_tokens,
-        outputTokens: judgment.usage.output_tokens
+        outputTokens: judgment.usage.output_tokens,
+        modelLatencyMs
       };
     }
   };
@@ -61,7 +67,8 @@ export function createReasoningDemoAdapter(evaluator: Exclude<DemoEvaluator, "je
         disposition,
         family: disposition === "vulnerable" ? output.family : null,
         ...(result.usage === null ? {} : { inputTokens: result.usage.inputTokens, outputTokens: result.usage.outputTokens }),
-        ...(result.chargeUsd === null ? {} : { costUsd: result.chargeUsd })
+        ...(result.chargeUsd === null ? {} : { costUsd: result.chargeUsd }),
+        modelLatencyMs: result.modelLatencyMs
       };
     }
   };

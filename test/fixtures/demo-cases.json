@@ -26,7 +26,13 @@
           "to": "s2",
           "kind": "flows_to"
         }
-      ],
+      ]
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -34,10 +40,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "injection"
     }
   },
   {
@@ -67,7 +69,13 @@
           "to": "s2",
           "kind": "flows_to"
         }
-      ],
+      ]
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -75,10 +83,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -95,7 +99,13 @@
           "text": "return lookupUser(req.query.id);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "unresolved",
         "upstreamDataFlow": "resolved",
@@ -103,10 +113,6 @@
         "authorization": "unresolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -136,7 +142,13 @@
           "to": "s2",
           "kind": "flows_to"
         }
-      ],
+      ]
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -144,10 +156,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "broken_access_control"
     }
   },
   {
@@ -177,7 +185,13 @@
           "to": "s2",
           "kind": "guards"
         }
-      ],
+      ]
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -185,10 +199,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -218,7 +228,13 @@
           "to": "s2",
           "kind": "guards"
         }
-      ],
+      ]
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "unresolved",
         "upstreamDataFlow": "resolved",
@@ -226,10 +242,6 @@
         "authorization": "unresolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -246,7 +258,13 @@
           "text": "return fetch(req.query.url);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -254,10 +272,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "ssrf"
     }
   },
   {
@@ -287,7 +301,13 @@
           "to": "s2",
           "kind": "guards"
         }
-      ],
+      ]
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -295,10 +315,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -315,7 +331,13 @@
           "text": "return fetch(resolveServiceUrl(req.query.service));"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "unresolved",
         "upstreamDataFlow": "unresolved",
@@ -323,10 +345,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -337,13 +355,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-vulnerable-sql-order-sort.ts",
+          "path": "src/demo/sql-order-sort.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "db.query(`SELECT * FROM orders ORDER BY ${req.query.sort}`);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -351,10 +375,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "injection"
     }
   },
   {
@@ -365,13 +385,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-vulnerable-sql-report-filter.ts",
+          "path": "src/demo/sql-report-filter.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "reports.raw(`status = '${req.body.status}'`);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -379,10 +405,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "injection"
     }
   },
   {
@@ -393,13 +415,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-vulnerable-shell-export.ts",
+          "path": "src/demo/shell-export.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "exec(`tar -czf export.tgz ${req.query.folder}`);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -407,10 +435,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "injection"
     }
   },
   {
@@ -421,13 +445,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-vulnerable-shell-git-ref.ts",
+          "path": "src/demo/shell-git-ref.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "spawnSync('sh',['-c',`git show ${req.params.ref}`]);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -435,10 +465,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "injection"
     }
   },
   {
@@ -449,13 +475,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-vulnerable-eval-formula.ts",
+          "path": "src/demo/eval-formula.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "eval(req.body.formula);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -463,10 +495,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "injection"
     }
   },
   {
@@ -477,13 +505,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-vulnerable-vm-script.ts",
+          "path": "src/demo/vm-script.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "new vm.Script(req.body.script).runInContext(context);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -491,10 +525,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "injection"
     }
   },
   {
@@ -505,13 +535,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-vulnerable-template-helper.ts",
+          "path": "src/demo/template-helper.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "handlebars.compile(req.body.template)(data);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -519,10 +555,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "injection"
     }
   },
   {
@@ -533,13 +565,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-vulnerable-template-name.ts",
+          "path": "src/demo/template-name.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "res.render(req.query.view,model);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -547,10 +585,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "injection"
     }
   },
   {
@@ -561,13 +595,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-vulnerable-path-archive.ts",
+          "path": "src/demo/path-archive.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "readFile(join('/exports',req.params.name));"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -575,10 +615,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "injection"
     }
   },
   {
@@ -589,13 +625,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-vulnerable-orm-order.ts",
+          "path": "src/demo/orm-order.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "User.findAll({order:literal(req.query.order)});"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -603,10 +645,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "injection"
     }
   },
   {
@@ -617,13 +655,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-vulnerable-graphql-raw-filter.ts",
+          "path": "src/demo/graphql-raw-filter.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "repository.query(req.body.rawFilter);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -631,10 +675,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "injection"
     }
   },
   {
@@ -645,13 +685,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-safe-sql-placeholder-email.ts",
+          "path": "src/demo/sql-placeholder-email.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "db.query('SELECT * FROM users WHERE email = $1',[req.query.email]);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -659,10 +705,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -673,13 +715,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-safe-query-builder-eq.ts",
+          "path": "src/demo/query-builder-eq.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "db('users').where({id:req.params.id}).first();"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -687,10 +735,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -701,13 +745,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-safe-shell-execfile-args.ts",
+          "path": "src/demo/shell-execfile-args.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "execFile('/usr/bin/convert',[inputPath,outputPath]);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -715,10 +765,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -729,13 +775,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-safe-shell-command-allowlist.ts",
+          "path": "src/demo/shell-command-allowlist.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "if(!COMMANDS.has(req.body.action)) throw Error('invalid'); run(COMMANDS.get(req.body.action));"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -743,10 +795,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -757,13 +805,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-safe-json-parse.ts",
+          "path": "src/demo/json-parse.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "JSON.parse(req.body.settings);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -771,10 +825,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -785,13 +835,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-safe-template-autoescape.ts",
+          "path": "src/demo/template-autoescape.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "templates.render('profile',{name:req.body.name},{autoescape:true});"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -799,10 +855,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -813,13 +865,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-safe-path-basename-root.ts",
+          "path": "src/demo/path-basename-root.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "readFile(join(ROOT,basename(req.params.file)));"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -827,10 +885,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -841,13 +895,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-safe-path-resolve-root.ts",
+          "path": "src/demo/path-resolve-root.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const f=resolve(ROOT,req.params.file); if(!f.startsWith(ROOT+sep)) throw Error('outside');"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -855,10 +915,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -869,13 +925,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-safe-orm-enum-sort.ts",
+          "path": "src/demo/orm-enum-sort.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const s=SORT_FIELDS[req.query.sort]; if(!s) throw Error('invalid'); User.findAll({order:[[s,'ASC']]});"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -883,10 +945,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -897,13 +955,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-safe-parser-schema-validation.ts",
+          "path": "src/demo/parser-schema-validation.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "parser.execute(schema.parse(req.body).expression);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -911,10 +975,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -925,13 +985,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-insufficient-sql-helper-hidden.ts",
+          "path": "src/demo/sql-helper.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "findUsers(req.query.filter);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -939,10 +1005,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -953,13 +1015,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-insufficient-db-wrapper-hidden.ts",
+          "path": "src/demo/db-wrapper.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "repository.search(req.body.term);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -967,10 +1035,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -981,13 +1045,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-insufficient-command-builder-hidden.ts",
+          "path": "src/demo/command-builder.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "commandService.run(req.body.job);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -995,10 +1065,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1009,13 +1075,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-insufficient-process-service-hidden.ts",
+          "path": "src/demo/process-service.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "exportService.create(req.query.format);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1023,10 +1095,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1037,13 +1105,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-insufficient-expression-compiler-hidden.ts",
+          "path": "src/demo/expression-compiler.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "formulaEngine.calculate(req.body.formula);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1051,10 +1125,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1065,13 +1135,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-insufficient-template-sanitizer-hidden.ts",
+          "path": "src/demo/template-sanitizer.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "pageRenderer.render(req.body.content);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1079,10 +1155,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1093,13 +1165,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-insufficient-archive-path-guard-hidden.ts",
+          "path": "src/demo/archive-path-guard.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "archive.open(req.params.entry);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1107,10 +1185,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1121,13 +1195,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-insufficient-upload-normalizer-hidden.ts",
+          "path": "src/demo/upload-normalizer.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "uploads.read(normalizeUploadName(req.params.name));"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1135,10 +1215,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1149,13 +1225,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-insufficient-orm-filter-helper-hidden.ts",
+          "path": "src/demo/orm-filter-helper.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "products.applyFilter(req.query.filter);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1163,10 +1245,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1177,13 +1255,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/injection-insufficient-parser-policy-hidden.ts",
+          "path": "src/demo/parser-policy.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "queryLanguage.parse(req.body.query);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1191,10 +1275,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1205,13 +1285,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-vulnerable-invoice-read.ts",
+          "path": "src/demo/invoice-read.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "invoices.findById(req.params.invoiceId);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1219,10 +1305,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "broken_access_control"
     }
   },
   {
@@ -1233,13 +1315,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-vulnerable-profile-update.ts",
+          "path": "src/demo/profile-update.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "users.update(req.params.userId,req.body);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1247,10 +1335,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "broken_access_control"
     }
   },
   {
@@ -1261,13 +1345,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-vulnerable-tenant-report.ts",
+          "path": "src/demo/tenant-report.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "reports.forTenant(req.query.tenantId);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1275,10 +1365,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "broken_access_control"
     }
   },
   {
@@ -1289,13 +1375,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-vulnerable-admin-export.ts",
+          "path": "src/demo/admin-export.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "router.get('/admin/export',authenticated,exportAllUsers);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1303,10 +1395,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "broken_access_control"
     }
   },
   {
@@ -1317,13 +1405,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-vulnerable-project-delete.ts",
+          "path": "src/demo/project-delete.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "projects.delete(req.params.projectId);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1331,10 +1425,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "broken_access_control"
     }
   },
   {
@@ -1345,13 +1435,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-vulnerable-document-download.ts",
+          "path": "src/demo/document-download.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "documents.download(req.params.documentId);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1359,10 +1455,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "broken_access_control"
     }
   },
   {
@@ -1373,13 +1465,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-vulnerable-order-refund.ts",
+          "path": "src/demo/order-refund.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "refunds.create(req.params.orderId,req.body.amount);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1387,10 +1485,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "broken_access_control"
     }
   },
   {
@@ -1401,13 +1495,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-vulnerable-team-invite.ts",
+          "path": "src/demo/team-invite.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "teams.invite(req.params.teamId,req.body.email);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1415,10 +1515,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "broken_access_control"
     }
   },
   {
@@ -1429,13 +1525,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-vulnerable-api-key-rotate.ts",
+          "path": "src/demo/api-key-rotate.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "apiKeys.rotate(req.params.userId);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1443,10 +1545,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "broken_access_control"
     }
   },
   {
@@ -1457,13 +1555,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-vulnerable-mass-assignment-role.ts",
+          "path": "src/demo/mass-assignment-role.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "users.update(req.user.id,req.body);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1471,10 +1575,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "broken_access_control"
     }
   },
   {
@@ -1485,13 +1585,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-safe-invoice-owner-query.ts",
+          "path": "src/demo/invoice-owner-query.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "invoices.findOne({id:req.params.invoiceId,ownerId:req.user.id});"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1499,10 +1605,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -1513,13 +1615,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-safe-profile-self-id.ts",
+          "path": "src/demo/profile-self-id.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "if(req.params.userId!==req.user.id) return res.sendStatus(403); users.update(req.user.id,req.body);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1527,10 +1635,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -1541,13 +1645,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-safe-tenant-scope-query.ts",
+          "path": "src/demo/tenant-scope-query.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "reports.find({tenantId:req.user.tenantId,id:req.params.reportId});"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1555,10 +1665,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -1569,13 +1675,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-safe-admin-middleware.ts",
+          "path": "src/demo/admin-middleware.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "router.get('/admin/export',authenticated,requireRole('admin'),exportAllUsers);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1583,10 +1695,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -1597,13 +1705,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-safe-project-owner-check.ts",
+          "path": "src/demo/project-owner-check.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const p=await projects.get(req.params.projectId); if(p.ownerId!==req.user.id) return res.sendStatus(403);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1611,10 +1725,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -1625,13 +1735,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-safe-document-membership.ts",
+          "path": "src/demo/document-membership.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "await memberships.require(req.user.id,req.params.documentId); documents.download(req.params.documentId);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1639,10 +1755,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -1653,13 +1765,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-safe-refund-permission.ts",
+          "path": "src/demo/refund-permission.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "if(!req.user.permissions.includes('refund:create')) return res.sendStatus(403); refunds.create(req.params.orderId);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1667,10 +1785,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -1681,13 +1795,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-safe-team-owner-guard.ts",
+          "path": "src/demo/team-owner-guard.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "await teams.requireOwner(req.user.id,req.params.teamId); teams.invite(req.params.teamId,req.body.email);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1695,10 +1815,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -1709,13 +1825,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-safe-api-key-session-user.ts",
+          "path": "src/demo/api-key-session-user.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "apiKeys.rotate(req.user.id);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1723,10 +1845,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -1737,13 +1855,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-safe-mass-assignment-allowlist.ts",
+          "path": "src/demo/mass-assignment-allowlist.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "users.update(req.user.id,pick(req.body,['displayName','timezone']));"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1751,10 +1875,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -1765,13 +1885,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-insufficient-invoice-policy-hidden.ts",
+          "path": "src/demo/invoice-policy.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "authorizeInvoice(req.user,req.params.invoiceId);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1779,10 +1905,6 @@
         "authorization": "unresolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1793,13 +1915,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-insufficient-profile-auth-helper.ts",
+          "path": "src/demo/profile-auth-helper.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "canEditProfile(req);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1807,10 +1935,6 @@
         "authorization": "unresolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1821,13 +1945,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-insufficient-tenant-context-hidden.ts",
+          "path": "src/demo/tenant-context.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "tenantRepository(req).reports.get(req.params.reportId);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1835,10 +1965,6 @@
         "authorization": "unresolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1849,13 +1975,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-insufficient-admin-middleware-hidden.ts",
+          "path": "src/demo/admin-middleware.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "router.get('/admin/audit',adminPolicy,auditLog);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1863,10 +1995,6 @@
         "authorization": "unresolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1877,13 +2005,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-insufficient-project-permission-service.ts",
+          "path": "src/demo/project-permission-service.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "permissionService.check(req.user,'delete',req.params.projectId);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1891,10 +2025,6 @@
         "authorization": "unresolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1905,13 +2035,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-insufficient-document-acl-hidden.ts",
+          "path": "src/demo/document-acl.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "secureDocuments(req.user).download(req.params.documentId);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1919,10 +2055,6 @@
         "authorization": "unresolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1933,13 +2065,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-insufficient-refund-policy-hidden.ts",
+          "path": "src/demo/refund-policy.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "refundPolicy.enforce(req);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1947,10 +2085,6 @@
         "authorization": "unresolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1961,13 +2095,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-insufficient-team-role-hidden.ts",
+          "path": "src/demo/team-role.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "requireTeamRole(req);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -1975,10 +2115,6 @@
         "authorization": "unresolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -1989,13 +2125,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-insufficient-api-key-authorization-hidden.ts",
+          "path": "src/demo/api-key-authorization.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "authorizeKeyRotation(req);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2003,10 +2145,6 @@
         "authorization": "unresolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -2017,13 +2155,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/access-insufficient-field-policy-hidden.ts",
+          "path": "src/demo/field-policy.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "allowedProfileChanges(req.user,req.body);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2031,10 +2175,6 @@
         "authorization": "unresolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -2045,13 +2185,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-vulnerable-avatar-url.ts",
+          "path": "src/demo/avatar-url.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "fetch(req.body.avatarUrl);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2059,10 +2205,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "ssrf"
     }
   },
   {
@@ -2073,13 +2215,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-vulnerable-webhook-test-url.ts",
+          "path": "src/demo/webhook-test-url.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "http.post(req.body.callbackUrl,testPayload);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2087,10 +2235,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "ssrf"
     }
   },
   {
@@ -2101,13 +2245,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-vulnerable-pdf-render-url.ts",
+          "path": "src/demo/pdf-render-url.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "pdf.renderFromUrl(req.query.page);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2115,10 +2265,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "ssrf"
     }
   },
   {
@@ -2129,13 +2275,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-vulnerable-redirect-follow.ts",
+          "path": "src/demo/redirect-follow.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "fetch(req.query.url,{redirect:'follow'});"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2143,10 +2295,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "ssrf"
     }
   },
   {
@@ -2157,13 +2305,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-vulnerable-metadata-host.ts",
+          "path": "src/demo/metadata-host.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "request(`http://${req.query.host}/status`);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2171,10 +2325,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "ssrf"
     }
   },
   {
@@ -2185,13 +2335,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-vulnerable-dns-rebind-host.ts",
+          "path": "src/demo/dns-rebind-host.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "fetch(new URL(req.body.url));"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2199,10 +2355,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "ssrf"
     }
   },
   {
@@ -2213,13 +2365,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-vulnerable-proxy-destination.ts",
+          "path": "src/demo/proxy-destination.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "proxy.forward(req.query.destination);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2227,10 +2385,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "ssrf"
     }
   },
   {
@@ -2241,13 +2395,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-vulnerable-image-import-url.ts",
+          "path": "src/demo/image-import-url.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "images.importFrom(req.body.source);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2255,10 +2415,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "ssrf"
     }
   },
   {
@@ -2269,13 +2425,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-vulnerable-feed-fetch-url.ts",
+          "path": "src/demo/feed-fetch-url.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "feeds.parse(await fetch(req.body.feedUrl));"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2283,10 +2445,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "ssrf"
     }
   },
   {
@@ -2297,13 +2455,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-vulnerable-oauth-jwks-url.ts",
+          "path": "src/demo/oauth-jwks-url.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "jwksClient(req.body.jwksUri).getSigningKey();"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2311,10 +2475,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "vulnerable",
-      "family": "ssrf"
     }
   },
   {
@@ -2325,13 +2485,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-safe-avatar-host-allowlist.ts",
+          "path": "src/demo/avatar-host-allowlist.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const u=new URL(req.body.avatarUrl); if(!AVATAR_HOSTS.has(u.hostname)) throw Error('blocked'); fetch(u);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2339,10 +2505,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -2353,13 +2515,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-safe-webhook-https-domain.ts",
+          "path": "src/demo/webhook-https-domain.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const u=new URL(req.body.callbackUrl); if(u.protocol!=='https:'||!u.hostname.endsWith('.hooks.example.com')) throw Error('blocked'); fetch(u);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2367,10 +2535,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -2381,13 +2545,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-safe-pdf-fixed-origin.ts",
+          "path": "src/demo/pdf-constant-origin.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "pdf.renderFromUrl(`https://docs.example.com/${encodeURIComponent(req.params.slug)}`);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2395,10 +2565,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -2409,13 +2575,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-safe-redirect-disabled.ts",
+          "path": "src/demo/redirect-disabled.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "fetch(approvedUrl,{redirect:'error'});"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2423,10 +2595,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -2437,13 +2605,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-safe-private-ip-block.ts",
+          "path": "src/demo/private-ip-block.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const a=await resolvePublicAddress(req.query.host); if(isPrivate(a)) throw Error('blocked'); fetch(`https://${a}`);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2451,10 +2625,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -2465,13 +2635,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-safe-dns-pin-check.ts",
+          "path": "src/demo/dns-pin-check.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "fetch(await validateAndPinPublicUrl(req.body.url));"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2479,10 +2655,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -2493,13 +2665,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-safe-proxy-service-enum.ts",
+          "path": "src/demo/proxy-service-enum.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const o=SERVICE_ORIGINS[req.query.service]; if(!o) throw Error('unknown'); fetch(o);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2507,10 +2685,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -2521,13 +2695,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-safe-image-object-key.ts",
+          "path": "src/demo/image-object-key.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "images.readFromBucket(req.params.objectKey);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2535,10 +2715,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -2549,13 +2725,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-safe-feed-registry.ts",
+          "path": "src/demo/feed-registry.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const f=FEEDS.get(req.params.feedId); if(!f) return res.sendStatus(404); fetch(f.url);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2563,10 +2745,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -2577,13 +2755,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-safe-jwks-issuer-map.ts",
+          "path": "src/demo/jwks-issuer-map.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const u=TRUSTED_ISSUERS[claims.iss]?.jwksUri; if(!u) throw Error('issuer'); fetch(u);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2591,10 +2775,6 @@
         "authorization": "resolved",
         "callPath": "resolved"
       }
-    },
-    "expected": {
-      "disposition": "safe",
-      "family": null
     }
   },
   {
@@ -2605,13 +2785,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-insufficient-avatar-validator-hidden.ts",
+          "path": "src/demo/avatar-validator.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "avatarService.fetch(validateAvatarUrl(req.body.avatarUrl));"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2619,10 +2805,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -2633,13 +2815,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-insufficient-webhook-policy-hidden.ts",
+          "path": "src/demo/webhook-policy.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "webhookPolicy(req.user).send(req.body.callbackUrl);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2647,10 +2835,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -2661,13 +2845,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-insufficient-pdf-resolver-hidden.ts",
+          "path": "src/demo/pdf-resolver.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "pdf.renderFromUrl(resolveDocumentUrl(req.params.document));"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2675,10 +2865,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -2689,13 +2875,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-insufficient-redirect-config-hidden.ts",
+          "path": "src/demo/redirect-config.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "safeHttpClient.get(req.query.url);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2703,10 +2895,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -2717,13 +2905,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-insufficient-ip-filter-hidden.ts",
+          "path": "src/demo/ip-filter.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "fetch(filterNetworkTarget(req.body.url));"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2731,10 +2925,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -2745,13 +2935,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-insufficient-dns-cache-hidden.ts",
+          "path": "src/demo/dns-cache.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "pinnedDnsClient.request(req.body.url);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2759,10 +2955,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -2773,13 +2965,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-insufficient-proxy-map-hidden.ts",
+          "path": "src/demo/proxy-map.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "serviceProxy.forward(req.query.service,req.path);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2787,10 +2985,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -2801,13 +2995,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-insufficient-image-fetcher-hidden.ts",
+          "path": "src/demo/image-fetcher.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "remoteImageStore.import(req.body.source);"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2815,10 +3015,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -2829,13 +3025,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-insufficient-feed-resolver-hidden.ts",
+          "path": "src/demo/feed-resolver.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "feeds.load(resolveFeed(req.params.feedId));"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2843,10 +3045,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   },
   {
@@ -2857,13 +3055,19 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ssrf-insufficient-jwks-discovery-hidden.ts",
+          "path": "src/demo/jwks-discovery.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "oidcClient(req.body.issuer).discoverKeys();"
         }
       ],
-      "relationships": [],
+      "relationships": []
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    },
+    "ledger": {
       "contextResolution": {
         "middleware": "resolved",
         "upstreamDataFlow": "resolved",
@@ -2871,10 +3075,6 @@
         "authorization": "resolved",
         "callPath": "unresolved"
       }
-    },
-    "expected": {
-      "disposition": "insufficient_context",
-      "family": null
     }
   }
 ]

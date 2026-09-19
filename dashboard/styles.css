@@ -93,7 +93,9 @@ h2 { margin: 0; font-size: clamp(2.25rem, 4vw, 4.2rem); }
 .legend-mark { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; margin-right: .3rem; color: var(--surface); font: 700 .7rem var(--mono); }
 .vulnerable { background: var(--incorrect); }
 .safe { background: var(--correct); }
-.insufficient { background: var(--insufficient); }
+.insufficient, .insufficient_context { background: var(--insufficient); }
+.warnings { margin: 0 auto 1.5rem; padding: .9rem 1.2rem; border: 1px solid var(--insufficient); border-radius: 6px; background: color-mix(in srgb, var(--insufficient) 12%, var(--surface)); }
+.warnings ul { margin: 0; padding-left: 1.2rem; }
 .error { background: var(--error); }
 .decision-grid { display: grid; grid-template-columns: repeat(10,minmax(1.5rem,1fr)); gap: .35rem; }
 .decision-cell { aspect-ratio: 1; display: grid; place-items: center; border: 0; color: #101210; cursor: pointer; font: 750 clamp(.62rem,1.2vw,.9rem) var(--mono); transition: transform .15s ease, filter .15s ease; animation: reveal .25s both; }
