@@ -45,12 +45,13 @@ Jev now answers one direct five-way TypeSafe Choice and records the selected lab
 
 ```bash
 export TYPESAFE_API_KEY='...'
-npm run demo:record -- --models jev --run-id 2026-09-19-public-v3
+JEV_RUN_ID="jev-choice-$(date -u +%Y%m%d-%H%M%S)"
+npm run demo:record -- --models jev --run-id "$JEV_RUN_ID"
 
-cp results/recorded/2026-09-19-public-v2/terra.json results/recorded/2026-09-19-public-v3/terra.json
-cp results/recorded/2026-09-19-public-v2/opus.json results/recorded/2026-09-19-public-v3/opus.json
+cp results/recorded/2026-09-19-public-v2/terra.json "results/recorded/$JEV_RUN_ID/terra.json"
+cp results/recorded/2026-09-19-public-v2/opus.json "results/recorded/$JEV_RUN_ID/opus.json"
 
-npm run dashboard:build -- --run-dir results/recorded/2026-09-19-public-v3 --output dashboard/data/latest.json
+npm run dashboard:build -- --run-dir "results/recorded/$JEV_RUN_ID" --output dashboard/data/latest.json
 npm run dashboard:preview
 ```
 
@@ -65,6 +66,13 @@ results/recorded/2026-09-19-public-v3/opus.json
 ```
 
 They must contain the same corpus hash and complete coverage of all 100 cases. Artifacts are exclusive-write and reject credentials, absolute local paths, duplicates, missing cases, unknown cases, and invalid hashes.
+
+To preview the already committed public v3 bundle without making model calls:
+
+```bash
+npm run dashboard:build -- --run-dir results/recorded/2026-09-19-public-v3 --output dashboard/data/latest.json
+npm run dashboard:preview
+```
 
 ## Publish on GitHub Pages
 

@@ -108,7 +108,7 @@ export function parseDemoChoice(value: unknown, label: string): DemoChoice {
   if (Object.keys(values).length !== choiceLabels.length || choiceLabels.some((key) => !probability(values[key]))) throw new Error(`${label}.probabilities are invalid`);
   const probabilities = Object.fromEntries(choiceLabels.map((key) => [key, values[key] as number])) as Record<DemoChoiceLabel, number>;
   const sum = choiceLabels.reduce((total, key) => total + probabilities[key], 0);
-  if (Math.abs(sum - 1) > 0.02) throw new Error(`${label}.probabilities sum to ${sum}`);
+  if (Math.abs(sum - 1) > 0.02 + Number.EPSILON * choiceLabels.length) throw new Error(`${label}.probabilities sum to ${sum}`);
   if (probabilities[selected] < Math.max(...choiceLabels.map((key) => probabilities[key]))) throw new Error(`${label}.selected option is not maximal`);
   return { selected, confidence: row.confidence, probabilities };
 }

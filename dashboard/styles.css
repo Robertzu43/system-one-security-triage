@@ -134,6 +134,7 @@ th:first-child, td:first-child { text-align: left; }
 .case-result { display: grid; grid-template-columns: 3.5rem 1fr auto; gap: .6rem; padding: .7rem; border-bottom: 1px solid var(--line); font-size: .8rem; }
 .case-result strong { text-transform: capitalize; }
 .case-result .outcome { overflow-wrap: anywhere; font-family: var(--mono); }
+.choice-probabilities { grid-column: 1 / -1; }
 .correctness { font-weight: 750; }
 .correctness.yes { color: var(--correct); }
 .correctness.no { color: var(--incorrect); }

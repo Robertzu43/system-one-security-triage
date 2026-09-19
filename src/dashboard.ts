@@ -12,6 +12,10 @@ export interface PublishedDemoData {
   caseCount: 100;
   recorded: true;
   synthetic: true;
+  provenance: {
+    kind: "direct-choice-mixed" | "archived-threshold-router" | "fixture";
+    description: string;
+  };
   sourceArtifacts: Array<{ evaluator: DemoEvaluator; runId: string; artifactSha256: string }>;
   models: Array<{
     evaluator: DemoEvaluator;
@@ -32,6 +36,24 @@ export interface PublishedDemoData {
 }
 
 const evaluators = ["jev", "terra", "opus"] as const;
+
+function provenance(runs: readonly RecordedDemoRun[]): PublishedDemoData["provenance"] {
+  if (runs.every((run) => run.runId === "dashboard-runs")) return {
+    kind: "fixture",
+    description: "Fixture preview using simulated saved outputs. These are not live model benchmark results."
+  };
+  const jev = runs.find((run) => run.evaluator === "jev");
+  const choices = jev?.results.filter((result) => result.status === "valid" && result.decision?.choice !== undefined).length ?? 0;
+  const valid = jev?.results.filter((result) => result.status === "valid").length ?? 0;
+  if (choices > 0 && choices !== valid) throw new Error("Jev run mixes direct Choice and threshold-routed results");
+  return choices > 0 ? {
+    kind: "direct-choice-mixed",
+    description: "Jev was rerun with one direct five-way Choice. Terra and Opus are retained recorded controls from the earlier run over the same 100-case corpus."
+  } : {
+    kind: "archived-threshold-router",
+    description: "Archived Jev + threshold router run. The router's needs_deep_review outcome was collapsed into insufficient_context in the published comparison."
+  };
+}
 
 export function buildPublishedDemoData(cases: readonly DemoCase[], runs: readonly RecordedDemoRun[], generatedAt: string): PublishedDemoData {
   if (cases.length !== 100) throw new Error("dashboard requires exactly 100 cases");
@@ -56,6 +78,7 @@ export function buildPublishedDemoData(cases: readonly DemoCase[], runs: readonl
     caseCount: 100,
     recorded: true,
     synthetic: true,
+    provenance: provenance(orderedRuns),
     sourceArtifacts: orderedRuns.map(({ evaluator, runId, artifactSha256 }) => ({ evaluator, runId, artifactSha256 })),
     models: orderedRuns.map(({ evaluator, provider, modelId, runner, runnerVersion, recordedAt }) => ({ evaluator, provider, modelId, runner, runnerVersion, recordedAt })),
     summary,

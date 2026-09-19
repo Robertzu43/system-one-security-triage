@@ -18,6 +18,7 @@ function renderMetadata(data) {
   byId("corpus-id").textContent = data.corpusHash.slice(0, 12);
   byId("recorded-at").textContent = new Date(data.models[0].recordedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
   byId("case-count").textContent = `${data.caseCount} synthetic`;
+  byId("provenance-note").textContent = data.provenance.description;
 }
 
 function renderScorecards(data) {
@@ -196,7 +197,7 @@ async function start() {
     const response = await fetch("./data/latest.json");
     if (!response.ok) throw new Error(`data request failed: ${response.status}`);
     const data = await response.json();
-    if (data.schemaVersion !== 1 || data.recorded !== true || data.synthetic !== true || data.caseCount !== 100) throw new Error("dashboard data contract is invalid");
+    if (data.schemaVersion !== 1 || data.recorded !== true || data.synthetic !== true || data.caseCount !== 100 || typeof data.provenance?.description !== "string") throw new Error("dashboard data contract is invalid");
     sourceData = data;
     renderMetadata(data); renderScorecards(data); renderDecisionGrid(data); renderComparisonBars(data); renderConfusionMatrices(data); renderCases(data, selectedFilters());
     byId("replay").addEventListener("click", () => replayRecordedRun(data));

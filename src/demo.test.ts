@@ -53,6 +53,21 @@ test("demo decisions accept tied maxima and preserve low confidence", () => {
   assert.deepEqual(parseDemoDecision({ disposition: "vulnerable", family: "injection", choice }, "decision").choice, choice);
 });
 
+test("demo Choice probability tolerance includes both endpoints only", () => {
+  for (const value of [0.49, 0.51]) {
+    const choice = {
+      selected: "safe" as const,
+      confidence: 0.1,
+      probabilities: { vulnerable_injection: 0, vulnerable_broken_access_control: 0, vulnerable_ssrf: 0, safe: value, insufficient_context: value }
+    };
+    assert.deepEqual(parseDemoDecision({ disposition: "safe", family: null, choice }, "decision").choice, choice);
+  }
+  assert.throws(() => parseDemoDecision({ disposition: "safe", family: null, choice: {
+    selected: "safe", confidence: 0.1,
+    probabilities: { vulnerable_injection: 0, vulnerable_broken_access_control: 0, vulnerable_ssrf: 0, safe: 0.4895, insufficient_context: 0.4895 }
+  } }, "decision"), /probabilities sum/);
+});
+
 test("100-case fixture has the frozen family and disposition matrix", async () => {
   const cases = await loadDemoCases("test/fixtures/demo-cases.json");
   assert.equal(cases.length, 100);
