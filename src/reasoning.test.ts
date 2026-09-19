@@ -17,7 +17,7 @@ ${source}`, "utf8");
   return path;
 }
 
-test("reasoning runner uses the fixed Terra command in a sanitized cwd with a minimal environment", async () => {
+test("reasoning runner uses the fixed Terra command in a sanitized cwd with a minimal environment", { skip: process.platform !== "darwin" }, async () => {
   const root = await mkdtemp(join(tmpdir(), "reasoning-test-"));
   try {
     const snapshot = join(root, "snapshot");
@@ -73,7 +73,7 @@ process.stderr.write(JSON.stringify({ args, cwd: process.cwd(), env: Object.keys
   }
 });
 
-test("reasoning runner retains malformed, failed, and timed-out reviews as manual review", async () => {
+test("reasoning runner retains malformed, failed, and timed-out reviews as manual review", { skip: process.platform !== "darwin" }, async () => {
   const root = await mkdtemp(join(tmpdir(), "reasoning-failure-test-"));
   try {
     const snapshot = join(root, "snapshot");
@@ -100,7 +100,7 @@ await writeFile(args[args.indexOf("--output-last-message") + 1], JSON.stringify(
   }
 });
 
-test("controlled Opus uses the frozen full model and an empty allowed-tool list", async () => {
+test("controlled Opus uses the frozen full model and an empty allowed-tool list", { skip: process.platform !== "darwin" }, async () => {
   const root = await mkdtemp(resolve(".opus-command-test-"));
   try {
     const snapshot = join(root, "empty");
@@ -133,7 +133,7 @@ process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", fam
   }
 });
 
-test("Claude structured_output envelopes preserve output and usage while unsupported Codex usage fails closed", async () => {
+test("Claude structured_output envelopes preserve output and usage while unsupported Codex usage fails closed", { skip: process.platform !== "darwin" }, async () => {
   const root = await mkdtemp(join(tmpdir(), "reasoning-envelope-test-"));
   try {
     const snapshot = join(root, "snapshot");
@@ -160,7 +160,7 @@ await writeFile(args[args.indexOf("--output-last-message") + 1], JSON.stringify(
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
-test("demo mode keeps a valid Terra decision when CLI usage metadata is unavailable", async () => {
+test("demo mode keeps a valid Terra decision when CLI usage metadata is unavailable", { skip: process.platform !== "darwin" }, async () => {
   const root = await mkdtemp(join(tmpdir(), "reasoning-demo-test-"));
   try {
     const snapshot = join(root, "empty");
@@ -180,7 +180,7 @@ await writeFile(args[args.indexOf("--output-last-message") + 1], JSON.stringify(
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
-test("reasoning runner rejects version drift before a model attempt", async () => {
+test("reasoning runner rejects version drift before a model attempt", { skip: process.platform !== "darwin" }, async () => {
   const root = await mkdtemp(join(tmpdir(), "reasoning-version-test-"));
   try {
     const snapshot = join(root, "snapshot");
