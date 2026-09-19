@@ -193,7 +193,9 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
     const processResult = await execute({ command: "/usr/bin/sandbox-exec", args: ["-f", profilePath, inner.command, ...inner.args], cwd: inner.cwd }, request.prompt, request.timeoutMs, environment);
     const modelLatencyMs = performance.now() - modelStarted;
     const observedUsage = usageFrom(processResult.stdout);
-    const resultBase = { ...emptyBase, usage: observedUsage, usageStatus: observedUsage === null ? "inconclusive" as const : "available" as const, attempts: 1, modelLatencyMs, stdout: processResult.stdout, stderr: processResult.stderr };
+    // A cost the provider states beats one derived from a rate card, so it wins over the caller's figure.
+    const observedCharge = reportedCharge(processResult.stdout) ?? chargeUsd;
+    const resultBase = { ...emptyBase, usage: observedUsage, usageStatus: observedUsage === null ? "inconclusive" as const : "available" as const, chargeUsd: observedCharge, costStatus: observedCharge === null ? "inconclusive" as const : "available" as const, attempts: 1, modelLatencyMs, stdout: processResult.stdout, stderr: processResult.stderr };
     if (processResult.timedOut) return failure("timeout", `review exceeded ${request.timeoutMs}ms`, resultBase);
     if (processResult.spawnError !== null) return failure("spawn_error", processResult.spawnError.message, resultBase);
     if (processResult.code !== 0) return failure(reasonForFailure(processResult.stderr, processResult.code), `review exited ${processResult.code}`, resultBase);
@@ -215,6 +217,31 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
   }
 }
 
+/**
+ * Provider-reported cost for the turn, when the CLI states one.
+ *
+ * Claude Code returns `total_cost_usd`, which is authoritative: it already accounts for the cache
+ * tier actually used. Re-deriving it from a rate card means guessing that tier — Claude Code takes
+ * a one-hour ephemeral cache, billed at 2x input, where a five-minute entry bills at 1.25x. Using
+ * the reported figure removes the guess entirely.
+ */
+function reportedCharge(stdout: string): number | null {
+  let best: number | null = null;
+  const find = (value: unknown): void => {
+    if (value === null || typeof value !== "object") return;
+    const row = value as Record<string, unknown>;
+    const charge = row.total_cost_usd;
+    if (typeof charge === "number" && Number.isFinite(charge) && charge >= 0 && (best === null || charge > best)) best = charge;
+    Object.values(row).forEach(find);
+  };
+  for (const line of stdout.split("\n")) {
+    const trimmed = line.trim();
+    if (trimmed.length === 0) continue;
+    try { find(JSON.parse(trimmed)); } catch { continue; }
+  }
+  return best;
+}
+
 function total(usage: NonNullable<ReasoningResult["usage"]>): number {
   return usage.inputTokens + usage.outputTokens + usage.cacheReadTokens + usage.cacheWriteTokens;
 }
@@ -226,14 +253,18 @@ function tokenCounts(value: unknown): ReasoningResult["usage"] {
   const input = parsed.input_tokens ?? parsed.inputTokens ?? parsed.prompt_tokens;
   const output = parsed.output_tokens ?? parsed.outputTokens ?? parsed.completion_tokens;
   if (typeof input !== "number" || !Number.isInteger(input) || input < 0 || typeof output !== "number" || !Number.isInteger(output) || output < 0) return null;
-  // Claude Code reports uncached input separately from cache reads and writes. They are kept apart
-  // because they bill at different rates; summing them would price a cache hit at ten times its cost.
+  // The two CLIs spell the cache buckets differently: Claude Code reports
+  // cache_read_input_tokens/cache_creation_input_tokens, Codex reports
+  // cached_input_tokens/cache_write_input_tokens. They stay apart from fresh input because they
+  // bill at different rates; summing them would price a cache hit at ten times its cost.
   const count = (entry: unknown): number => typeof entry === "number" && Number.isInteger(entry) && entry >= 0 ? entry : 0;
+  // Reasoning tokens are generated and billed as output even though they never appear in the answer.
+  const reasoning = count(parsed.reasoning_output_tokens);
   return {
     inputTokens: input,
-    outputTokens: output,
-    cacheReadTokens: count(parsed.cache_read_input_tokens ?? parsed.cached_tokens),
-    cacheWriteTokens: count(parsed.cache_creation_input_tokens)
+    outputTokens: output + reasoning,
+    cacheReadTokens: count(parsed.cache_read_input_tokens ?? parsed.cached_input_tokens),
+    cacheWriteTokens: count(parsed.cache_creation_input_tokens ?? parsed.cache_write_input_tokens)
   };
 }
 

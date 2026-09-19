@@ -53,7 +53,7 @@ test("the shipped table carries every rate card and every source", async () => {
   assert.deepEqual([shipped["gpt-5.6-terra"]?.inputPerMillionUsd, shipped["gpt-5.6-terra"]?.outputPerMillionUsd], [2, 12]);
   assert.deepEqual([shipped["gpt-5.6-terra"]?.cacheReadPerMillionUsd, shipped["gpt-5.6-terra"]?.cacheWritePerMillionUsd], [0.2, 2.5]);
   assert.deepEqual([shipped["claude-opus-4-6"]?.inputPerMillionUsd, shipped["claude-opus-4-6"]?.outputPerMillionUsd], [5, 25]);
-  assert.deepEqual([shipped["claude-opus-4-6"]?.cacheReadPerMillionUsd, shipped["claude-opus-4-6"]?.cacheWritePerMillionUsd], [0.5, 6.25]);
+  assert.deepEqual([shipped["claude-opus-4-6"]?.cacheReadPerMillionUsd, shipped["claude-opus-4-6"]?.cacheWritePerMillionUsd], [0.5, 10]);
   // Every rate must name where it came from, so a published cost can be traced back to a rate card.
   for (const model of Object.keys(shipped)) assert.match(shipped[model]!.source, /https?:\/\/|unmetered/);
 });

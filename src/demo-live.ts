@@ -73,7 +73,10 @@ export function createReasoningDemoAdapter(evaluator: Exclude<DemoEvaluator, "je
         snapshot: emptySnapshot,
         schemaPath: "config/demo-output.schema.json",
         timeoutMs: 120_000,
-        tokenBudget: 8_000,
+        // Both CLIs prepend a large system prompt of their own: a trivial Codex turn already
+        // reports ~13k input tokens before any evidence. The budget guards against a runaway turn,
+        // so it sits well above that floor rather than at the size of our own prompt.
+        tokenBudget: 80_000,
         toolBudget: 1,
         ...(evaluator === "opus" ? { model: "claude-opus-4-6" } : {})
       }, config);
