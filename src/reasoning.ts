@@ -44,7 +44,7 @@ interface ProcessResult { code: number; stdout: string; stderr: string; timedOut
 
 const decisions = new Set<StructuredReview["decision"]>(["vulnerable", "safe", "abstain"]);
 const families = new Set<StructuredReview["family"]>(["injection", "broken_access_control", "ssrf"]);
-const expectedVersions: Readonly<Record<ReasoningEvaluator, string>> = { terra: "codex-cli 0.147.0", opus: "2.1.277 (Claude Code)" };
+export const reasoningRunnerVersions: Readonly<Record<ReasoningEvaluator, string>> = { terra: "codex-cli 0.147.0", opus: "2.1.277 (Claude Code)" };
 
 function record(value: unknown): Record<string, unknown> | null { return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null; }
 function usage(value: unknown): ReasoningResult["usage"] {
@@ -172,7 +172,7 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
     if (version.timedOut) return failure("timeout", "CLI version check timed out", { ...emptyBase, stderr: version.stderr });
     if (version.spawnError !== null) return failure("spawn_error", version.spawnError.message, { ...emptyBase, stderr: version.stderr });
     if (version.code !== 0) return failure("nonzero_exit", `CLI version check exited ${version.code}`, { ...emptyBase, stdout: version.stdout, stderr: version.stderr });
-    if (version.stdout.trim() !== expectedVersions[request.evaluator]) return failure("version_mismatch", `expected ${expectedVersions[request.evaluator]}, received ${version.stdout.trim() || "empty version"}`, { ...emptyBase, stdout: version.stdout, stderr: version.stderr });
+    if (version.stdout.trim() !== reasoningRunnerVersions[request.evaluator]) return failure("version_mismatch", `expected ${reasoningRunnerVersions[request.evaluator]}, received ${version.stdout.trim() || "empty version"}`, { ...emptyBase, stdout: version.stdout, stderr: version.stderr });
     const compactSchema = JSON.stringify(JSON.parse(await readFile(resolve(request.schemaPath), "utf8")));
     const inner = command(request, await executablePath(executable, environment), outputPath, compactSchema);
     const profilePath = join(outputDirectory, "filesystem.sb");

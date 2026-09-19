@@ -32,6 +32,7 @@ test("all evaluators receive identical canonical evidence and failures stay visi
   const seen = new Map<string, string[]>();
   const adapter = (name: "jev" | "terra" | "opus", fail = false): DemoAdapter => ({
     name,
+    metadata: { provider: "Fixture", modelId: name, runner: "fixture", runnerVersion: "1" },
     evaluate: async (stateJson, item) => {
       seen.set(item.caseId, [...(seen.get(item.caseId) ?? []), stateJson]);
       if (fail && item.caseId === cases[1]?.caseId) throw new Error("fixture failure");
@@ -51,7 +52,7 @@ test("all evaluators receive identical canonical evidence and failures stay visi
 
 test("triage accuracy scores disposition and vulnerable family", async () => {
   const item = (await loadDemoCases("test/fixtures/demo-cases.json"))[0]!;
-  const adapter: DemoAdapter = { name: "jev", evaluate: async () => ({ disposition: "vulnerable", family: "injection" }) };
+  const adapter: DemoAdapter = { name: "jev", metadata: { provider: "Fixture", modelId: "jev", runner: "fixture", runnerVersion: "1" }, evaluate: async () => ({ disposition: "vulnerable", family: "injection" }) };
   const report = await runDemo([item], [adapter], "fixture");
   assert.equal(report.results[0]?.correct, true);
   assert.equal(report.summary.jev!.vulnerabilityRecall, 1);

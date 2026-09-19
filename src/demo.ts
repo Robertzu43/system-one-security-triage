@@ -21,8 +21,16 @@ export interface DemoCase {
   expected: DemoDecision;
 }
 
+export interface EvaluatorMetadata {
+  provider: "TypeSafe" | "OpenAI" | "Anthropic" | "Fixture";
+  modelId: string;
+  runner: string;
+  runnerVersion: string;
+}
+
 export interface DemoAdapter {
   name: DemoEvaluator;
+  metadata: EvaluatorMetadata;
   evaluate(stateJson: string, item: DemoCase): Promise<DemoDecision>;
 }
 
@@ -67,7 +75,7 @@ function text(value: unknown, label: string): string {
   return value;
 }
 
-function parseDecision(value: unknown, label: string): DemoDecision {
+export function parseDemoDecision(value: unknown, label: string): DemoDecision {
   const row = record(value, label);
   const disposition = text(row.disposition, `${label}.disposition`) as DemoDisposition;
   if (!dispositions.has(disposition)) throw new Error(`${label}.disposition is invalid`);
@@ -100,7 +108,7 @@ export async function loadDemoCases(path: string): Promise<DemoCase[]> {
     const row = record(item, `cases[${index}]`);
     const family = text(row.family, `cases[${index}].family`) as Family;
     if (!families.has(family)) throw new Error(`cases[${index}].family is invalid`);
-    return { caseId: text(row.caseId, `cases[${index}].caseId`), family, state: record(row.state, `cases[${index}].state`), expected: parseDecision(row.expected, `cases[${index}].expected`) };
+    return { caseId: text(row.caseId, `cases[${index}].caseId`), family, state: record(row.state, `cases[${index}].state`), expected: parseDemoDecision(row.expected, `cases[${index}].expected`) };
   });
   if (new Set(cases.map((item) => item.caseId)).size !== cases.length) throw new Error("caseId must be unique");
   return cases;
@@ -129,7 +137,7 @@ export async function runDemo(cases: readonly DemoCase[], adapters: readonly Dem
     for (const adapter of adapters) {
       const started = performance.now();
       try {
-        const decision = parseDecision(await adapter.evaluate(stateJson, item), `${adapter.name} decision`);
+        const decision = parseDemoDecision(await adapter.evaluate(stateJson, item), `${adapter.name} decision`);
         results.push({ caseId: item.caseId, evaluator: adapter.name, status: "valid", decision, correct: isCorrect(decision, item.expected), latencyMs: performance.now() - started, error: null });
       } catch (error) {
         results.push({ caseId: item.caseId, evaluator: adapter.name, status: "error", decision: null, correct: false, latencyMs: performance.now() - started, error: error instanceof Error ? error.message : String(error) });

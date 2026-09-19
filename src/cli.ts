@@ -122,6 +122,7 @@ async function demo(values: Values): Promise<unknown> {
   }
   const adapters = (["jev", "terra", "opus"] as const).map((name): DemoAdapter => ({
     name,
+    metadata: { provider: "Fixture", modelId: name, runner: "fixture", runnerVersion: "1" },
     evaluate: async (_stateJson, item) => ({ ...item.expected, inputTokens: 0, outputTokens: 0, costUsd: 0 })
   }));
   return output(await runDemo(cases, adapters, "fixture"));

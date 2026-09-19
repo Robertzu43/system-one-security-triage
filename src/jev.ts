@@ -3,6 +3,7 @@ import type { JevAnswers, JevJudgment, NoulAnswer, ScoreAnswer } from "./contrac
 import type { EvidencePacket } from "./packets.js";
 
 export const questionIds = ["untrusted_influence", "reaches_sensitive_operation", "validation_blocks_attack", "crosses_authorization_boundary", "authorization_enforced", "security_impact", "is_injection", "is_broken_access_control", "is_ssrf", "enough_context", "exploitability"] as const;
+export const jevModel = "jev-1.13.0";
 
 const questions = {
   untrusted_influence: noul("Can an untrusted actor influence data used by the shown operation?"),
@@ -43,7 +44,7 @@ function abstain(error: unknown): JevJudgment {
 
 export async function judgeWithJev(packet: EvidencePacket | string, client: Pick<TypeSafeClient, "systemOne">): Promise<JevJudgment> {
   try {
-    const response: unknown = await client.systemOne({ state: packet as unknown as EntryType, model: "jev-1.13.0", questions });
+    const response: unknown = await client.systemOne({ state: packet as unknown as EntryType, model: jevModel, questions });
     const result = record(response); const usage = record(result?.usage);
     if (typeof result?.model !== "string" || result.model.length === 0 || usage === undefined || !Number.isInteger(usage.input_tokens) || (usage.input_tokens as number) < 0 || !Number.isInteger(usage.output_tokens) || (usage.output_tokens as number) < 0 || !answers(result.answers)) throw new Error("malformed Jev response");
     return { kind: "judgment", model: result.model, usage: { input_tokens: usage.input_tokens as number, output_tokens: usage.output_tokens as number }, answers: result.answers };

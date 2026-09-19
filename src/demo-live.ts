@@ -1,7 +1,8 @@
 import type { JevJudgment, RouterConfig } from "./contracts.js";
 import type { DemoAdapter, DemoDecision, DemoEvaluator } from "./demo.js";
+import { jevModel } from "./jev.js";
 import type { EvidencePacket } from "./packets.js";
-import { type ReasoningConfig, type ReasoningRequest, type ReasoningResult, runReasoningReview } from "./reasoning.js";
+import { reasoningRunnerVersions, type ReasoningConfig, type ReasoningRequest, type ReasoningResult, runReasoningReview } from "./reasoning.js";
 import { parseRouterConfig, route } from "./router.js";
 
 type JudgeJev = (stateJson: string) => Promise<JevJudgment>;
@@ -32,6 +33,7 @@ function jevFamily(judgment: Exclude<JevJudgment, { kind: "abstain" }>): DemoDec
 export function createJevDemoAdapter(judge: JudgeJev): DemoAdapter {
   return {
     name: "jev",
+    metadata: { provider: "TypeSafe", modelId: jevModel, runner: "@typesafe-ai/sdk", runnerVersion: "0.6.0" },
     evaluate: async (stateJson, item) => {
       const judgment = await judge(stateJson);
       if (judgment.kind === "abstain") throw new Error(`${judgment.error.name}: ${judgment.error.message}`);
@@ -47,6 +49,9 @@ export function createJevDemoAdapter(judge: JudgeJev): DemoAdapter {
 export function createReasoningDemoAdapter(evaluator: Exclude<DemoEvaluator, "jev">, emptySnapshot: string, runner: RunReasoning = runReasoningReview, config: ReasoningConfig = {}): DemoAdapter {
   return {
     name: evaluator,
+    metadata: evaluator === "terra"
+      ? { provider: "OpenAI", modelId: "gpt-5.6-terra", runner: "codex-cli", runnerVersion: reasoningRunnerVersions.terra.replace("codex-cli ", "") }
+      : { provider: "Anthropic", modelId: "claude-opus-4-6", runner: "claude-code", runnerVersion: reasoningRunnerVersions.opus.replace(" (Claude Code)", "") },
     evaluate: async (stateJson) => {
       const result = await runner({
         evaluator,
