@@ -10,6 +10,8 @@ export interface PublishedDemoData {
   generatedAt: string;
   corpusHash: string;
   caseCount: 100;
+  /** Passes over the corpus; every case carries one decision per pass. */
+  repetitions: number;
   recorded: true;
   synthetic: true;
   /** Human-readable caveats derived from the data itself, shown on the dashboard. */
@@ -82,10 +84,13 @@ export function buildPublishedDemoData(cases: readonly DemoCase[], runs: readonl
   const orderedRuns = evaluators.map((evaluator) => byEvaluator.get(evaluator)!);
   for (const run of orderedRuns) {
     if (run.corpusHash !== expectedHash) throw new Error(`corpus hash mismatch for ${run.evaluator}`);
-    if (run.mode !== "live-recorded" || run.caseCount !== 100 || run.results.length !== 100) throw new Error(`incomplete recorded run for ${run.evaluator}`);
+    // Each case appears once per repetition, so a five-pass run carries 500 results over 100 cases.
+    if (run.mode !== "live-recorded" || run.caseCount !== 100 || run.results.length !== 100 * run.repetitions) throw new Error(`incomplete recorded run for ${run.evaluator}`);
   }
   // corpusHash stops runs over different corpora being pooled; this stops runs over different
   // prompts being pooled, which would otherwise read as a model difference rather than an edit.
+  const passes = new Set(orderedRuns.map((run) => run.repetitions));
+  if (passes.size > 1) throw new Error("evaluators were recorded with different repetition counts; metrics would weight them unequally");
   const reasoningPrompts = new Set(orderedRuns.filter((run) => run.evaluator !== "jev").map((run) => run.promptSpecHash));
   if (reasoningPrompts.size > 1) throw new Error("Terra and Opus were recorded against different prompts; re-record both against one prompt before publishing");
   const summary = Object.fromEntries(orderedRuns.map((run) => [run.evaluator, summarizeDemoResults(cases, run.results, [run.evaluator])[run.evaluator]!])) as Record<DemoEvaluator, DemoSummary>;
@@ -106,6 +111,7 @@ export function buildPublishedDemoData(cases: readonly DemoCase[], runs: readonl
     generatedAt,
     corpusHash: expectedHash,
     caseCount: 100,
+    repetitions: orderedRuns[0]!.repetitions,
     recorded: true,
     synthetic: true,
     warnings,
