@@ -30,7 +30,7 @@ export interface RecordDemoInput {
 
 const evaluators = new Set<DemoEvaluator>(["jev", "terra", "opus"]);
 const providers = new Set<EvaluatorMetadata["provider"]>(["TypeSafe", "OpenAI", "Anthropic", "Fixture"]);
-const localPath = /(?:^|\s)(?:\/Users\/|\/home\/|\/private\/|\/var\/folders\/|\/Volumes\/|[A-Za-z]:\\|\\\\)/;
+const localPath = /(?:^|[\s("'=])(?:\/(?!\/|\s)|[A-Za-z]:\\|\\\\)/;
 const secretText = /(?:TYPESAFE_API_KEY|ANTHROPIC_API_KEY|OPENAI_API_KEY|authorization:\s*bearer)/i;
 
 function record(value: unknown, label: string): Record<string, unknown> {

@@ -65,6 +65,7 @@ test("recorded run parser rejects incomplete, duplicate, unknown, and path-beari
   assert.throws(() => parseRecordedDemoRun({ ...base, results: [...base.results, base.results[0]] }, cases), /duplicate case/);
   assert.throws(() => parseRecordedDemoRun({ ...base, results: [{ ...base.results[0]!, caseId: "unknown" }, ...base.results.slice(1)] }, cases), /unknown case/);
   assert.throws(() => parseRecordedDemoRun({ ...base, results: [{ ...base.results[0]!, error: "/Users/alice/.claude.json" }, ...base.results.slice(1)] }, cases), /local path/);
+  assert.throws(() => parseRecordedDemoRun({ ...base, results: [{ ...base.results[0]!, error: "runner wrote /tmp/session/output.json" }, ...base.results.slice(1)] }, cases), /local path/);
   assert.throws(() => parseRecordedDemoRun({ ...base, results: [{ ...base.results[0]!, error: "C:\\Users\\alice\\secret" }, ...base.results.slice(1)] }, cases), /local path/);
   assert.throws(() => parseRecordedDemoRun({ ...base, runnerVersion: "OPENAI_API_KEY=secret" }, cases), /secret text/);
 });
