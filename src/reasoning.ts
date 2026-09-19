@@ -82,7 +82,7 @@ function failure(kind: ReasoningFailureKind, message: string, result: Omit<Reaso
 function minimalEnvironment(config: ReasoningConfig): NodeJS.ProcessEnv {
   const source = config.environment ?? process.env;
   const selected: NodeJS.ProcessEnv = {};
-  for (const key of ["PATH", "HOME", ...(config.environmentKeys ?? [])]) if (!/^(?:all_|http_|https_|no_)?proxy$/i.test(key) && typeof source[key] === "string") selected[key] = source[key];
+  for (const key of ["PATH", "HOME", "USER", ...(config.environmentKeys ?? [])]) if (!/^(?:all_|http_|https_|no_)?proxy$/i.test(key) && typeof source[key] === "string") selected[key] = source[key];
   return selected;
 }
 function reasonForFailure(stderr: string, code: number): ReasoningFailureKind {
@@ -100,7 +100,7 @@ function command(request: ReasoningRequest, executable: string, outputPath: stri
   const tools = request.mode === "agentic" ? "Read,Grep,Glob" : "";
   return {
     command: executable,
-    args: ["--print", "--bare", "--no-session-persistence", "--restricted", "--strict-mcp-config", "--permission-mode", "dontAsk", "--permission-prompts", "none", "--tools", tools, "--model", request.model, "--json-schema", compactSchema, "--output-format", "json"],
+    args: ["--print", "--no-session-persistence", "--restricted", "--strict-mcp-config", "--permission-mode", "dontAsk", "--permission-prompts", "none", "--tools", tools, "--model", request.model, "--json-schema", compactSchema, "--output-format", "json"],
     cwd: request.snapshot
   };
 }
@@ -142,7 +142,7 @@ async function executablePath(executable: string, environment: NodeJS.ProcessEnv
 function sandboxProfile(snapshot: string, schemaPath: string, outputDirectory: string, executable: string, environment: NodeJS.ProcessEnv): string {
   const home = environment.HOME;
   const codexHome = environment.CODEX_HOME;
-  const authFiles = [codexHome === undefined ? undefined : join(codexHome, "auth.json"), home === undefined ? undefined : join(home, ".claude.json"), home === undefined ? undefined : join(home, ".claude/.credentials.json")].filter((path): path is string => path !== undefined);
+  const authFiles = [codexHome === undefined ? undefined : join(codexHome, "auth.json"), home === undefined ? undefined : join(home, ".claude.json"), home === undefined ? undefined : join(home, ".claude/.credentials.json"), home === undefined || environment.CLAUDE_CODE_TMPDIR === undefined ? undefined : join(home, "Library/Keychains/login.keychain-db")].filter((path): path is string => path !== undefined);
   const subpaths = [snapshot, outputDirectory].map((path) => `(subpath ${JSON.stringify(resolve(path))})`).join(" ");
   const literals = [schemaPath, executable, ...authFiles].map((path) => `(literal ${JSON.stringify(resolve(path))})`).join(" ");
   return `(version 1)\n(allow default)\n(deny file-read-data (subpath \"/Users\") (subpath \"/private/tmp\") (subpath \"/private/var/folders\") (subpath \"/Volumes\"))\n(allow file-read-data ${subpaths} ${literals})\n(deny file-write*)\n(allow file-write* (subpath ${JSON.stringify(outputDirectory)}) (literal \"/dev/null\"))\n`;
@@ -168,6 +168,7 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
     if ((config.platform ?? process.platform) !== "darwin") return failure("unsupported_platform", "snapshot-only filesystem isolation is unavailable on this platform", emptyBase);
     if (request.evaluator === "terra" && request.mode === "controlled") return failure("budget_unverifiable", "controlled Terra cannot disable all repository tools with the frozen CLI", emptyBase);
     const environment = minimalEnvironment(config);
+    if (request.evaluator === "opus") environment.CLAUDE_CODE_TMPDIR = outputDirectory;
     if (request.evaluator === "terra") {
       if (environment.HOME === undefined) return failure("spawn_error", "HOME is required for Codex authentication", emptyBase);
       const codexHome = join(outputDirectory, "codex-home");

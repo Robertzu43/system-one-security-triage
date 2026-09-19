@@ -101,24 +101,32 @@ await writeFile(args[args.indexOf("--output-last-message") + 1], JSON.stringify(
 });
 
 test("controlled Opus uses the frozen full model and an empty allowed-tool list", async () => {
-  const root = await mkdtemp(join(tmpdir(), "opus-command-test-"));
+  const root = await mkdtemp(resolve(".opus-command-test-"));
   try {
     const snapshot = join(root, "empty");
+    const home = join(root, "home");
     const schemaPath = resolve("config/reasoning-output.schema.json");
     await (await import("node:fs/promises")).mkdir(snapshot);
+    await (await import("node:fs/promises")).mkdir(join(home, "Library/Keychains"), { recursive: true });
+    await writeFile(join(home, "Library/Keychains/login.keychain-db"), "fixture-keychain", "utf8");
     const executable = await fixture(root, `
-process.stderr.write(JSON.stringify({ args: process.argv.slice(2), cwd: process.cwd() }));
+const { readFile } = await import("node:fs/promises");
+const keychain = await readFile(process.env.HOME + "/Library/Keychains/login.keychain-db", "utf8");
+process.stderr.write(JSON.stringify({ args: process.argv.slice(2), claudeCodeTmpdir: process.env.CLAUDE_CODE_TMPDIR, cwd: process.cwd(), keychain, user: process.env.USER }));
 process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] }, usage: { input_tokens: 11, output_tokens: 13 } }));
 `, "2.1.278 (Claude Code)");
     const { runReasoningReview } = await reasoning();
     const result = await runReasoningReview({
       evaluator: "opus", mode: "controlled", prompt: "{\"packet\":true}", snapshot, schemaPath, timeoutMs: 5_000,
       tokenBudget: 200, toolBudget: 3, model: "claude-opus-4-6"
-    }, { executable, outputDirectory: root, environment: { PATH: process.env.PATH, HOME: process.env.HOME } });
+    }, { executable, outputDirectory: root, environment: { PATH: process.env.PATH, HOME: home, USER: "fixture-user" } });
 
     const observed = JSON.parse(result.stderr);
-    assert.deepEqual(observed.args, ["--print", "--bare", "--no-session-persistence", "--restricted", "--strict-mcp-config", "--permission-mode", "dontAsk", "--permission-prompts", "none", "--tools", "", "--model", "claude-opus-4-6", "--json-schema", JSON.stringify(JSON.parse(await readFile(schemaPath, "utf8"))), "--output-format", "json"]);
+    assert.deepEqual(observed.args, ["--print", "--no-session-persistence", "--restricted", "--strict-mcp-config", "--permission-mode", "dontAsk", "--permission-prompts", "none", "--tools", "", "--model", "claude-opus-4-6", "--json-schema", JSON.stringify(JSON.parse(await readFile(schemaPath, "utf8"))), "--output-format", "json"]);
     assert.equal(observed.cwd, await realpath(snapshot));
+    assert.equal(observed.keychain, "fixture-keychain");
+    assert.equal(observed.user, "fixture-user");
+    assert.match(observed.claudeCodeTmpdir, new RegExp(`^${root.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/reasoning-`));
     assert.equal(result.finalOutcome, "no_alert");
   } finally {
     await rm(root, { recursive: true, force: true });
