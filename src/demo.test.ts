@@ -4,15 +4,27 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { loadDemoCases, runDemo, type DemoAdapter } from "./demo.js";
 import { createJevDemoAdapter, createReasoningDemoAdapter } from "./demo-live.js";
+import { stableHash } from "./jsonl.js";
 
-test("nine-case fixture is balanced across families and dispositions", async () => {
+test("100-case fixture has the frozen family and disposition matrix", async () => {
   const cases = await loadDemoCases("test/fixtures/demo-cases.json");
-  assert.equal(cases.length, 9);
-  assert.deepEqual([...new Set(cases.map((item) => item.family))].sort(), ["broken_access_control", "injection", "ssrf"]);
-  assert.deepEqual(
-    Object.fromEntries(["vulnerable", "safe", "insufficient_context"].map((value) => [value, cases.filter((item) => item.expected.disposition === value).length])),
-    { vulnerable: 3, safe: 3, insufficient_context: 3 }
-  );
+  assert.equal(cases.length, 100);
+  const expected = {
+    injection: { vulnerable: 12, safe: 11, insufficient_context: 11 },
+    broken_access_control: { vulnerable: 11, safe: 11, insufficient_context: 11 },
+    ssrf: { vulnerable: 11, safe: 11, insufficient_context: 11 }
+  } as const;
+  for (const [family, dispositions] of Object.entries(expected)) {
+    for (const [disposition, count] of Object.entries(dispositions)) {
+      assert.equal(cases.filter((item) => item.family === family && item.expected.disposition === disposition).length, count, `${family}/${disposition}`);
+    }
+  }
+});
+
+test("100-case fixture uses unique IDs and distinct canonical evidence", async () => {
+  const cases = await loadDemoCases("test/fixtures/demo-cases.json");
+  assert.equal(new Set(cases.map((item) => item.caseId)).size, 100);
+  assert.equal(new Set(cases.map((item) => stableHash(item.state))).size, 100);
 });
 
 test("all evaluators receive identical canonical evidence and failures stay visible", async () => {
@@ -57,7 +69,7 @@ test("fixture CLI prints an explicitly simulated three-model report", async () =
   const report = JSON.parse(result.stdout);
   assert.equal(report.mode, "fixture");
   assert.equal(report.disclaimer, "SIMULATED ADAPTERS — not model benchmark results");
-  assert.equal(report.caseCount, 9);
+  assert.equal(report.caseCount, 100);
   assert.equal("results" in report, false);
   assert.deepEqual(Object.keys(report.summary).sort(), ["jev", "opus", "terra"]);
   assert.equal((await readFile("test/fixtures/demo-cases.json", "utf8")).includes("expected"), true);
