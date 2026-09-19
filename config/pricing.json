@@ -17,7 +17,7 @@
     "inputPerMillionUsd": 5.0,
     "outputPerMillionUsd": 25.0,
     "cacheReadPerMillionUsd": 0.5,
-    "cacheWritePerMillionUsd": 6.25,
-    "source": "https://benchlm.ai/anthropic/api-pricing and https://devtk.ai/en/models/claude-opus-4-6/ - retrieved 2026-09-19; cache read 0.1x and 5-minute cache write 1.25x the base input rate"
+    "cacheWritePerMillionUsd": 10.0,
+    "source": "https://benchlm.ai/anthropic/api-pricing and https://devtk.ai/en/models/claude-opus-4-6/ - retrieved 2026-09-19; cache read 0.1x input. Cache write is the 2x one-hour rate, which is the tier Claude Code takes (observed ephemeral_1h_input_tokens); a five-minute entry would be 1.25x. Only a fallback: this CLI reports total_cost_usd and that figure wins."
   }
 }
