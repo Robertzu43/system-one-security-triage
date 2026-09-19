@@ -109,7 +109,7 @@ test("controlled Opus uses the frozen full model and an empty allowed-tool list"
     const executable = await fixture(root, `
 process.stderr.write(JSON.stringify({ args: process.argv.slice(2), cwd: process.cwd() }));
 process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] }, usage: { input_tokens: 11, output_tokens: 13 } }));
-`, "2.1.277 (Claude Code)");
+`, "2.1.278 (Claude Code)");
     const { runReasoningReview } = await reasoning();
     const result = await runReasoningReview({
       evaluator: "opus", mode: "controlled", prompt: "{\"packet\":true}", snapshot, schemaPath, timeoutMs: 5_000,
@@ -131,7 +131,7 @@ test("Claude structured_output envelopes preserve output and usage while unsuppo
     const snapshot = join(root, "snapshot");
     const schemaPath = resolve("config/reasoning-output.schema.json");
     await (await import("node:fs/promises")).mkdir(snapshot);
-    const opusExecutable = await fixture(root, 'process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] }, usage: { input_tokens: 11, output_tokens: 13 } }));', "2.1.277 (Claude Code)");
+    const opusExecutable = await fixture(root, 'process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] }, usage: { input_tokens: 11, output_tokens: 13 } }));', "2.1.278 (Claude Code)");
     const terraRoot = join(root, "terra");
     await (await import("node:fs/promises")).mkdir(terraRoot);
     const terraExecutable = await fixture(terraRoot, `
@@ -178,7 +178,7 @@ test("reasoning runner rejects version drift before a model attempt", async () =
     const snapshot = join(root, "snapshot");
     await (await import("node:fs/promises")).mkdir(snapshot);
     const marker = join(root, "model-called");
-    const executable = await fixture(root, `await (await import("node:fs/promises")).writeFile(${JSON.stringify(marker)}, "called");`, "2.1.278 (Claude Code)");
+    const executable = await fixture(root, `await (await import("node:fs/promises")).writeFile(${JSON.stringify(marker)}, "called");`, "2.1.279 (Claude Code)");
     const { runReasoningReview } = await reasoning();
     const result = await runReasoningReview({ evaluator: "opus", mode: "controlled", prompt: "{}", snapshot, schemaPath: resolve("config/reasoning-output.schema.json"), timeoutMs: 5_000, tokenBudget: 100, toolBudget: 1, model: "claude-opus-4-6" }, { executable, outputDirectory: root });
     assert.equal(result.error?.kind, "version_mismatch");

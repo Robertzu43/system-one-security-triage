@@ -44,7 +44,7 @@ interface ProcessResult { code: number; stdout: string; stderr: string; timedOut
 
 const decisions = new Set<StructuredReview["decision"]>(["vulnerable", "safe", "abstain"]);
 const families = new Set<StructuredReview["family"]>(["injection", "broken_access_control", "ssrf"]);
-export const reasoningRunnerVersions: Readonly<Record<ReasoningEvaluator, string>> = { terra: "codex-cli 0.147.0", opus: "2.1.277 (Claude Code)" };
+export const reasoningRunnerVersions: Readonly<Record<ReasoningEvaluator, string>> = { terra: "codex-cli 0.147.0", opus: "2.1.278 (Claude Code)" };
 
 function record(value: unknown): Record<string, unknown> | null { return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null; }
 function usage(value: unknown): ReasoningResult["usage"] {

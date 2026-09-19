@@ -10,7 +10,7 @@ import { stableHash } from "./jsonl.js";
 const metadata = {
   jev: { provider: "TypeSafe", modelId: "jev-1.13.0", runner: "@typesafe-ai/sdk", runnerVersion: "0.6.0" },
   terra: { provider: "OpenAI", modelId: "gpt-5.6-terra", runner: "codex-cli", runnerVersion: "0.147.0" },
-  opus: { provider: "Anthropic", modelId: "claude-opus-4-6", runner: "claude-code", runnerVersion: "2.1.277" }
+  opus: { provider: "Anthropic", modelId: "claude-opus-4-6", runner: "claude-code", runnerVersion: "2.1.278" }
 } as const;
 
 function validRecordedRunFixture(cases: readonly DemoCase[]): RecordedDemoRun {
