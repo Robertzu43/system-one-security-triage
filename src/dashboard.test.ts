@@ -64,7 +64,10 @@ test("builder preserves Jev Choice probabilities in published case data", async 
 
   const data = buildPublishedDemoData(cases, runs, "2026-09-18T13:00:00.000Z");
 
-  assert.deepEqual(data.cases[0]!.results.jev.decision?.choice, choice);
+  assert.deepEqual(data.cases[0]!.results.jev.passes[0]!.decision?.choice, choice);
+  // Every pass reaches the UI: keeping only the first would discard the variance the repeats exist to show.
+  assert.equal(data.cases[0]!.results.jev.passes.length, data.repetitions);
+  assert.equal(data.cases[0]!.results.jev.stable, true);
   assert.equal(data.provenance.kind, "direct-choice-mixed");
   assert.match(data.provenance.description, /Jev was rerun.*direct five-way Choice.*Terra and Opus.*retained/);
   assert.equal(typeof data.summary.jev.brierScore, "number");

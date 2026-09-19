@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import type { Family } from "./contracts.js";
 import { corpusHash, type RecordedDemoRun } from "./demo-record.js";
+import { costOf, type PriceTable } from "./pricing.js";
 import { summarizeDemoResults, type DemoCase, type DemoDecision, type DemoEvaluator, type DemoResult, type DemoSummary } from "./demo.js";
 import { canonicalJson } from "./jsonl.js";
 
@@ -32,12 +33,14 @@ export interface PublishedDemoData {
     gitSha: string;
   }>;
   summary: Record<DemoEvaluator, DemoSummary>;
+  economics: Economics[];
+  stability: Record<DemoEvaluator, { stableCases: number; flippedCases: number; meanAgreement: number }>;
   cases: Array<{
     caseId: string;
     family: Family;
     state: Record<string, unknown>;
     expected: DemoDecision;
-    results: Record<DemoEvaluator, DemoResult>;
+    results: Record<DemoEvaluator, CaseOutcome>;
   }>;
 }
 
@@ -69,6 +72,62 @@ function provenance(runs: readonly RecordedDemoRun[]): PublishedDemoData["proven
 export interface BuildOptions {
   /** Publish even when an evaluator returned one outcome for every case. Off by default. */
   allowDegenerate?: boolean;
+  /** Rate cards, applied at build time so re-pricing never requires re-recording. */
+  prices?: PriceTable;
+}
+
+/** What a run cost, and what each right answer cost. Never a silent zero. */
+export interface Economics {
+  evaluator: DemoEvaluator;
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  costUsd: number | null;
+  costPerCorrectUsd: number | null;
+  /** "provider" when the CLI reported the charge itself, "rate-card" when derived, "unpriced" otherwise. */
+  basis: "provider" | "rate-card" | "unpriced";
+}
+
+/** One evaluator's answers for one case, across every pass. */
+export interface CaseOutcome {
+  /** Every pass, in order. Keeping all of them is the point of repeating the corpus. */
+  passes: DemoResult[];
+  /** The answer given most often; ties resolve to the earliest pass. */
+  modal: string;
+  /** Share of passes that gave the modal answer: 1 when the model never changed its mind. */
+  agreement: number;
+  /** True when every pass gave the same answer. */
+  stable: boolean;
+  /** Passes that matched the expected label. */
+  correctPasses: number;
+}
+
+function answerOf(result: DemoResult): string {
+  if (result.status === "error") return "error";
+  return result.decision === null ? "error" : `${result.decision.disposition}${result.decision.family === null ? "" : `:${result.decision.family}`}`;
+}
+
+function caseOutcome(passes: readonly DemoResult[]): CaseOutcome {
+  const counts = new Map<string, number>();
+  for (const pass of passes) counts.set(answerOf(pass), (counts.get(answerOf(pass)) ?? 0) + 1);
+  const modal = [...counts].reduce((best, entry) => entry[1] > best[1] ? entry : best)[0];
+  const agreement = (counts.get(modal) ?? 0) / passes.length;
+  return { passes: [...passes], modal, agreement, stable: counts.size === 1, correctPasses: passes.filter((pass) => pass.correct).length };
+}
+
+function economicsFor(run: RecordedDemoRun, prices: PriceTable | undefined): Economics {
+  const sum = (key: "inputTokens" | "outputTokens" | "cacheReadTokens" | "cacheWriteTokens"): number =>
+    run.results.reduce((total, result) => total + (result.decision?.[key] ?? 0), 0);
+  const usage = { inputTokens: sum("inputTokens"), outputTokens: sum("outputTokens"), cacheReadTokens: sum("cacheReadTokens"), cacheWriteTokens: sum("cacheWriteTokens") };
+  // A charge the provider stated beats one derived from a rate card: it already accounts for the
+  // cache tier actually used, which a rate card can only guess at.
+  const reported = run.results.reduce((total, result) => total + (result.decision?.costUsd ?? 0), 0);
+  const derived = prices === undefined ? { status: "unpriced" as const } : costOf(prices, run.modelId, usage);
+  const costUsd = reported > 0 ? reported : derived.status === "available" ? derived.costUsd : null;
+  const basis = reported > 0 ? "provider" as const : costUsd === null ? "unpriced" as const : "rate-card" as const;
+  const correct = run.results.filter((result) => result.correct).length;
+  return { evaluator: run.evaluator, ...usage, costUsd, costPerCorrectUsd: costUsd === null || correct === 0 ? null : costUsd / correct, basis };
 }
 
 export function buildPublishedDemoData(cases: readonly DemoCase[], runs: readonly RecordedDemoRun[], generatedAt: string, options: BuildOptions = {}): PublishedDemoData {
@@ -119,16 +178,27 @@ export function buildPublishedDemoData(cases: readonly DemoCase[], runs: readonl
     sourceArtifacts: orderedRuns.map(({ evaluator, runId, artifactSha256 }) => ({ evaluator, runId, artifactSha256 })),
     models: orderedRuns.map(({ evaluator, provider, modelId, runner, runnerVersion, recordedAt, promptSpecHash, gitSha }) => ({ evaluator, provider, modelId, runner, runnerVersion, recordedAt, promptSpecHash, gitSha })),
     summary,
+    economics: orderedRuns.map((run) => economicsFor(run, options.prices)),
+    stability: Object.fromEntries(orderedRuns.map((run) => {
+      // How often the model gave the same answer to the same evidence. A model that flips on
+      // identical input is a different risk from one that is simply wrong, and one pass hides it.
+      const outcomes = cases.map((item) => caseOutcome(run.results.filter((result) => result.caseId === item.caseId)));
+      return [run.evaluator, {
+        stableCases: outcomes.filter((outcome) => outcome.stable).length,
+        flippedCases: outcomes.filter((outcome) => !outcome.stable).length,
+        meanAgreement: outcomes.reduce((total, outcome) => total + outcome.agreement, 0) / outcomes.length
+      }];
+    })) as Record<DemoEvaluator, { stableCases: number; flippedCases: number; meanAgreement: number }>,
     cases: cases.map(({ caseId, family, state, expected }) => ({
       caseId,
       family,
       state,
       expected,
       results: Object.fromEntries(orderedRuns.map((run) => {
-        const result = run.results.find((item) => item.caseId === caseId);
-        if (result === undefined) throw new Error(`missing ${run.evaluator} result for ${caseId}`);
-        return [run.evaluator, result];
-      })) as Record<DemoEvaluator, DemoResult>
+        const passes = run.results.filter((item) => item.caseId === caseId).sort((left, right) => left.repetition - right.repetition);
+        if (passes.length === 0) throw new Error(`missing ${run.evaluator} result for ${caseId}`);
+        return [run.evaluator, caseOutcome(passes)];
+      })) as Record<DemoEvaluator, CaseOutcome>
     }))
   };
 }
