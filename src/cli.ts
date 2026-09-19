@@ -36,7 +36,7 @@ function required(values: Values, name: string): string {
 }
 function fixtureReview(): ReasoningResult {
   return {
-    finalOutcome: "alert", output: { decision: "vulnerable", family: "injection", evidence_span_ids: ["s1"] }, usage: { inputTokens: 0, outputTokens: 0 },
+    finalOutcome: "alert", output: { decision: "vulnerable", family: "injection", evidence_span_ids: ["s1"] }, usage: { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 },
     usageStatus: "available", chargeUsd: null, costStatus: "inconclusive", attempts: 1, modelLatencyMs: 0, stdout: "", stderr: "", error: null
   };
 }

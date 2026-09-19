@@ -19,6 +19,9 @@ export interface DemoDecision {
   choice?: DemoChoice;
   inputTokens?: number;
   outputTokens?: number;
+  /** Cached tokens, kept apart from fresh input because they bill at a different rate. */
+  cacheReadTokens?: number;
+  cacheWriteTokens?: number;
   costUsd?: number;
 }
 
@@ -163,7 +166,7 @@ export function parseDemoDecision(value: unknown, label: string): DemoDecision {
   if (family !== null && !families.has(family)) throw new Error(`${label}.family is invalid`);
   if (disposition === "vulnerable" && family === null) throw new Error(`${label}.family is required for vulnerable`);
   if (disposition !== "vulnerable" && family !== null) throw new Error(`${label}.family must be null unless vulnerable`);
-  const optionalNumber = (key: "inputTokens" | "outputTokens" | "costUsd"): number | undefined => {
+  const optionalNumber = (key: "inputTokens" | "outputTokens" | "cacheReadTokens" | "cacheWriteTokens" | "costUsd"): number | undefined => {
     const number = row[key];
     if (number === undefined) return undefined;
     if (typeof number !== "number" || !Number.isFinite(number) || number < 0 || (key !== "costUsd" && !Number.isInteger(number))) throw new Error(`${label}.${key} is invalid`);
@@ -171,6 +174,8 @@ export function parseDemoDecision(value: unknown, label: string): DemoDecision {
   };
   const inputTokens = optionalNumber("inputTokens");
   const outputTokens = optionalNumber("outputTokens");
+  const cacheReadTokens = optionalNumber("cacheReadTokens");
+  const cacheWriteTokens = optionalNumber("cacheWriteTokens");
   const costUsd = optionalNumber("costUsd");
   const choice = row.choice === undefined ? undefined : parseDemoChoice(row.choice, `${label}.choice`);
   if (choice !== undefined) {
@@ -183,6 +188,8 @@ export function parseDemoDecision(value: unknown, label: string): DemoDecision {
     ...(choice === undefined ? {} : { choice }),
     ...(inputTokens === undefined ? {} : { inputTokens }),
     ...(outputTokens === undefined ? {} : { outputTokens }),
+    ...(cacheReadTokens === undefined ? {} : { cacheReadTokens }),
+    ...(cacheWriteTokens === undefined ? {} : { cacheWriteTokens }),
     ...(costUsd === undefined ? {} : { costUsd })
   };
 }

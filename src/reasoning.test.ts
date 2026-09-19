@@ -139,7 +139,7 @@ test("Claude structured_output envelopes preserve output and usage while unsuppo
     const snapshot = join(root, "snapshot");
     const schemaPath = resolve("config/reasoning-output.schema.json");
     await (await import("node:fs/promises")).mkdir(snapshot);
-    const opusExecutable = await fixture(root, 'process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] }, usage: { input_tokens: 11, output_tokens: 13 } }));', "2.1.278 (Claude Code)");
+    const opusExecutable = await fixture(root, 'process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] }, usage: { input_tokens: 11, output_tokens: 13, cache_read_input_tokens: 40, cache_creation_input_tokens: 7 } }));', "2.1.278 (Claude Code)");
     const terraRoot = join(root, "terra");
     await (await import("node:fs/promises")).mkdir(terraRoot);
     const terraExecutable = await fixture(terraRoot, `
@@ -151,7 +151,8 @@ await writeFile(args[args.indexOf("--output-last-message") + 1], JSON.stringify(
     const opus = await runReasoningReview({ evaluator: "opus", mode: "controlled", prompt: "{}", snapshot, schemaPath, timeoutMs: 5_000, tokenBudget: 100, toolBudget: 1, model: "claude-opus-4-6" }, { executable: opusExecutable, outputDirectory: root });
     const terra = await runReasoningReview({ evaluator: "terra", mode: "agentic", prompt: "{}", snapshot, schemaPath, timeoutMs: 5_000, tokenBudget: 100, toolBudget: 1 }, { executable: terraExecutable, outputDirectory: root });
     assert.deepEqual(opus.output, { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] });
-    assert.deepEqual(opus.usage, { inputTokens: 11, outputTokens: 13 });
+    // Cache buckets stay separate: folding them into inputTokens would price a cache hit at ten times its rate.
+    assert.deepEqual(opus.usage, { inputTokens: 11, outputTokens: 13, cacheReadTokens: 40, cacheWriteTokens: 7 });
     assert.equal(opus.usageStatus, "available");
     assert.equal(terra.usage, null);
     assert.equal(terra.usageStatus, "inconclusive");
