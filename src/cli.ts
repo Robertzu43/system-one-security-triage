@@ -1,11 +1,13 @@
 import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { TypeSafeClient } from "@typesafe-ai/sdk";
 import { inventoryAst } from "./discover.js";
 import type { Candidate, ControlledEvaluator, Repetition, ScoreInput } from "./contracts.js";
-import { loadDemoCases, runDemo, type DemoAdapter } from "./demo.js";
+import { buildPublishedDemoData, writePublishedDemoData } from "./dashboard.js";
+import { parseRecordedDemoRun, writeRecordedDemoRuns, type RecordedDemoRun } from "./demo-record.js";
+import { loadDemoCases, runDemo, type DemoAdapter, type DemoEvaluator, type EvaluatorMetadata } from "./demo.js";
 import { createJevDemoAdapter, createReasoningDemoAdapter } from "./demo-live.js";
 import { judgeWithJev } from "./jev.js";
 import { canonicalJson } from "./jsonl.js";
@@ -97,24 +99,38 @@ async function runFixture(values: Values): Promise<unknown> {
   }
 }
 
+function selectedEvaluators(values: Values): DemoEvaluator[] {
+  const selected = (typeof values.models === "string" ? values.models : "jev,terra").split(",") as DemoEvaluator[];
+  if (selected.length === 0 || selected.some((name) => !["jev", "terra", "opus"].includes(name)) || new Set(selected).size !== selected.length) throw new Error("--models must be a unique comma-separated subset of jev,terra,opus");
+  return selected;
+}
+
+function requireCredentials(selected: readonly DemoEvaluator[]): void {
+  if (selected.includes("jev") && !(process.env.TYPESAFE_API_KEY?.trim())) throw new Error("TYPESAFE_API_KEY is required for live Jev evaluation");
+}
+
+async function liveAdapters(selected: readonly DemoEvaluator[], emptySnapshot: string, outputDirectory: string): Promise<DemoAdapter[]> {
+  const adapters: DemoAdapter[] = [];
+  if (selected.includes("jev")) {
+    const client = new TypeSafeClient({ timeout: 30_000, retry: { maxRetries: 0 }, logLevel: "off" });
+    adapters.push(createJevDemoAdapter((stateJson) => judgeWithJev(stateJson, client)));
+  }
+  if (selected.includes("terra")) adapters.push(createReasoningDemoAdapter("terra", emptySnapshot, undefined, { outputDirectory }));
+  if (selected.includes("opus")) adapters.push(createReasoningDemoAdapter("opus", emptySnapshot, undefined, { outputDirectory }));
+  return adapters;
+}
+
 async function demo(values: Values): Promise<unknown> {
   const output = (report: Awaited<ReturnType<typeof runDemo>>): unknown => values.details === true ? report : ({ mode: report.mode, disclaimer: report.disclaimer, caseCount: report.caseCount, summary: report.summary });
   const cases = await loadDemoCases(required(values, "fixture"));
   if (values.live === true) {
-    const selected = (typeof values.models === "string" ? values.models : "jev,terra").split(",");
-    if (selected.length === 0 || selected.some((name) => !["jev", "terra", "opus"].includes(name)) || new Set(selected).size !== selected.length) throw new Error("--models must be a unique comma-separated subset of jev,terra,opus");
-    if (selected.includes("jev") && !(process.env.TYPESAFE_API_KEY?.trim())) throw new Error("TYPESAFE_API_KEY is required for live Jev evaluation");
+    const selected = selectedEvaluators(values);
+    requireCredentials(selected);
     const root = await mkdtemp(join(tmpdir(), "triage-demo-"));
     const emptySnapshot = join(root, "empty");
     await mkdir(emptySnapshot);
     try {
-      const adapters: DemoAdapter[] = [];
-      if (selected.includes("jev")) {
-        const client = new TypeSafeClient({ timeout: 30_000, retry: { maxRetries: 0 }, logLevel: "off" });
-        adapters.push(createJevDemoAdapter((stateJson) => judgeWithJev(stateJson, client)));
-      }
-      if (selected.includes("terra")) adapters.push(createReasoningDemoAdapter("terra", emptySnapshot, undefined, { outputDirectory: root }));
-      if (selected.includes("opus")) adapters.push(createReasoningDemoAdapter("opus", emptySnapshot, undefined, { outputDirectory: root }));
+      const adapters = await liveAdapters(selected, emptySnapshot, root);
       return output(await runDemo(cases, adapters, "live"));
     } finally {
       await rm(root, { recursive: true, force: true });
@@ -128,12 +144,56 @@ async function demo(values: Values): Promise<unknown> {
   return output(await runDemo(cases, adapters, "fixture"));
 }
 
+async function demoRecord(values: Values): Promise<unknown> {
+  const fixture = required(values, "fixture");
+  const selected = selectedEvaluators(values);
+  const runId = required(values, "run-id");
+  const outputRoot = required(values, "output");
+  requireCredentials(selected);
+  const cases = await loadDemoCases(fixture);
+  const root = await mkdtemp(join(tmpdir(), "triage-demo-record-"));
+  const emptySnapshot = join(root, "empty");
+  await mkdir(emptySnapshot);
+  try {
+    const adapters = await liveAdapters(selected, emptySnapshot, root);
+    const report = await runDemo(cases, adapters, "live");
+    return writeRecordedDemoRuns({
+      cases,
+      report,
+      metadata: Object.fromEntries(adapters.map((adapter) => [adapter.name, adapter.metadata])) as Partial<Record<DemoEvaluator, EvaluatorMetadata>>,
+      runId,
+      recordedAt: new Date().toISOString(),
+      outputRoot
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+}
+
+async function dashboardBuild(values: Values): Promise<unknown> {
+  const cases = await loadDemoCases(required(values, "fixture"));
+  const runDirectory = required(values, "run-dir");
+  const output = required(values, "output");
+  const runs: RecordedDemoRun[] = [];
+  for (const evaluator of ["jev", "terra", "opus"] as const) {
+    try {
+      runs.push(parseRecordedDemoRun(JSON.parse(await readFile(join(runDirectory, `${evaluator}.json`), "utf8")), cases));
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
+  }
+  const generatedAt = runs.map((run) => run.recordedAt).sort().at(-1) ?? "1970-01-01T00:00:00.000Z";
+  const data = buildPublishedDemoData(cases, runs, generatedAt);
+  await writePublishedDemoData(output, data);
+  return { output: basename(output), corpusHash: data.corpusHash, sourceHashes: Object.fromEntries(data.sourceArtifacts.map(({ evaluator, artifactSha256 }) => [evaluator, artifactSha256])) };
+}
+
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({ args: process.argv.slice(2), allowPositionals: true, strict: true, options: {
-    source: { type: "string" }, destination: { type: "string" }, commit: { type: "string" }, snapshot: { type: "string" }, input: { type: "string" }, fixture: { type: "string" }, evaluator: { type: "string" }, "run-id": { type: "string" }, live: { type: "boolean" }, models: { type: "string" }, details: { type: "boolean" }
+    source: { type: "string" }, destination: { type: "string" }, commit: { type: "string" }, snapshot: { type: "string" }, input: { type: "string" }, output: { type: "string" }, fixture: { type: "string" }, evaluator: { type: "string" }, "run-id": { type: "string" }, "run-dir": { type: "string" }, live: { type: "boolean" }, models: { type: "string" }, details: { type: "boolean" }
   } });
   const command = positionals[0];
-  const result = command === "sanitize" ? await sanitize(values) : command === "discover" ? await discover(values) : command === "score" ? await score(values) : command === "run" ? await runFixture(values) : command === "demo" ? await demo(values) : (() => { throw new Error("expected sanitize, discover, run, score, or demo"); })();
+  const result = command === "sanitize" ? await sanitize(values) : command === "discover" ? await discover(values) : command === "score" ? await score(values) : command === "run" ? await runFixture(values) : command === "demo" ? await demo(values) : command === "demo-record" ? await demoRecord(values) : command === "dashboard-build" ? await dashboardBuild(values) : (() => { throw new Error("expected sanitize, discover, run, score, demo, demo-record, or dashboard-build"); })();
   process.stdout.write(`${canonicalJson(result)}\n`);
 }
 
