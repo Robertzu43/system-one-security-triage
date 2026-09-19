@@ -9,6 +9,10 @@
     "test": "npm run build && node --test --test-concurrency=1 dist/src/*.test.js",
     "demo": "npm run build --silent && node dist/src/cli.js demo --fixture test/fixtures/demo-cases.json",
     "demo:live": "npm run build --silent && node dist/src/cli.js demo --live --fixture test/fixtures/demo-cases.json",
+    "demo:record": "npm run build --silent && node dist/src/cli.js demo-record --fixture test/fixtures/demo-cases.json --output results/recorded",
+    "dashboard:build": "npm run build --silent && node dist/src/cli.js dashboard-build --fixture test/fixtures/demo-cases.json",
+    "dashboard:fixture": "npm run dashboard:build -- --run-dir test/fixtures/dashboard-runs --output dashboard/data/latest.json",
+    "dashboard:preview": "python3 -m http.server 4173 --directory dashboard",
     "triage": "npm run build --silent && node dist/src/cli.js",
     "test:e2e": "npm run build --silent && node dist/src/cli.js run --fixture test/fixtures/repository/candidates --evaluator fixture",
     "check": "npm test && git diff --check"

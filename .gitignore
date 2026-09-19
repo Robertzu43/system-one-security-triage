@@ -3,3 +3,6 @@ private/
 .env
 dist/
 node_modules/
+.worktrees/
+.superpowers/
+dashboard/data/latest.json

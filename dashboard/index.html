@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Recorded comparison of Jev, Terra, and Opus across 100 synthetic security-triage cases.">
+  <title>System One · Recorded Security Triage</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to results</a>
+  <header class="masthead">
+    <a class="wordmark" href="./" aria-label="System One demo home"><span>S/1</span> Security Triage</a>
+    <span class="run-state"><i aria-hidden="true"></i> Recorded evidence</span>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">100 synthetic cases · recorded model run</p>
+        <h1 id="page-title">Decisions,<br><em>under inspection.</em></h1>
+      </div>
+      <div class="hero-copy">
+        <p class="lede">A reproducible look at how three AI models classified the same security evidence. These are saved outputs—not live browser inference.</p>
+        <dl class="model-definitions">
+          <div><dt>Jev</dt><dd>TypeSafe System One decision model</dd></div>
+          <div><dt>Terra</dt><dd>OpenAI model through Codex CLI</dd></div>
+          <div><dt>Opus</dt><dd>Anthropic Claude Opus through Claude tooling</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="run-strip" aria-label="Recorded run metadata">
+      <div><span>Corpus</span><strong id="corpus-id">Loading…</strong></div>
+      <div><span>Recorded</span><strong id="recorded-at">Loading…</strong></div>
+      <div><span>Cases</span><strong id="case-count">100 synthetic</strong></div>
+      <button id="replay" type="button">Replay recorded run <span aria-hidden="true">↻</span></button>
+      <p id="replay-status" class="sr-only" aria-live="polite"></p>
+    </section>
+
+    <section class="primary-results" aria-labelledby="scoreboard-title">
+      <div class="section-heading">
+        <div><p class="section-number">01 / Scoreboard</p><h2 id="scoreboard-title">The run at a glance</h2></div>
+        <p>Errors stay in every denominator. Missing usage or cost stays unknown—not zero.</p>
+      </div>
+      <div id="scorecards" class="scorecards" aria-live="polite"></div>
+    </section>
+
+    <section class="panel decision-panel" aria-labelledby="decision-title">
+      <div class="section-heading compact">
+        <div><p class="section-number">02 / Decision map</p><h2 id="decision-title">Jev’s 100 decisions</h2></div>
+        <p>One cell per case, in frozen corpus order.</p>
+      </div>
+      <ul class="legend" aria-label="Decision legend">
+        <li><span class="legend-mark vulnerable">V</span> Vulnerable</li>
+        <li><span class="legend-mark safe">S</span> Safe</li>
+        <li><span class="legend-mark insufficient">?</span> Insufficient context</li>
+        <li><span class="legend-mark error">!</span> Error</li>
+      </ul>
+      <div id="decision-grid" class="decision-grid" role="list" aria-label="Jev decisions for 100 cases"></div>
+    </section>
+
+    <div class="analysis-grid">
+      <section class="panel" aria-labelledby="comparison-title">
+        <div class="section-heading compact"><div><p class="section-number">03 / Comparison</p><h2 id="comparison-title">Accuracy &amp; recall</h2></div></div>
+        <div id="comparison-bars" class="chart" aria-hidden="true"></div>
+        <div class="table-scroll" tabindex="0" aria-label="Comparison chart values">
+          <table id="comparison-table"><caption>Model comparison values</caption><thead><tr><th>Model</th><th>Accuracy</th><th>Vulnerability recall</th></tr></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="confusion-title">
+        <div class="section-heading compact"><div><p class="section-number">04 / Outcomes</p><h2 id="confusion-title">Decision matrices</h2></div></div>
+        <div id="confusion-matrices" class="matrix-stack"></div>
+      </section>
+    </div>
+
+    <section class="method" aria-labelledby="method-title">
+      <p class="section-number">05 / Method</p>
+      <h2 id="method-title">Same evidence in.<br>Saved decisions out.</h2>
+      <div class="method-copy">
+        <p>Every evaluator received identical canonical evidence for 100 synthetic TypeScript/Node.js cases across injection, broken access control, and SSRF. The expected labels are part of the frozen corpus.</p>
+        <p>This is a descriptive demo, not a statistical benchmark. Replay only reveals the recorded results again; it never calls a model, changes a decision, or sends data elsewhere.</p>
+      </div>
+    </section>
+
+    <section class="explorer" aria-labelledby="explorer-title">
+      <div class="section-heading">
+        <div><p class="section-number">06 / Evidence</p><h2 id="explorer-title">Case explorer</h2></div>
+        <p id="results-count" aria-live="polite">Loading cases…</p>
+      </div>
+      <form class="filters" aria-label="Filter cases">
+        <label for="model-filter">Model<select id="model-filter"><option value="all">All models</option><option value="jev">Jev</option><option value="terra">Terra</option><option value="opus">Opus</option></select></label>
+        <label for="family-filter">Family<select id="family-filter"><option value="all">All families</option><option value="injection">Injection</option><option value="broken_access_control">Broken access control</option><option value="ssrf">SSRF</option></select></label>
+        <label for="expected-filter">Expected<select id="expected-filter"><option value="all">Any expected</option><option value="vulnerable">Vulnerable</option><option value="safe">Safe</option><option value="insufficient_context">Insufficient context</option></select></label>
+        <label for="decision-filter">Decision<select id="decision-filter"><option value="all">Any decision</option><option value="vulnerable">Vulnerable</option><option value="safe">Safe</option><option value="insufficient_context">Insufficient context</option></select></label>
+        <label for="correct-filter">Correctness<select id="correct-filter"><option value="all">Either</option><option value="true">Correct</option><option value="false">Incorrect</option></select></label>
+        <label for="status-filter">Status<select id="status-filter"><option value="all">Any status</option><option value="valid">Valid</option><option value="error">Error</option></select></label>
+      </form>
+      <div id="case-list" class="case-list"></div>
+    </section>
+
+    <footer>
+      <p>Inspect the evidence, not just the headline.</p>
+      <nav aria-label="Project links">
+        <a href="./data/latest.json">Recorded data</a>
+        <a href="https://github.com/Robertzu43/system-one-security-triage">Source repository</a>
+        <a href="https://github.com/Robertzu43/system-one-security-triage/blob/main/test/fixtures/demo-cases.json">Synthetic corpus</a>
+      </nav>
+    </footer>
+
+    <noscript>
+      <section class="noscript"><h2>JavaScript is off</h2><p>This page compares recorded model decisions over 100 synthetic security cases. The complete, inspectable dataset remains available as <a href="./data/latest.json">JSON</a>.</p></section>
+    </noscript>
+  </main>
+</body>
+</html>

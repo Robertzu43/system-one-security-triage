@@ -1,64 +1,94 @@
-# Jev vs Terra vs Opus: nine-case security-triage demo
+# System One security triage
 
-This repository currently focuses on a small, reproducible demonstration: can Jev make the same bounded security-triage decisions as Terra and Opus when all three receive identical evidence JSON?
+The current focus is a reproducible **100-case recorded demo** comparing three models on identical security evidence:
 
-The demo contains nine TypeScript/Node cases across three vulnerability families:
+| Evaluator | What it is | Runner |
+| --- | --- | --- |
+| **Jev** | TypeSafe's System One decision model (`jev-1.13.0`) | `@typesafe-ai/sdk` |
+| **Terra** | OpenAI model (`gpt-5.6-terra`) | Codex CLI |
+| **Opus** | Anthropic Claude Opus (`claude-opus-4-6`) | Claude tooling |
 
-| Family | Vulnerable | Safe | Insufficient context |
-| --- | --- | --- | --- |
-| Injection | 1 | 1 | 1 |
-| Broken access control | 1 | 1 | 1 |
-| SSRF | 1 | 1 | 1 |
+Jev is the model making the first set of decisions—not the name of the benchmark or dashboard. The browser only renders saved JSON artifacts. It contains no provider credentials, backend, or runtime model calls.
 
-Accuracy scores the disposition and, for vulnerable cases, the vulnerability family. This is a descriptive demo, not a statistically powered benchmark.
+> Dashboard URL: [https://robertzu43.github.io/system-one-security-triage/](https://robertzu43.github.io/system-one-security-triage/) — unavailable until the first complete three-model run is deployed.
 
-## Run the demo without credentials
+## The 100-case demo
+
+The frozen synthetic TypeScript/Node.js corpus covers three vulnerability families and three expected outcomes:
+
+| Family | Vulnerable | Safe | Insufficient context | Total |
+| --- | ---: | ---: | ---: | ---: |
+| Injection | 12 | 11 | 11 | 34 |
+| Broken access control | 11 | 11 | 11 | 33 |
+| SSRF | 11 | 11 | 11 | 33 |
+| **Total** | **34** | **33** | **33** | **100** |
+
+Accuracy scores the disposition and, for vulnerable cases, the vulnerability family. Explicit errors remain incorrect and stay in every denominator. This is a descriptive, synthetic demo—not a statistically powered benchmark or a claim of general model superiority.
+
+### Preview with saved fixture results
+
+No credentials or paid model calls are needed:
 
 ```bash
 npm install
-npm run demo
+npm run dashboard:fixture
+npm run dashboard:preview
 ```
 
-This exercises the complete comparison and scoring path with explicitly simulated adapters. It verifies the harness; its output is not a model result.
+Open [http://localhost:4173](http://localhost:4173). The fixture results exercise the complete dashboard path and are visibly synthetic; they are not model benchmark results.
 
-Add `--details` to include every per-case decision:
+The older terminal summary remains available with `npm run demo`. It also uses explicitly simulated adapters.
 
-```bash
-npm run demo -- --details
-```
+## Record a real three-model run
 
-## Run the live comparison
-
-Set a newly rotated TypeSafe key locally; do not reuse a key pasted into chat or commit it:
+Use one run ID for all three immutable artifacts:
 
 ```bash
+# Local Jev + Terra recording
 export TYPESAFE_API_KEY='...'
-npm run demo:live -- --models jev,terra
+npm run demo:record -- --models jev,terra --run-id 2026-09-18-public
+
+# From the same checkout opened in Claude
+npm run demo:record -- --models opus --run-id 2026-09-18-public
+
+# Validate and preview all three saved runs
+npm run dashboard:build -- --run-dir results/recorded/2026-09-19-public-v2 --output dashboard/data/latest.json
+npm run dashboard:preview
 ```
 
-Add Opus after the local Claude subscription is authenticated:
+The Opus command uses the repository's pinned, bounded Claude adapter; it does not use conversational context as model input. Each evaluator receives the same canonical evidence bytes. Missing usage or cost stays `null`, never zero.
 
-```bash
-npm run demo:live -- --models jev,terra,opus
+Before committing, review all three files:
+
+```text
+results/recorded/2026-09-19-public-v2/jev.json
+results/recorded/2026-09-19-public-v2/terra.json
+results/recorded/2026-09-19-public-v2/opus.json
 ```
 
-Every adapter receives the same canonical JSON string. Errors remain in the denominator. The report includes decision accuracy, vulnerability recall, failures, latency, and token/cost fields when the provider exposes them. Evidence localization is excluded because the current Jev primitive does not return comparable source-span selections.
+They must contain the same corpus hash and complete coverage of all 100 cases. Artifacts are exclusive-write and reject credentials, absolute local paths, duplicates, missing cases, unknown cases, and invalid hashes.
+
+## Publish on GitHub Pages
+
+Commit the reviewed `results/recorded/<run-id>/` directory, push it, then manually run the **Publish recorded demo dashboard** workflow in GitHub Actions with the matching `run_id`.
+
+The workflow runs the full test suite, rebuilds the public dataset from the three committed artifacts, and deploys only the static `dashboard/` directory. It has no provider secrets and cannot record new model results.
 
 ## Larger project: in progress
 
-The long-term project is a reproducible security-triage benchmark with sanitized repository snapshots, Semgrep and AST candidate discovery, immutable evidence packets, controlled Jev/Terra/Opus evaluation, cascade experiments, statistical scoring, and a static report.
+The larger goal is a reproducible security-triage benchmark using sanitized repository snapshots, Semgrep and AST discovery, immutable evidence packets, controlled Jev/Terra/Opus evaluation, cascade experiments, and statistical scoring.
 
-That larger benchmark is actively being developed, but it is not the current runnable result. Its approved design and implementation roadmaps live here:
+Those foundations are actively being developed, but they are not the current published result. The 100-case recorded demo above is the runnable focus today:
 
-- [Benchmark design](docs/superpowers/specs/2026-09-18-system-one-security-triage-design.md)
+- [Recorded dashboard design](docs/superpowers/specs/2026-09-18-recorded-demo-dashboard-design.md)
+- [Larger benchmark design](docs/superpowers/specs/2026-09-18-system-one-security-triage-design.md)
 - [Controlled model comparison plan](docs/superpowers/plans/2026-09-18-controlled-model-comparison.md)
 - [Controlled corpus preparation plan](docs/superpowers/plans/2026-09-18-controlled-corpus-preparation.md)
-- [Original implementation plan](docs/superpowers/plans/2026-09-18-system-one-security-triage.md)
 
-The supporting benchmark modules already in `src/` are foundations for that work. They should not be mistaken for a completed or published benchmark.
+## Verification
 
-## Current claim boundary
+```bash
+npm run check
+```
 
-The nine cases are intentionally small and hand-curated. They demonstrate a controlled comparison workflow; they do not establish general model superiority, production security coverage, or performance on real-world vulnerability distributions.
-
-Terra runs through Codex CLI in an empty read-only directory, but that CLI does not prove that every agent tool is disabled. Live results should therefore be reported as demo results, not primary benchmark findings.
+Tests and dashboard builds never make paid model calls.

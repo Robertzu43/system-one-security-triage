@@ -5,13 +5,40 @@
     "state": {
       "entryKind": "route",
       "spans": [
-        { "id": "s1", "path": "src/users.ts", "startLine": 10, "endLine": 10, "text": "const query = `SELECT * FROM users WHERE id = ${req.query.id}`;" },
-        { "id": "s2", "path": "src/users.ts", "startLine": 11, "endLine": 11, "text": "return db.query(query);" }
+        {
+          "id": "s1",
+          "path": "src/users.ts",
+          "startLine": 10,
+          "endLine": 10,
+          "text": "const query = `SELECT * FROM users WHERE id = ${req.query.id}`;"
+        },
+        {
+          "id": "s2",
+          "path": "src/users.ts",
+          "startLine": 11,
+          "endLine": 11,
+          "text": "return db.query(query);"
+        }
       ],
-      "relationships": [{ "from": "s1", "to": "s2", "kind": "flows_to" }],
-      "contextResolution": { "middleware": "resolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "resolved", "callPath": "resolved" }
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
     },
-    "expected": { "disposition": "vulnerable", "family": "injection" }
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    }
   },
   {
     "caseId": "injection-safe",
@@ -19,24 +46,68 @@
     "state": {
       "entryKind": "route",
       "spans": [
-        { "id": "s1", "path": "src/users.ts", "startLine": 20, "endLine": 20, "text": "const id = Number.parseInt(req.query.id, 10);" },
-        { "id": "s2", "path": "src/users.ts", "startLine": 21, "endLine": 21, "text": "return db.query('SELECT * FROM users WHERE id = $1', [id]);" }
+        {
+          "id": "s1",
+          "path": "src/users.ts",
+          "startLine": 20,
+          "endLine": 20,
+          "text": "const id = Number.parseInt(req.query.id, 10);"
+        },
+        {
+          "id": "s2",
+          "path": "src/users.ts",
+          "startLine": 21,
+          "endLine": 21,
+          "text": "return db.query('SELECT * FROM users WHERE id = $1', [id]);"
+        }
       ],
-      "relationships": [{ "from": "s1", "to": "s2", "kind": "flows_to" }],
-      "contextResolution": { "middleware": "resolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "resolved", "callPath": "resolved" }
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
     },
-    "expected": { "disposition": "safe", "family": null }
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
   },
   {
     "caseId": "injection-insufficient",
     "family": "injection",
     "state": {
       "entryKind": "call",
-      "spans": [{ "id": "s1", "path": "src/users.ts", "startLine": 30, "endLine": 30, "text": "return lookupUser(req.query.id);" }],
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/users.ts",
+          "startLine": 30,
+          "endLine": 30,
+          "text": "return lookupUser(req.query.id);"
+        }
+      ],
       "relationships": [],
-      "contextResolution": { "middleware": "unresolved", "upstreamDataFlow": "resolved", "sanitizers": "unresolved", "authorization": "unresolved", "callPath": "unresolved" }
+      "contextResolution": {
+        "middleware": "unresolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "unresolved",
+        "callPath": "unresolved"
+      }
     },
-    "expected": { "disposition": "insufficient_context", "family": null }
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
   },
   {
     "caseId": "access-vulnerable",
@@ -44,13 +115,40 @@
     "state": {
       "entryKind": "route",
       "spans": [
-        { "id": "s1", "path": "src/accounts.ts", "startLine": 10, "endLine": 11, "text": "const authenticatedUserId = req.user.id;\nconst requestedAccountId = req.params.accountId;" },
-        { "id": "s2", "path": "src/accounts.ts", "startLine": 12, "endLine": 12, "text": "return db.accounts.findById(requestedAccountId);" }
+        {
+          "id": "s1",
+          "path": "src/accounts.ts",
+          "startLine": 10,
+          "endLine": 11,
+          "text": "const authenticatedUserId = req.user.id;\nconst requestedAccountId = req.params.accountId;"
+        },
+        {
+          "id": "s2",
+          "path": "src/accounts.ts",
+          "startLine": 12,
+          "endLine": 12,
+          "text": "return db.accounts.findById(requestedAccountId);"
+        }
       ],
-      "relationships": [{ "from": "s1", "to": "s2", "kind": "flows_to" }],
-      "contextResolution": { "middleware": "resolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "resolved", "callPath": "resolved" }
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
     },
-    "expected": { "disposition": "vulnerable", "family": "broken_access_control" }
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    }
   },
   {
     "caseId": "access-safe",
@@ -58,13 +156,40 @@
     "state": {
       "entryKind": "route",
       "spans": [
-        { "id": "s1", "path": "src/accounts.ts", "startLine": 20, "endLine": 20, "text": "if (req.user.accountId !== req.params.accountId) return res.sendStatus(403);" },
-        { "id": "s2", "path": "src/accounts.ts", "startLine": 21, "endLine": 21, "text": "return db.accounts.findById(req.params.accountId);" }
+        {
+          "id": "s1",
+          "path": "src/accounts.ts",
+          "startLine": 20,
+          "endLine": 20,
+          "text": "if (req.user.accountId !== req.params.accountId) return res.sendStatus(403);"
+        },
+        {
+          "id": "s2",
+          "path": "src/accounts.ts",
+          "startLine": 21,
+          "endLine": 21,
+          "text": "return db.accounts.findById(req.params.accountId);"
+        }
       ],
-      "relationships": [{ "from": "s1", "to": "s2", "kind": "guards" }],
-      "contextResolution": { "middleware": "resolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "resolved", "callPath": "resolved" }
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "guards"
+        }
+      ],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
     },
-    "expected": { "disposition": "safe", "family": null }
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
   },
   {
     "caseId": "access-insufficient",
@@ -72,24 +197,68 @@
     "state": {
       "entryKind": "route",
       "spans": [
-        { "id": "s1", "path": "src/accounts.ts", "startLine": 30, "endLine": 30, "text": "await authorize(req, req.params.accountId);" },
-        { "id": "s2", "path": "src/accounts.ts", "startLine": 31, "endLine": 31, "text": "return db.accounts.findById(req.params.accountId);" }
+        {
+          "id": "s1",
+          "path": "src/accounts.ts",
+          "startLine": 30,
+          "endLine": 30,
+          "text": "await authorize(req, req.params.accountId);"
+        },
+        {
+          "id": "s2",
+          "path": "src/accounts.ts",
+          "startLine": 31,
+          "endLine": 31,
+          "text": "return db.accounts.findById(req.params.accountId);"
+        }
       ],
-      "relationships": [{ "from": "s1", "to": "s2", "kind": "guards" }],
-      "contextResolution": { "middleware": "unresolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "unresolved", "callPath": "unresolved" }
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "guards"
+        }
+      ],
+      "contextResolution": {
+        "middleware": "unresolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "unresolved",
+        "callPath": "unresolved"
+      }
     },
-    "expected": { "disposition": "insufficient_context", "family": null }
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
   },
   {
     "caseId": "ssrf-vulnerable",
     "family": "ssrf",
     "state": {
       "entryKind": "route",
-      "spans": [{ "id": "s1", "path": "src/proxy.ts", "startLine": 10, "endLine": 10, "text": "return fetch(req.query.url);" }],
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/proxy.ts",
+          "startLine": 10,
+          "endLine": 10,
+          "text": "return fetch(req.query.url);"
+        }
+      ],
       "relationships": [],
-      "contextResolution": { "middleware": "resolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "resolved", "callPath": "resolved" }
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
     },
-    "expected": { "disposition": "vulnerable", "family": "ssrf" }
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    }
   },
   {
     "caseId": "ssrf-safe",
@@ -97,23 +266,2615 @@
     "state": {
       "entryKind": "route",
       "spans": [
-        { "id": "s1", "path": "src/proxy.ts", "startLine": 20, "endLine": 20, "text": "const target = new URL(req.query.url); if (!ALLOWED_HOSTS.has(target.hostname)) return res.sendStatus(400);" },
-        { "id": "s2", "path": "src/proxy.ts", "startLine": 21, "endLine": 21, "text": "return fetch(target);" }
+        {
+          "id": "s1",
+          "path": "src/proxy.ts",
+          "startLine": 20,
+          "endLine": 20,
+          "text": "const target = new URL(req.query.url); if (!ALLOWED_HOSTS.has(target.hostname)) return res.sendStatus(400);"
+        },
+        {
+          "id": "s2",
+          "path": "src/proxy.ts",
+          "startLine": 21,
+          "endLine": 21,
+          "text": "return fetch(target);"
+        }
       ],
-      "relationships": [{ "from": "s1", "to": "s2", "kind": "guards" }],
-      "contextResolution": { "middleware": "resolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "resolved", "callPath": "resolved" }
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "guards"
+        }
+      ],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
     },
-    "expected": { "disposition": "safe", "family": null }
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
   },
   {
     "caseId": "ssrf-insufficient",
     "family": "ssrf",
     "state": {
       "entryKind": "call",
-      "spans": [{ "id": "s1", "path": "src/proxy.ts", "startLine": 30, "endLine": 30, "text": "return fetch(resolveServiceUrl(req.query.service));" }],
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/proxy.ts",
+          "startLine": 30,
+          "endLine": 30,
+          "text": "return fetch(resolveServiceUrl(req.query.service));"
+        }
+      ],
       "relationships": [],
-      "contextResolution": { "middleware": "unresolved", "upstreamDataFlow": "unresolved", "sanitizers": "unresolved", "authorization": "resolved", "callPath": "unresolved" }
+      "contextResolution": {
+        "middleware": "unresolved",
+        "upstreamDataFlow": "unresolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
     },
-    "expected": { "disposition": "insufficient_context", "family": null }
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-vulnerable-sql-order-sort",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-vulnerable-sql-order-sort.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "db.query(`SELECT * FROM orders ORDER BY ${req.query.sort}`);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    }
+  },
+  {
+    "caseId": "injection-vulnerable-sql-report-filter",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-vulnerable-sql-report-filter.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "reports.raw(`status = '${req.body.status}'`);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    }
+  },
+  {
+    "caseId": "injection-vulnerable-shell-export",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-vulnerable-shell-export.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "exec(`tar -czf export.tgz ${req.query.folder}`);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    }
+  },
+  {
+    "caseId": "injection-vulnerable-shell-git-ref",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-vulnerable-shell-git-ref.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "spawnSync('sh',['-c',`git show ${req.params.ref}`]);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    }
+  },
+  {
+    "caseId": "injection-vulnerable-eval-formula",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-vulnerable-eval-formula.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "eval(req.body.formula);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    }
+  },
+  {
+    "caseId": "injection-vulnerable-vm-script",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-vulnerable-vm-script.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "new vm.Script(req.body.script).runInContext(context);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    }
+  },
+  {
+    "caseId": "injection-vulnerable-template-helper",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-vulnerable-template-helper.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "handlebars.compile(req.body.template)(data);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    }
+  },
+  {
+    "caseId": "injection-vulnerable-template-name",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-vulnerable-template-name.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "res.render(req.query.view,model);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    }
+  },
+  {
+    "caseId": "injection-vulnerable-path-archive",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-vulnerable-path-archive.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "readFile(join('/exports',req.params.name));"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    }
+  },
+  {
+    "caseId": "injection-vulnerable-orm-order",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-vulnerable-orm-order.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "User.findAll({order:literal(req.query.order)});"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    }
+  },
+  {
+    "caseId": "injection-vulnerable-graphql-raw-filter",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-vulnerable-graphql-raw-filter.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "repository.query(req.body.rawFilter);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "injection"
+    }
+  },
+  {
+    "caseId": "injection-safe-sql-placeholder-email",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-safe-sql-placeholder-email.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "db.query('SELECT * FROM users WHERE email = $1',[req.query.email]);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-safe-query-builder-eq",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-safe-query-builder-eq.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "db('users').where({id:req.params.id}).first();"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-safe-shell-execfile-args",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-safe-shell-execfile-args.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "execFile('/usr/bin/convert',[inputPath,outputPath]);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-safe-shell-command-allowlist",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-safe-shell-command-allowlist.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "if(!COMMANDS.has(req.body.action)) throw Error('invalid'); run(COMMANDS.get(req.body.action));"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-safe-json-parse",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-safe-json-parse.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "JSON.parse(req.body.settings);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-safe-template-autoescape",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-safe-template-autoescape.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "templates.render('profile',{name:req.body.name},{autoescape:true});"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-safe-path-basename-root",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-safe-path-basename-root.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "readFile(join(ROOT,basename(req.params.file)));"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-safe-path-resolve-root",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-safe-path-resolve-root.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "const f=resolve(ROOT,req.params.file); if(!f.startsWith(ROOT+sep)) throw Error('outside');"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-safe-orm-enum-sort",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-safe-orm-enum-sort.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "const s=SORT_FIELDS[req.query.sort]; if(!s) throw Error('invalid'); User.findAll({order:[[s,'ASC']]});"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-safe-parser-schema-validation",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-safe-parser-schema-validation.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "parser.execute(schema.parse(req.body).expression);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-insufficient-sql-helper-hidden",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-insufficient-sql-helper-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "findUsers(req.query.filter);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-insufficient-db-wrapper-hidden",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-insufficient-db-wrapper-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "repository.search(req.body.term);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-insufficient-command-builder-hidden",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-insufficient-command-builder-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "commandService.run(req.body.job);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-insufficient-process-service-hidden",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-insufficient-process-service-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "exportService.create(req.query.format);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-insufficient-expression-compiler-hidden",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-insufficient-expression-compiler-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "formulaEngine.calculate(req.body.formula);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-insufficient-template-sanitizer-hidden",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-insufficient-template-sanitizer-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "pageRenderer.render(req.body.content);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-insufficient-archive-path-guard-hidden",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-insufficient-archive-path-guard-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "archive.open(req.params.entry);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-insufficient-upload-normalizer-hidden",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-insufficient-upload-normalizer-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "uploads.read(normalizeUploadName(req.params.name));"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-insufficient-orm-filter-helper-hidden",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-insufficient-orm-filter-helper-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "products.applyFilter(req.query.filter);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "injection-insufficient-parser-policy-hidden",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/injection-insufficient-parser-policy-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "queryLanguage.parse(req.body.query);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-vulnerable-invoice-read",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-vulnerable-invoice-read.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "invoices.findById(req.params.invoiceId);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    }
+  },
+  {
+    "caseId": "access-vulnerable-profile-update",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-vulnerable-profile-update.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "users.update(req.params.userId,req.body);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    }
+  },
+  {
+    "caseId": "access-vulnerable-tenant-report",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-vulnerable-tenant-report.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "reports.forTenant(req.query.tenantId);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    }
+  },
+  {
+    "caseId": "access-vulnerable-admin-export",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-vulnerable-admin-export.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "router.get('/admin/export',authenticated,exportAllUsers);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    }
+  },
+  {
+    "caseId": "access-vulnerable-project-delete",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-vulnerable-project-delete.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "projects.delete(req.params.projectId);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    }
+  },
+  {
+    "caseId": "access-vulnerable-document-download",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-vulnerable-document-download.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "documents.download(req.params.documentId);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    }
+  },
+  {
+    "caseId": "access-vulnerable-order-refund",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-vulnerable-order-refund.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "refunds.create(req.params.orderId,req.body.amount);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    }
+  },
+  {
+    "caseId": "access-vulnerable-team-invite",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-vulnerable-team-invite.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "teams.invite(req.params.teamId,req.body.email);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    }
+  },
+  {
+    "caseId": "access-vulnerable-api-key-rotate",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-vulnerable-api-key-rotate.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "apiKeys.rotate(req.params.userId);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    }
+  },
+  {
+    "caseId": "access-vulnerable-mass-assignment-role",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-vulnerable-mass-assignment-role.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "users.update(req.user.id,req.body);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "broken_access_control"
+    }
+  },
+  {
+    "caseId": "access-safe-invoice-owner-query",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-safe-invoice-owner-query.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "invoices.findOne({id:req.params.invoiceId,ownerId:req.user.id});"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-safe-profile-self-id",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-safe-profile-self-id.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "if(req.params.userId!==req.user.id) return res.sendStatus(403); users.update(req.user.id,req.body);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-safe-tenant-scope-query",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-safe-tenant-scope-query.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "reports.find({tenantId:req.user.tenantId,id:req.params.reportId});"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-safe-admin-middleware",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-safe-admin-middleware.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "router.get('/admin/export',authenticated,requireRole('admin'),exportAllUsers);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-safe-project-owner-check",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-safe-project-owner-check.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "const p=await projects.get(req.params.projectId); if(p.ownerId!==req.user.id) return res.sendStatus(403);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-safe-document-membership",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-safe-document-membership.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "await memberships.require(req.user.id,req.params.documentId); documents.download(req.params.documentId);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-safe-refund-permission",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-safe-refund-permission.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "if(!req.user.permissions.includes('refund:create')) return res.sendStatus(403); refunds.create(req.params.orderId);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-safe-team-owner-guard",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-safe-team-owner-guard.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "await teams.requireOwner(req.user.id,req.params.teamId); teams.invite(req.params.teamId,req.body.email);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-safe-api-key-session-user",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-safe-api-key-session-user.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "apiKeys.rotate(req.user.id);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-safe-mass-assignment-allowlist",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-safe-mass-assignment-allowlist.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "users.update(req.user.id,pick(req.body,['displayName','timezone']));"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-insufficient-invoice-policy-hidden",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-insufficient-invoice-policy-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "authorizeInvoice(req.user,req.params.invoiceId);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "unresolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-insufficient-profile-auth-helper",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-insufficient-profile-auth-helper.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "canEditProfile(req);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "unresolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-insufficient-tenant-context-hidden",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-insufficient-tenant-context-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "tenantRepository(req).reports.get(req.params.reportId);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "unresolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-insufficient-admin-middleware-hidden",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-insufficient-admin-middleware-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "router.get('/admin/audit',adminPolicy,auditLog);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "unresolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-insufficient-project-permission-service",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-insufficient-project-permission-service.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "permissionService.check(req.user,'delete',req.params.projectId);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "unresolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-insufficient-document-acl-hidden",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-insufficient-document-acl-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "secureDocuments(req.user).download(req.params.documentId);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "unresolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-insufficient-refund-policy-hidden",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-insufficient-refund-policy-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "refundPolicy.enforce(req);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "unresolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-insufficient-team-role-hidden",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-insufficient-team-role-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "requireTeamRole(req);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "unresolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-insufficient-api-key-authorization-hidden",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-insufficient-api-key-authorization-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "authorizeKeyRotation(req);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "unresolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "access-insufficient-field-policy-hidden",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/access-insufficient-field-policy-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "allowedProfileChanges(req.user,req.body);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "unresolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-vulnerable-avatar-url",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-vulnerable-avatar-url.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "fetch(req.body.avatarUrl);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    }
+  },
+  {
+    "caseId": "ssrf-vulnerable-webhook-test-url",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-vulnerable-webhook-test-url.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "http.post(req.body.callbackUrl,testPayload);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    }
+  },
+  {
+    "caseId": "ssrf-vulnerable-pdf-render-url",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-vulnerable-pdf-render-url.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "pdf.renderFromUrl(req.query.page);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    }
+  },
+  {
+    "caseId": "ssrf-vulnerable-redirect-follow",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-vulnerable-redirect-follow.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "fetch(req.query.url,{redirect:'follow'});"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    }
+  },
+  {
+    "caseId": "ssrf-vulnerable-metadata-host",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-vulnerable-metadata-host.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "request(`http://${req.query.host}/status`);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    }
+  },
+  {
+    "caseId": "ssrf-vulnerable-dns-rebind-host",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-vulnerable-dns-rebind-host.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "fetch(new URL(req.body.url));"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    }
+  },
+  {
+    "caseId": "ssrf-vulnerable-proxy-destination",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-vulnerable-proxy-destination.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "proxy.forward(req.query.destination);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    }
+  },
+  {
+    "caseId": "ssrf-vulnerable-image-import-url",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-vulnerable-image-import-url.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "images.importFrom(req.body.source);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    }
+  },
+  {
+    "caseId": "ssrf-vulnerable-feed-fetch-url",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-vulnerable-feed-fetch-url.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "feeds.parse(await fetch(req.body.feedUrl));"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    }
+  },
+  {
+    "caseId": "ssrf-vulnerable-oauth-jwks-url",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-vulnerable-oauth-jwks-url.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "jwksClient(req.body.jwksUri).getSigningKey();"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "vulnerable",
+      "family": "ssrf"
+    }
+  },
+  {
+    "caseId": "ssrf-safe-avatar-host-allowlist",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-safe-avatar-host-allowlist.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "const u=new URL(req.body.avatarUrl); if(!AVATAR_HOSTS.has(u.hostname)) throw Error('blocked'); fetch(u);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-safe-webhook-https-domain",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-safe-webhook-https-domain.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "const u=new URL(req.body.callbackUrl); if(u.protocol!=='https:'||!u.hostname.endsWith('.hooks.example.com')) throw Error('blocked'); fetch(u);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-safe-pdf-fixed-origin",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-safe-pdf-fixed-origin.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "pdf.renderFromUrl(`https://docs.example.com/${encodeURIComponent(req.params.slug)}`);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-safe-redirect-disabled",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-safe-redirect-disabled.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "fetch(approvedUrl,{redirect:'error'});"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-safe-private-ip-block",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-safe-private-ip-block.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "const a=await resolvePublicAddress(req.query.host); if(isPrivate(a)) throw Error('blocked'); fetch(`https://${a}`);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-safe-dns-pin-check",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-safe-dns-pin-check.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "fetch(await validateAndPinPublicUrl(req.body.url));"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-safe-proxy-service-enum",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-safe-proxy-service-enum.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "const o=SERVICE_ORIGINS[req.query.service]; if(!o) throw Error('unknown'); fetch(o);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-safe-image-object-key",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-safe-image-object-key.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "images.readFromBucket(req.params.objectKey);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-safe-feed-registry",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-safe-feed-registry.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "const f=FEEDS.get(req.params.feedId); if(!f) return res.sendStatus(404); fetch(f.url);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-safe-jwks-issuer-map",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-safe-jwks-issuer-map.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "const u=TRUSTED_ISSUERS[claims.iss]?.jwksUri; if(!u) throw Error('issuer'); fetch(u);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "resolved",
+        "authorization": "resolved",
+        "callPath": "resolved"
+      }
+    },
+    "expected": {
+      "disposition": "safe",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-insufficient-avatar-validator-hidden",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-insufficient-avatar-validator-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "avatarService.fetch(validateAvatarUrl(req.body.avatarUrl));"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-insufficient-webhook-policy-hidden",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-insufficient-webhook-policy-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "webhookPolicy(req.user).send(req.body.callbackUrl);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-insufficient-pdf-resolver-hidden",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-insufficient-pdf-resolver-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "pdf.renderFromUrl(resolveDocumentUrl(req.params.document));"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-insufficient-redirect-config-hidden",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-insufficient-redirect-config-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "safeHttpClient.get(req.query.url);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-insufficient-ip-filter-hidden",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-insufficient-ip-filter-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "fetch(filterNetworkTarget(req.body.url));"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-insufficient-dns-cache-hidden",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-insufficient-dns-cache-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "pinnedDnsClient.request(req.body.url);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-insufficient-proxy-map-hidden",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-insufficient-proxy-map-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "serviceProxy.forward(req.query.service,req.path);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-insufficient-image-fetcher-hidden",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-insufficient-image-fetcher-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "remoteImageStore.import(req.body.source);"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-insufficient-feed-resolver-hidden",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-insufficient-feed-resolver-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "feeds.load(resolveFeed(req.params.feedId));"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
+  },
+  {
+    "caseId": "ssrf-insufficient-jwks-discovery-hidden",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [
+        {
+          "id": "s1",
+          "path": "src/demo/ssrf-insufficient-jwks-discovery-hidden.ts",
+          "startLine": 1,
+          "endLine": 1,
+          "text": "oidcClient(req.body.issuer).discoverKeys();"
+        }
+      ],
+      "relationships": [],
+      "contextResolution": {
+        "middleware": "resolved",
+        "upstreamDataFlow": "resolved",
+        "sanitizers": "unresolved",
+        "authorization": "resolved",
+        "callPath": "unresolved"
+      }
+    },
+    "expected": {
+      "disposition": "insufficient_context",
+      "family": null
+    }
   }
 ]
