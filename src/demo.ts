@@ -5,10 +5,18 @@ import { canonicalJson } from "./jsonl.js";
 
 export type DemoDisposition = "vulnerable" | "safe" | "insufficient_context";
 export type DemoEvaluator = "jev" | "terra" | "opus";
+export type DemoChoiceLabel = "vulnerable_injection" | "vulnerable_broken_access_control" | "vulnerable_ssrf" | "safe" | "insufficient_context";
+
+export interface DemoChoice {
+  selected: DemoChoiceLabel;
+  confidence: number;
+  probabilities: Readonly<Record<DemoChoiceLabel, number>>;
+}
 
 export interface DemoDecision {
   disposition: DemoDisposition;
   family: Family | null;
+  choice?: DemoChoice;
   inputTokens?: number;
   outputTokens?: number;
   costUsd?: number;
@@ -64,6 +72,8 @@ export interface DemoReport {
 
 const families = new Set<Family>(["injection", "broken_access_control", "ssrf"]);
 const dispositions = new Set<DemoDisposition>(["vulnerable", "safe", "insufficient_context"]);
+const choiceLabels = ["vulnerable_injection", "vulnerable_broken_access_control", "vulnerable_ssrf", "safe", "insufficient_context"] as const;
+const choiceLabelSet = new Set<DemoChoiceLabel>(choiceLabels);
 
 function record(value: unknown, label: string): Record<string, unknown> {
   if (value === null || typeof value !== "object" || Array.isArray(value)) throw new Error(`${label} must be an object`);
@@ -73,6 +83,34 @@ function record(value: unknown, label: string): Record<string, unknown> {
 function text(value: unknown, label: string): string {
   if (typeof value !== "string" || value.length === 0) throw new Error(`${label} must be a non-empty string`);
   return value;
+}
+
+function probability(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1;
+}
+
+export function decisionForChoice(selected: DemoChoiceLabel): Pick<DemoDecision, "disposition" | "family"> {
+  switch (selected) {
+    case "vulnerable_injection": return { disposition: "vulnerable", family: "injection" };
+    case "vulnerable_broken_access_control": return { disposition: "vulnerable", family: "broken_access_control" };
+    case "vulnerable_ssrf": return { disposition: "vulnerable", family: "ssrf" };
+    case "safe": return { disposition: "safe", family: null };
+    case "insufficient_context": return { disposition: "insufficient_context", family: null };
+  }
+}
+
+export function parseDemoChoice(value: unknown, label: string): DemoChoice {
+  const row = record(value, label);
+  const selected = text(row.selected, `${label}.selected`) as DemoChoiceLabel;
+  if (!choiceLabelSet.has(selected)) throw new Error(`${label}.selected is invalid`);
+  if (!probability(row.confidence)) throw new Error(`${label}.confidence is invalid`);
+  const values = record(row.probabilities, `${label}.probabilities`);
+  if (Object.keys(values).length !== choiceLabels.length || choiceLabels.some((key) => !probability(values[key]))) throw new Error(`${label}.probabilities are invalid`);
+  const probabilities = Object.fromEntries(choiceLabels.map((key) => [key, values[key] as number])) as Record<DemoChoiceLabel, number>;
+  const sum = choiceLabels.reduce((total, key) => total + probabilities[key], 0);
+  if (Math.abs(sum - 1) > 0.02) throw new Error(`${label}.probabilities sum to ${sum}`);
+  if (probabilities[selected] < Math.max(...choiceLabels.map((key) => probabilities[key]))) throw new Error(`${label}.selected option is not maximal`);
+  return { selected, confidence: row.confidence, probabilities };
 }
 
 export function parseDemoDecision(value: unknown, label: string): DemoDecision {
@@ -92,9 +130,15 @@ export function parseDemoDecision(value: unknown, label: string): DemoDecision {
   const inputTokens = optionalNumber("inputTokens");
   const outputTokens = optionalNumber("outputTokens");
   const costUsd = optionalNumber("costUsd");
+  const choice = row.choice === undefined ? undefined : parseDemoChoice(row.choice, `${label}.choice`);
+  if (choice !== undefined) {
+    const mapped = decisionForChoice(choice.selected);
+    if (mapped.disposition !== disposition || mapped.family !== family) throw new Error(`${label}.choice is inconsistent with disposition and family`);
+  }
   return {
     disposition,
     family,
+    ...(choice === undefined ? {} : { choice }),
     ...(inputTokens === undefined ? {} : { inputTokens }),
     ...(outputTokens === undefined ? {} : { outputTokens }),
     ...(costUsd === undefined ? {} : { costUsd })

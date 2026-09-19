@@ -29,3 +29,19 @@ test("builder derives metrics from case results including failures", async () =>
   assert.equal(data.summary.jev.accuracy, runs[0]!.results.filter((row) => row.correct).length / 100);
   assert.equal(data.summary.jev.errors, runs[0]!.results.filter((row) => row.status === "error").length);
 });
+
+test("builder preserves Jev Choice probabilities in published case data", async () => {
+  const cases = await loadDemoCases("test/fixtures/demo-cases.json");
+  const runs = await loadFixtureRuns(cases);
+  const choice = {
+    selected: "vulnerable_injection" as const,
+    confidence: 0.82,
+    probabilities: { vulnerable_injection: 0.86, vulnerable_broken_access_control: 0.02, vulnerable_ssrf: 0.01, safe: 0.06, insufficient_context: 0.05 }
+  };
+  const first = runs[0]!.results[0]!;
+  runs[0] = { ...runs[0]!, results: [{ ...first, decision: { ...first.decision!, choice } }, ...runs[0]!.results.slice(1)] };
+
+  const data = buildPublishedDemoData(cases, runs, "2026-09-18T13:00:00.000Z");
+
+  assert.deepEqual(data.cases[0]!.results.jev.decision?.choice, choice);
+});

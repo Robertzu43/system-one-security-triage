@@ -47,11 +47,19 @@ test("recorded runs are complete, hashed, parseable, and immutable", async () =>
       evaluate: async (_state: string, item: typeof cases[number]) => item.expected
     }));
     const report = await runDemo(cases, adapters, "live");
+    const choice = {
+      selected: "vulnerable_injection" as const,
+      confidence: 0.82,
+      probabilities: { vulnerable_injection: 0.86, vulnerable_broken_access_control: 0.02, vulnerable_ssrf: 0.01, safe: 0.06, insufficient_context: 0.05 }
+    };
+    report.results[0] = { ...report.results[0]!, decision: { ...report.results[0]!.decision!, choice } };
     const runs = await writeRecordedDemoRuns({ cases, report, metadata, runId: "2026-09-18-demo", recordedAt: "2026-09-18T12:00:00.000Z", outputRoot: root });
     assert.equal(runs.length, 3);
     assert.equal(runs[0]?.corpusHash, corpusHash(cases));
     assert.equal(runs[0]?.caseCount, 100);
-    assert.equal(parseRecordedDemoRun(JSON.parse(await readFile(join(root, "2026-09-18-demo", "jev.json"), "utf8")), cases).evaluator, "jev");
+    const parsed = parseRecordedDemoRun(JSON.parse(await readFile(join(root, "2026-09-18-demo", "jev.json"), "utf8")), cases);
+    assert.equal(parsed.evaluator, "jev");
+    assert.deepEqual(parsed.results[0]!.decision?.choice, choice);
     await assert.rejects(() => writeRecordedDemoRuns({ cases, report, metadata, runId: "2026-09-18-demo", recordedAt: "2026-09-18T12:00:00.000Z", outputRoot: root }), /already exists/);
   } finally {
     await rm(root, { recursive: true, force: true });

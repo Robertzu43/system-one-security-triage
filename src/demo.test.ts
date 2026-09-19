@@ -2,9 +2,56 @@ import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { loadDemoCases, runDemo, summarizeDemoResults, type DemoAdapter, type DemoResult } from "./demo.js";
+import { decisionForChoice, loadDemoCases, parseDemoDecision, runDemo, summarizeDemoResults, type DemoAdapter, type DemoResult } from "./demo.js";
 import { createJevDemoAdapter, createReasoningDemoAdapter } from "./demo-live.js";
 import { stableHash } from "./jsonl.js";
+
+const directChoice = {
+  selected: "vulnerable_injection",
+  confidence: 0.82,
+  probabilities: {
+    vulnerable_injection: 0.86,
+    vulnerable_broken_access_control: 0.02,
+    vulnerable_ssrf: 0.01,
+    safe: 0.06,
+    insufficient_context: 0.05
+  }
+} as const;
+
+test("demo decisions preserve a valid direct Choice and its mapping", () => {
+  assert.deepEqual(parseDemoDecision({ disposition: "vulnerable", family: "injection", choice: directChoice }, "decision"), {
+    disposition: "vulnerable",
+    family: "injection",
+    choice: directChoice
+  });
+  assert.deepEqual(decisionForChoice("safe"), { disposition: "safe", family: null });
+  assert.deepEqual(decisionForChoice("insufficient_context"), { disposition: "insufficient_context", family: null });
+});
+
+test("demo decisions reject malformed or inconsistent direct Choices", () => {
+  assert.throws(() => parseDemoDecision({ disposition: "vulnerable", family: "injection", choice: {
+    ...directChoice,
+    probabilities: { ...directChoice.probabilities, other: 0 }
+  } }, "decision"), /probabilities are invalid/);
+  assert.throws(() => parseDemoDecision({ disposition: "vulnerable", family: "injection", choice: {
+    ...directChoice,
+    probabilities: { ...directChoice.probabilities, vulnerable_injection: 1.6 }
+  } }, "decision"), /probabilities are invalid|sum/);
+  assert.throws(() => parseDemoDecision({ disposition: "vulnerable", family: "injection", choice: {
+    ...directChoice,
+    probabilities: { ...directChoice.probabilities, vulnerable_injection: 0.1, safe: 0.82 }
+  } }, "decision"), /selected option is not maximal/);
+  assert.throws(() => parseDemoDecision({ disposition: "vulnerable", family: "ssrf", choice: directChoice }, "decision"), /choice is inconsistent/);
+});
+
+test("demo decisions accept tied maxima and preserve low confidence", () => {
+  const choice = {
+    ...directChoice,
+    confidence: 0.1,
+    probabilities: { ...directChoice.probabilities, vulnerable_injection: 0.43, safe: 0.43, insufficient_context: 0.11 }
+  };
+  assert.deepEqual(parseDemoDecision({ disposition: "vulnerable", family: "injection", choice }, "decision").choice, choice);
+});
 
 test("100-case fixture has the frozen family and disposition matrix", async () => {
   const cases = await loadDemoCases("test/fixtures/demo-cases.json");
