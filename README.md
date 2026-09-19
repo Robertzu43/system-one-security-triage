@@ -10,7 +10,7 @@ The current focus is a reproducible **100-case recorded demo** comparing three m
 
 Jev is the model making the first set of decisions—not the name of the benchmark or dashboard. The browser only renders saved JSON artifacts. It contains no provider credentials, backend, or runtime model calls.
 
-> Dashboard URL: [https://robertzu43.github.io/system-one-security-triage/](https://robertzu43.github.io/system-one-security-triage/) — unavailable until the first complete three-model run is deployed.
+> Dashboard URL: [https://robertzu43.github.io/system-one-security-triage/](https://robertzu43.github.io/system-one-security-triage/)
 
 ## The 100-case demo
 
@@ -39,31 +39,29 @@ Open [http://localhost:4173](http://localhost:4173). The fixture results exercis
 
 The older terminal summary remains available with `npm run demo`. It also uses explicitly simulated adapters.
 
-## Record a real three-model run
+## Refresh Jev while retaining the recorded controls
 
-Use one run ID for all three immutable artifacts:
+Jev now answers one direct five-way TypeSafe Choice and records the selected label, all five probabilities, and confidence. To refresh only Jev while keeping the existing Terra and Opus results:
 
 ```bash
-# Local Jev + Terra recording
 export TYPESAFE_API_KEY='...'
-npm run demo:record -- --models jev,terra --run-id 2026-09-18-public
+npm run demo:record -- --models jev --run-id 2026-09-19-public-v3
 
-# From the same checkout opened in Claude
-npm run demo:record -- --models opus --run-id 2026-09-18-public
+cp results/recorded/2026-09-19-public-v2/terra.json results/recorded/2026-09-19-public-v3/terra.json
+cp results/recorded/2026-09-19-public-v2/opus.json results/recorded/2026-09-19-public-v3/opus.json
 
-# Validate and preview all three saved runs
-npm run dashboard:build -- --run-dir results/recorded/2026-09-19-public-v2 --output dashboard/data/latest.json
+npm run dashboard:build -- --run-dir results/recorded/2026-09-19-public-v3 --output dashboard/data/latest.json
 npm run dashboard:preview
 ```
 
-The Opus command uses the repository's pinned, bounded Claude adapter; it does not use conversational context as model input. Each evaluator receives the same canonical evidence bytes. Missing usage or cost stays `null`, never zero.
+The copied Terra and Opus files remain byte-for-byte identical to their `2026-09-19-public-v2` artifacts. All three evaluated the same canonical evidence corpus, but only Jev was rerun with the new Choice criteria; the dashboard discloses this mixed recording provenance. Missing usage or cost stays `null`, never zero.
 
 Before committing, review all three files:
 
 ```text
-results/recorded/2026-09-19-public-v2/jev.json
-results/recorded/2026-09-19-public-v2/terra.json
-results/recorded/2026-09-19-public-v2/opus.json
+results/recorded/2026-09-19-public-v3/jev.json
+results/recorded/2026-09-19-public-v3/terra.json
+results/recorded/2026-09-19-public-v3/opus.json
 ```
 
 They must contain the same corpus hash and complete coverage of all 100 cases. Artifacts are exclusive-write and reject credentials, absolute local paths, duplicates, missing cases, unknown cases, and invalid hashes.

@@ -1,6 +1,7 @@
 const evaluators = ["jev", "terra", "opus"];
 const names = { jev: "Jev", terra: "Terra", opus: "Opus" };
 const symbols = { vulnerable: "V", safe: "S", insufficient_context: "?", error: "!" };
+const choiceNames = { vulnerable_injection: "injection", vulnerable_broken_access_control: "broken access control", vulnerable_ssrf: "SSRF", safe: "safe", insufficient_context: "insufficient context" };
 let sourceData;
 
 const byId = (id) => document.getElementById(id);
@@ -153,6 +154,11 @@ function renderCases(data, filters) {
       const row = element("div", "case-result");
       const outcome = result.status === "error" ? `error · ${result.error}` : `${decisionName(result.decision.disposition)}${result.decision.family ? ` · ${decisionName(result.decision.family)}` : ""}`;
       row.append(element("strong", "", names[evaluator]), element("span", "outcome", outcome), element("span", `correctness ${result.correct ? "yes" : "no"}`, result.correct ? "✓ correct" : "× incorrect"));
+      if (evaluator === "jev" && result.decision?.choice) {
+        const choice = result.decision.choice;
+        const probabilities = Object.entries(choiceNames).map(([key, label]) => `${label} ${percent(choice.probabilities[key])}`).join(" · ");
+        row.append(element("span", "choice-probabilities", `Choice confidence ${percent(choice.confidence)} · ${probabilities}`));
+      }
       results.append(row);
     }
     body.append(evidence, results); details.append(body); return details;

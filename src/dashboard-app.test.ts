@@ -11,6 +11,7 @@ test("dashboard explains recorded synthetic model comparison accessibly", async 
   assert.match(html, /Opus.*Anthropic/s);
   assert.match(html, /recorded/i);
   assert.match(html, /synthetic/i);
+  assert.match(html, /Jev was rerun.*direct five-way Choice.*Terra and Opus.*retained/s);
   assert.match(html, /<button[^>]*id="replay"/);
   assert.match(html, /<main/);
   assert.match(html, /<noscript>/);
@@ -21,6 +22,7 @@ test("dashboard explains recorded synthetic model comparison accessibly", async 
   assert.match(css, /linear-gradient\([^;]*rgba\(202,255,74/);
   assert.doesNotMatch(js, /fetch\((?!["']\.\/data\/latest\.json["'])/);
   assert.doesNotMatch(js, /TypeSafeClient|TYPESAFE_API_KEY|ANTHROPIC_API_KEY|OPENAI_API_KEY/);
+  assert.match(js, /Choice confidence/);
 });
 
 test("dashboard controls, legends, live status, and chart tables have semantic fallbacks", async () => {
