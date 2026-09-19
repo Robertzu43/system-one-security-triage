@@ -1,0 +1,17 @@
+{
+  "jev-1.13.0": {
+    "inputPerMillionUsd": 0.042,
+    "outputPerMillionUsd": 0,
+    "source": "https://docs.typesafe.ai/models.md - early-access pricing, input-metered, output unmetered"
+  },
+  "gpt-5.6-terra": {
+    "inputPerMillionUsd": null,
+    "outputPerMillionUsd": null,
+    "source": "unset - fill in from the provider rate card for this exact model ID before publishing any cost figure"
+  },
+  "claude-opus-4-6": {
+    "inputPerMillionUsd": null,
+    "outputPerMillionUsd": null,
+    "source": "unset - fill in from the provider rate card for this exact model ID before publishing any cost figure"
+  }
+}

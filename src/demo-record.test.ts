@@ -8,9 +8,9 @@ import { corpusHash, parseRecordedDemoRun, writeRecordedDemoRuns, type RecordedD
 import { stableHash } from "./jsonl.js";
 
 const metadata = {
-  jev: { provider: "TypeSafe", modelId: "jev-1.13.0", runner: "@typesafe-ai/sdk", runnerVersion: "0.6.0" },
-  terra: { provider: "OpenAI", modelId: "gpt-5.6-terra", runner: "codex-cli", runnerVersion: "0.147.0" },
-  opus: { provider: "Anthropic", modelId: "claude-opus-4-6", runner: "claude-code", runnerVersion: "2.1.278" }
+  jev: { provider: "TypeSafe", modelId: "jev-1.13.0", runner: "@typesafe-ai/sdk", runnerVersion: "0.6.0", promptSpecHash: "jev-prompt" },
+  terra: { provider: "OpenAI", modelId: "gpt-5.6-terra", runner: "codex-cli", runnerVersion: "0.147.0", promptSpecHash: "reasoning-prompt" },
+  opus: { provider: "Anthropic", modelId: "claude-opus-4-6", runner: "claude-code", runnerVersion: "2.1.278", promptSpecHash: "reasoning-prompt" }
 } as const;
 
 function validRecordedRunFixture(cases: readonly DemoCase[]): RecordedDemoRun {
@@ -33,6 +33,7 @@ function validRecordedRunFixture(cases: readonly DemoCase[]): RecordedDemoRun {
     ...metadata.jev,
     corpusHash: corpusHash(cases),
     caseCount: cases.length,
+    gitSha: "0".repeat(40),
     results
   };
   return { ...body, artifactSha256: stableHash(body) };
@@ -54,14 +55,14 @@ test("recorded runs are complete, hashed, parseable, and immutable", async () =>
       probabilities: { vulnerable_injection: 0.86, vulnerable_broken_access_control: 0.02, vulnerable_ssrf: 0.01, safe: 0.06, insufficient_context: 0.05 }
     };
     report.results[0] = { ...report.results[0]!, decision: { ...report.results[0]!.decision!, choice } };
-    const runs = await writeRecordedDemoRuns({ cases, report, metadata, runId: "2026-09-18-demo", recordedAt: "2026-09-18T12:00:00.000Z", outputRoot: root });
+    const runs = await writeRecordedDemoRuns({ cases, report, metadata, gitSha: "0".repeat(40), runId: "2026-09-18-demo", recordedAt: "2026-09-18T12:00:00.000Z", outputRoot: root });
     assert.equal(runs.length, 3);
     assert.equal(runs[0]?.corpusHash, corpusHash(cases));
     assert.equal(runs[0]?.caseCount, 100);
     const parsed = parseRecordedDemoRun(JSON.parse(await readFile(join(root, "2026-09-18-demo", "jev.json"), "utf8")), cases);
     assert.equal(parsed.evaluator, "jev");
     assert.deepEqual(parsed.results[0]!.decision?.choice, choice);
-    await assert.rejects(() => writeRecordedDemoRuns({ cases, report, metadata, runId: "2026-09-18-demo", recordedAt: "2026-09-18T12:00:00.000Z", outputRoot: root }), /already exists/);
+    await assert.rejects(() => writeRecordedDemoRuns({ cases, report, metadata, gitSha: "0".repeat(40), runId: "2026-09-18-demo", recordedAt: "2026-09-18T12:00:00.000Z", outputRoot: root }), /already exists/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

@@ -13,6 +13,10 @@ export interface RecordedDemoRun {
   modelId: string;
   runner: string;
   runnerVersion: string;
+  /** Hash of the prompt text this evaluator received; runs may only be pooled when it matches. */
+  promptSpecHash: string;
+  /** Commit that produced the run, so a result can be traced to the code that generated it. */
+  gitSha: string;
   corpusHash: string;
   caseCount: number;
   results: DemoResult[];
@@ -25,6 +29,7 @@ export interface RecordDemoInput {
   runId: string;
   recordedAt: string;
   outputRoot: string;
+  gitSha: string;
   metadata: Readonly<Partial<Record<DemoEvaluator, EvaluatorMetadata>>>;
 }
 
@@ -136,6 +141,8 @@ export function parseRecordedDemoRun(value: unknown, cases: readonly DemoCase[])
     modelId: text(row.modelId, "modelId"),
     runner: text(row.runner, "runner"),
     runnerVersion: text(row.runnerVersion, "runnerVersion"),
+    promptSpecHash: text(row.promptSpecHash, "promptSpecHash"),
+    gitSha: text(row.gitSha, "gitSha"),
     corpusHash: hash,
     caseCount: cases.length,
     results,
@@ -170,6 +177,7 @@ export async function writeRecordedDemoRuns(input: RecordDemoInput): Promise<Rec
       mode: "live-recorded" as const,
       evaluator,
       ...details,
+      gitSha: input.gitSha,
       corpusHash: corpusHash(input.cases),
       caseCount: input.cases.length,
       results: input.report.results.filter((result) => result.evaluator === evaluator)

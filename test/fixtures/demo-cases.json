@@ -7,14 +7,14 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/users.ts",
+          "path": "src/demo/case-001.ts",
           "startLine": 10,
           "endLine": 10,
           "text": "const query = `SELECT * FROM users WHERE id = ${req.query.id}`;"
         },
         {
           "id": "s2",
-          "path": "src/users.ts",
+          "path": "src/demo/case-001.ts",
           "startLine": 11,
           "endLine": 11,
           "text": "return db.query(query);"
@@ -50,14 +50,14 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/users.ts",
+          "path": "src/demo/case-002.ts",
           "startLine": 20,
           "endLine": 20,
           "text": "const id = Number.parseInt(req.query.id, 10);"
         },
         {
           "id": "s2",
-          "path": "src/users.ts",
+          "path": "src/demo/case-002.ts",
           "startLine": 21,
           "endLine": 21,
           "text": "return db.query('SELECT * FROM users WHERE id = $1', [id]);"
@@ -93,7 +93,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/users.ts",
+          "path": "src/demo/case-003.ts",
           "startLine": 30,
           "endLine": 30,
           "text": "return lookupUser(req.query.id);"
@@ -123,14 +123,14 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/accounts.ts",
+          "path": "src/demo/case-004.ts",
           "startLine": 10,
           "endLine": 11,
           "text": "const authenticatedUserId = req.user.id;\nconst requestedAccountId = req.params.accountId;"
         },
         {
           "id": "s2",
-          "path": "src/accounts.ts",
+          "path": "src/demo/case-004.ts",
           "startLine": 12,
           "endLine": 12,
           "text": "return db.accounts.findById(requestedAccountId);"
@@ -166,14 +166,14 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/accounts.ts",
+          "path": "src/demo/case-005.ts",
           "startLine": 20,
           "endLine": 20,
           "text": "if (req.user.accountId !== req.params.accountId) return res.sendStatus(403);"
         },
         {
           "id": "s2",
-          "path": "src/accounts.ts",
+          "path": "src/demo/case-005.ts",
           "startLine": 21,
           "endLine": 21,
           "text": "return db.accounts.findById(req.params.accountId);"
@@ -209,14 +209,14 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/accounts.ts",
+          "path": "src/demo/case-006.ts",
           "startLine": 30,
           "endLine": 30,
           "text": "await authorize(req, req.params.accountId);"
         },
         {
           "id": "s2",
-          "path": "src/accounts.ts",
+          "path": "src/demo/case-006.ts",
           "startLine": 31,
           "endLine": 31,
           "text": "return db.accounts.findById(req.params.accountId);"
@@ -252,7 +252,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/proxy.ts",
+          "path": "src/demo/case-007.ts",
           "startLine": 10,
           "endLine": 10,
           "text": "return fetch(req.query.url);"
@@ -282,14 +282,14 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/proxy.ts",
+          "path": "src/demo/case-008.ts",
           "startLine": 20,
           "endLine": 20,
           "text": "const target = new URL(req.query.url); if (!ALLOWED_HOSTS.has(target.hostname)) return res.sendStatus(400);"
         },
         {
           "id": "s2",
-          "path": "src/proxy.ts",
+          "path": "src/demo/case-008.ts",
           "startLine": 21,
           "endLine": 21,
           "text": "return fetch(target);"
@@ -325,7 +325,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/proxy.ts",
+          "path": "src/demo/case-009.ts",
           "startLine": 30,
           "endLine": 30,
           "text": "return fetch(resolveServiceUrl(req.query.service));"
@@ -355,7 +355,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/sql-order-sort.ts",
+          "path": "src/demo/case-010.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "db.query(`SELECT * FROM orders ORDER BY ${req.query.sort}`);"
@@ -385,7 +385,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/sql-report-filter.ts",
+          "path": "src/demo/case-011.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "reports.raw(`status = '${req.body.status}'`);"
@@ -415,7 +415,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/shell-export.ts",
+          "path": "src/demo/case-012.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "exec(`tar -czf export.tgz ${req.query.folder}`);"
@@ -445,7 +445,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/shell-git-ref.ts",
+          "path": "src/demo/case-013.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "spawnSync('sh',['-c',`git show ${req.params.ref}`]);"
@@ -475,7 +475,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/eval-formula.ts",
+          "path": "src/demo/case-014.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "eval(req.body.formula);"
@@ -505,7 +505,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/vm-script.ts",
+          "path": "src/demo/case-015.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "new vm.Script(req.body.script).runInContext(context);"
@@ -535,7 +535,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/template-helper.ts",
+          "path": "src/demo/case-016.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "handlebars.compile(req.body.template)(data);"
@@ -565,7 +565,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/template-name.ts",
+          "path": "src/demo/case-017.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "res.render(req.query.view,model);"
@@ -595,7 +595,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/path-archive.ts",
+          "path": "src/demo/case-018.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "readFile(join('/exports',req.params.name));"
@@ -625,7 +625,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/orm-order.ts",
+          "path": "src/demo/case-019.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "User.findAll({order:literal(req.query.order)});"
@@ -655,7 +655,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/graphql-raw-filter.ts",
+          "path": "src/demo/case-020.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "repository.query(req.body.rawFilter);"
@@ -685,7 +685,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/sql-placeholder-email.ts",
+          "path": "src/demo/case-021.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "db.query('SELECT * FROM users WHERE email = $1',[req.query.email]);"
@@ -715,7 +715,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/query-builder-eq.ts",
+          "path": "src/demo/case-022.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "db('users').where({id:req.params.id}).first();"
@@ -745,7 +745,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/shell-execfile-args.ts",
+          "path": "src/demo/case-023.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "execFile('/usr/bin/convert',[inputPath,outputPath]);"
@@ -775,7 +775,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/shell-command-allowlist.ts",
+          "path": "src/demo/case-024.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "if(!COMMANDS.has(req.body.action)) throw Error('invalid'); run(COMMANDS.get(req.body.action));"
@@ -805,7 +805,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/json-parse.ts",
+          "path": "src/demo/case-025.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "JSON.parse(req.body.settings);"
@@ -835,7 +835,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/template-autoescape.ts",
+          "path": "src/demo/case-026.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "templates.render('profile',{name:req.body.name},{autoescape:true});"
@@ -865,7 +865,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/path-basename-root.ts",
+          "path": "src/demo/case-027.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "readFile(join(ROOT,basename(req.params.file)));"
@@ -895,7 +895,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/path-resolve-root.ts",
+          "path": "src/demo/case-028.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const f=resolve(ROOT,req.params.file); if(!f.startsWith(ROOT+sep)) throw Error('outside');"
@@ -925,7 +925,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/orm-enum-sort.ts",
+          "path": "src/demo/case-029.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const s=SORT_FIELDS[req.query.sort]; if(!s) throw Error('invalid'); User.findAll({order:[[s,'ASC']]});"
@@ -955,7 +955,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/parser-schema-validation.ts",
+          "path": "src/demo/case-030.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "parser.execute(schema.parse(req.body).expression);"
@@ -985,7 +985,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/sql-helper.ts",
+          "path": "src/demo/case-031.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "findUsers(req.query.filter);"
@@ -1015,7 +1015,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/db-wrapper.ts",
+          "path": "src/demo/case-032.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "repository.search(req.body.term);"
@@ -1045,7 +1045,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/command-builder.ts",
+          "path": "src/demo/case-033.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "commandService.run(req.body.job);"
@@ -1075,7 +1075,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/process-service.ts",
+          "path": "src/demo/case-034.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "exportService.create(req.query.format);"
@@ -1105,7 +1105,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/expression-compiler.ts",
+          "path": "src/demo/case-035.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "formulaEngine.calculate(req.body.formula);"
@@ -1135,7 +1135,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/template-sanitizer.ts",
+          "path": "src/demo/case-036.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "pageRenderer.render(req.body.content);"
@@ -1165,7 +1165,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/archive-path-guard.ts",
+          "path": "src/demo/case-037.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "archive.open(req.params.entry);"
@@ -1195,7 +1195,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/upload-normalizer.ts",
+          "path": "src/demo/case-038.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "uploads.read(normalizeUploadName(req.params.name));"
@@ -1225,7 +1225,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/orm-filter-helper.ts",
+          "path": "src/demo/case-039.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "products.applyFilter(req.query.filter);"
@@ -1255,7 +1255,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/parser-policy.ts",
+          "path": "src/demo/case-040.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "queryLanguage.parse(req.body.query);"
@@ -1285,13 +1285,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/invoice-read.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "invoices.findById(req.params.invoiceId);"
+          "path": "src/demo/case-041.ts",
+          "startLine": 12,
+          "endLine": 13,
+          "text": "const sessionUserId = req.user.id;\nconst requestedInvoiceId = req.params.invoiceId;"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-041.ts",
+          "startLine": 14,
+          "endLine": 14,
+          "text": "return invoices.findById(requestedInvoiceId);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ]
     },
     "expected": {
       "disposition": "vulnerable",
@@ -1315,13 +1328,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/profile-update.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "users.update(req.params.userId,req.body);"
+          "path": "src/demo/case-042.ts",
+          "startLine": 20,
+          "endLine": 21,
+          "text": "const sessionUserId = req.user.id;\nconst targetUserId = req.params.userId;"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-042.ts",
+          "startLine": 22,
+          "endLine": 22,
+          "text": "return users.update(targetUserId, req.body);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ]
     },
     "expected": {
       "disposition": "vulnerable",
@@ -1345,13 +1371,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/tenant-report.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "reports.forTenant(req.query.tenantId);"
+          "path": "src/demo/case-043.ts",
+          "startLine": 31,
+          "endLine": 32,
+          "text": "const sessionTenantId = req.user.tenantId;\nconst requestedTenantId = req.query.tenantId;"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-043.ts",
+          "startLine": 33,
+          "endLine": 33,
+          "text": "return reports.forTenant(requestedTenantId);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ]
     },
     "expected": {
       "disposition": "vulnerable",
@@ -1375,13 +1414,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/admin-export.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "router.get('/admin/export',authenticated,exportAllUsers);"
+          "path": "src/demo/case-044.ts",
+          "startLine": 9,
+          "endLine": 9,
+          "text": "const sessionRole = req.user.role;"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-044.ts",
+          "startLine": 11,
+          "endLine": 11,
+          "text": "return exportAllUsers();"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ]
     },
     "expected": {
       "disposition": "vulnerable",
@@ -1405,13 +1457,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/project-delete.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "projects.delete(req.params.projectId);"
+          "path": "src/demo/case-045.ts",
+          "startLine": 44,
+          "endLine": 45,
+          "text": "const sessionUserId = req.user.id;\nconst targetProjectId = req.params.projectId;"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-045.ts",
+          "startLine": 46,
+          "endLine": 46,
+          "text": "return projects.delete(targetProjectId);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ]
     },
     "expected": {
       "disposition": "vulnerable",
@@ -1435,13 +1500,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/document-download.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "documents.download(req.params.documentId);"
+          "path": "src/demo/case-046.ts",
+          "startLine": 18,
+          "endLine": 19,
+          "text": "const sessionUserId = req.user.id;\nconst requestedDocumentId = req.params.documentId;"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-046.ts",
+          "startLine": 20,
+          "endLine": 20,
+          "text": "return documents.download(requestedDocumentId);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ]
     },
     "expected": {
       "disposition": "vulnerable",
@@ -1465,13 +1543,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/order-refund.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "refunds.create(req.params.orderId,req.body.amount);"
+          "path": "src/demo/case-047.ts",
+          "startLine": 55,
+          "endLine": 56,
+          "text": "const sessionUserId = req.user.id;\nconst targetOrderId = req.params.orderId;"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-047.ts",
+          "startLine": 57,
+          "endLine": 57,
+          "text": "return refunds.create(targetOrderId, req.body.amount);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ]
     },
     "expected": {
       "disposition": "vulnerable",
@@ -1495,13 +1586,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/team-invite.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "teams.invite(req.params.teamId,req.body.email);"
+          "path": "src/demo/case-048.ts",
+          "startLine": 27,
+          "endLine": 28,
+          "text": "const sessionUserId = req.user.id;\nconst targetTeamId = req.params.teamId;"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-048.ts",
+          "startLine": 29,
+          "endLine": 29,
+          "text": "return teams.invite(targetTeamId, req.body.email);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ]
     },
     "expected": {
       "disposition": "vulnerable",
@@ -1525,13 +1629,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/api-key-rotate.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "apiKeys.rotate(req.params.userId);"
+          "path": "src/demo/case-049.ts",
+          "startLine": 38,
+          "endLine": 39,
+          "text": "const sessionUserId = req.user.id;\nconst targetUserId = req.params.userId;"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-049.ts",
+          "startLine": 40,
+          "endLine": 40,
+          "text": "return apiKeys.rotate(targetUserId);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ]
     },
     "expected": {
       "disposition": "vulnerable",
@@ -1555,7 +1672,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/mass-assignment-role.ts",
+          "path": "src/demo/case-050.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "users.update(req.user.id,req.body);"
@@ -1585,7 +1702,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/invoice-owner-query.ts",
+          "path": "src/demo/case-051.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "invoices.findOne({id:req.params.invoiceId,ownerId:req.user.id});"
@@ -1615,7 +1732,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/profile-self-id.ts",
+          "path": "src/demo/case-052.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "if(req.params.userId!==req.user.id) return res.sendStatus(403); users.update(req.user.id,req.body);"
@@ -1645,7 +1762,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/tenant-scope-query.ts",
+          "path": "src/demo/case-053.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "reports.find({tenantId:req.user.tenantId,id:req.params.reportId});"
@@ -1675,7 +1792,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/admin-middleware.ts",
+          "path": "src/demo/case-054.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "router.get('/admin/export',authenticated,requireRole('admin'),exportAllUsers);"
@@ -1705,7 +1822,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/project-owner-check.ts",
+          "path": "src/demo/case-055.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const p=await projects.get(req.params.projectId); if(p.ownerId!==req.user.id) return res.sendStatus(403);"
@@ -1735,13 +1852,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/document-membership.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "await memberships.require(req.user.id,req.params.documentId); documents.download(req.params.documentId);"
+          "path": "src/demo/case-056.ts",
+          "startLine": 33,
+          "endLine": 34,
+          "text": "const membership = await memberships.find({ userId: req.user.id, documentId: req.params.documentId });\nif (!membership) return res.sendStatus(403);"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-056.ts",
+          "startLine": 36,
+          "endLine": 36,
+          "text": "return documents.download(req.params.documentId);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "guards"
+        }
+      ]
     },
     "expected": {
       "disposition": "safe",
@@ -1765,7 +1895,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/refund-permission.ts",
+          "path": "src/demo/case-057.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "if(!req.user.permissions.includes('refund:create')) return res.sendStatus(403); refunds.create(req.params.orderId);"
@@ -1795,13 +1925,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/team-owner-guard.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "await teams.requireOwner(req.user.id,req.params.teamId); teams.invite(req.params.teamId,req.body.email);"
+          "path": "src/demo/case-058.ts",
+          "startLine": 48,
+          "endLine": 49,
+          "text": "const team = await teams.get(req.params.teamId);\nif (team.ownerId !== req.user.id) return res.sendStatus(403);"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-058.ts",
+          "startLine": 51,
+          "endLine": 51,
+          "text": "return teams.invite(req.params.teamId, req.body.email);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "guards"
+        }
+      ]
     },
     "expected": {
       "disposition": "safe",
@@ -1825,13 +1968,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/api-key-session-user.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "apiKeys.rotate(req.user.id);"
+          "path": "src/demo/case-059.ts",
+          "startLine": 24,
+          "endLine": 24,
+          "text": "const sessionUserId = req.user.id;"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-059.ts",
+          "startLine": 26,
+          "endLine": 26,
+          "text": "return apiKeys.rotate(sessionUserId);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ]
     },
     "expected": {
       "disposition": "safe",
@@ -1855,7 +2011,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/mass-assignment-allowlist.ts",
+          "path": "src/demo/case-060.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "users.update(req.user.id,pick(req.body,['displayName','timezone']));"
@@ -1885,7 +2041,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/invoice-policy.ts",
+          "path": "src/demo/case-061.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "authorizeInvoice(req.user,req.params.invoiceId);"
@@ -1915,7 +2071,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/profile-auth-helper.ts",
+          "path": "src/demo/case-062.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "canEditProfile(req);"
@@ -1945,7 +2101,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/tenant-context.ts",
+          "path": "src/demo/case-063.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "tenantRepository(req).reports.get(req.params.reportId);"
@@ -1975,7 +2131,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/admin-middleware.ts",
+          "path": "src/demo/case-064.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "router.get('/admin/audit',adminPolicy,auditLog);"
@@ -2005,7 +2161,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/project-permission-service.ts",
+          "path": "src/demo/case-065.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "permissionService.check(req.user,'delete',req.params.projectId);"
@@ -2035,7 +2191,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/document-acl.ts",
+          "path": "src/demo/case-066.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "secureDocuments(req.user).download(req.params.documentId);"
@@ -2065,7 +2221,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/refund-policy.ts",
+          "path": "src/demo/case-067.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "refundPolicy.enforce(req);"
@@ -2095,7 +2251,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/team-role.ts",
+          "path": "src/demo/case-068.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "requireTeamRole(req);"
@@ -2125,7 +2281,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/api-key-authorization.ts",
+          "path": "src/demo/case-069.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "authorizeKeyRotation(req);"
@@ -2155,7 +2311,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/field-policy.ts",
+          "path": "src/demo/case-070.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "allowedProfileChanges(req.user,req.body);"
@@ -2185,7 +2341,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/avatar-url.ts",
+          "path": "src/demo/case-071.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "fetch(req.body.avatarUrl);"
@@ -2215,7 +2371,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/webhook-test-url.ts",
+          "path": "src/demo/case-072.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "http.post(req.body.callbackUrl,testPayload);"
@@ -2245,7 +2401,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/pdf-render-url.ts",
+          "path": "src/demo/case-073.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "pdf.renderFromUrl(req.query.page);"
@@ -2275,7 +2431,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/redirect-follow.ts",
+          "path": "src/demo/case-074.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "fetch(req.query.url,{redirect:'follow'});"
@@ -2305,7 +2461,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/metadata-host.ts",
+          "path": "src/demo/case-075.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "request(`http://${req.query.host}/status`);"
@@ -2335,7 +2491,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/dns-rebind-host.ts",
+          "path": "src/demo/case-076.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "fetch(new URL(req.body.url));"
@@ -2365,7 +2521,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/proxy-destination.ts",
+          "path": "src/demo/case-077.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "proxy.forward(req.query.destination);"
@@ -2395,13 +2551,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/image-import-url.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "images.importFrom(req.body.source);"
+          "path": "src/demo/case-078.ts",
+          "startLine": 15,
+          "endLine": 15,
+          "text": "const source = req.body.source;"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-078.ts",
+          "startLine": 17,
+          "endLine": 17,
+          "text": "const response = await fetch(source);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ]
     },
     "expected": {
       "disposition": "vulnerable",
@@ -2425,7 +2594,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/feed-fetch-url.ts",
+          "path": "src/demo/case-079.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "feeds.parse(await fetch(req.body.feedUrl));"
@@ -2455,7 +2624,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/oauth-jwks-url.ts",
+          "path": "src/demo/case-080.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "jwksClient(req.body.jwksUri).getSigningKey();"
@@ -2485,7 +2654,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/avatar-host-allowlist.ts",
+          "path": "src/demo/case-081.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const u=new URL(req.body.avatarUrl); if(!AVATAR_HOSTS.has(u.hostname)) throw Error('blocked'); fetch(u);"
@@ -2515,7 +2684,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/webhook-https-domain.ts",
+          "path": "src/demo/case-082.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const u=new URL(req.body.callbackUrl); if(u.protocol!=='https:'||!u.hostname.endsWith('.hooks.example.com')) throw Error('blocked'); fetch(u);"
@@ -2545,7 +2714,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/pdf-constant-origin.ts",
+          "path": "src/demo/case-083.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "pdf.renderFromUrl(`https://docs.example.com/${encodeURIComponent(req.params.slug)}`);"
@@ -2575,7 +2744,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/redirect-disabled.ts",
+          "path": "src/demo/case-084.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "fetch(approvedUrl,{redirect:'error'});"
@@ -2605,7 +2774,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/private-ip-block.ts",
+          "path": "src/demo/case-085.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const a=await resolvePublicAddress(req.query.host); if(isPrivate(a)) throw Error('blocked'); fetch(`https://${a}`);"
@@ -2635,13 +2804,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/dns-pin-check.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "fetch(await validateAndPinPublicUrl(req.body.url));"
+          "path": "src/demo/case-086.ts",
+          "startLine": 21,
+          "endLine": 22,
+          "text": "const { hostname } = new URL(req.body.url);\nif (!/^203\\.0\\.113\\./.test(await resolve4(hostname))) return res.sendStatus(400);"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-086.ts",
+          "startLine": 24,
+          "endLine": 24,
+          "text": "const response = await fetch(req.body.url);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "guards"
+        }
+      ]
     },
     "expected": {
       "disposition": "safe",
@@ -2665,7 +2847,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/proxy-service-enum.ts",
+          "path": "src/demo/case-087.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const o=SERVICE_ORIGINS[req.query.service]; if(!o) throw Error('unknown'); fetch(o);"
@@ -2695,13 +2877,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/image-object-key.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "images.readFromBucket(req.params.objectKey);"
+          "path": "src/demo/case-088.ts",
+          "startLine": 11,
+          "endLine": 11,
+          "text": "const client = new StorageClient({ endpoint: 'https://storage.internal' });"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-088.ts",
+          "startLine": 13,
+          "endLine": 13,
+          "text": "return client.getObject({ Bucket: 'user-uploads', Key: req.params.objectKey });"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "flows_to"
+        }
+      ]
     },
     "expected": {
       "disposition": "safe",
@@ -2725,13 +2920,26 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/feed-registry.ts",
-          "startLine": 1,
-          "endLine": 1,
-          "text": "const f=FEEDS.get(req.params.feedId); if(!f) return res.sendStatus(404); fetch(f.url);"
+          "path": "src/demo/case-089.ts",
+          "startLine": 6,
+          "endLine": 6,
+          "text": "const FEEDS = new Map([['news', 'https://feeds.internal/news.xml'], ['jobs', 'https://feeds.internal/jobs.xml']]);"
+        },
+        {
+          "id": "s2",
+          "path": "src/demo/case-089.ts",
+          "startLine": 30,
+          "endLine": 32,
+          "text": "const feed = FEEDS.get(req.params.feedId);\nif (!feed) return res.sendStatus(404);\nconst response = await fetch(feed);"
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "from": "s1",
+          "to": "s2",
+          "kind": "guards"
+        }
+      ]
     },
     "expected": {
       "disposition": "safe",
@@ -2755,7 +2963,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/jwks-issuer-map.ts",
+          "path": "src/demo/case-090.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "const u=TRUSTED_ISSUERS[claims.iss]?.jwksUri; if(!u) throw Error('issuer'); fetch(u);"
@@ -2785,7 +2993,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/avatar-validator.ts",
+          "path": "src/demo/case-091.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "avatarService.fetch(validateAvatarUrl(req.body.avatarUrl));"
@@ -2815,7 +3023,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/webhook-policy.ts",
+          "path": "src/demo/case-092.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "webhookPolicy(req.user).send(req.body.callbackUrl);"
@@ -2845,7 +3053,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/pdf-resolver.ts",
+          "path": "src/demo/case-093.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "pdf.renderFromUrl(resolveDocumentUrl(req.params.document));"
@@ -2875,7 +3083,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/redirect-config.ts",
+          "path": "src/demo/case-094.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "safeHttpClient.get(req.query.url);"
@@ -2905,7 +3113,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/ip-filter.ts",
+          "path": "src/demo/case-095.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "fetch(filterNetworkTarget(req.body.url));"
@@ -2935,7 +3143,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/dns-cache.ts",
+          "path": "src/demo/case-096.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "pinnedDnsClient.request(req.body.url);"
@@ -2965,7 +3173,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/proxy-map.ts",
+          "path": "src/demo/case-097.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "serviceProxy.forward(req.query.service,req.path);"
@@ -2995,7 +3203,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/image-fetcher.ts",
+          "path": "src/demo/case-098.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "remoteImageStore.import(req.body.source);"
@@ -3025,7 +3233,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/feed-resolver.ts",
+          "path": "src/demo/case-099.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "feeds.load(resolveFeed(req.params.feedId));"
@@ -3055,7 +3263,7 @@
       "spans": [
         {
           "id": "s1",
-          "path": "src/demo/jwks-discovery.ts",
+          "path": "src/demo/case-100.ts",
           "startLine": 1,
           "endLine": 1,
           "text": "oidcClient(req.body.issuer).discoverKeys();"

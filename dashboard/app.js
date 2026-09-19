@@ -43,7 +43,10 @@ function renderScorecards(data) {
       ["False positive rate", percent(summary.falsePositiveRate)],
       ["False safe rate", percent(summary.falseSafeRate)],
       ["Errors", String(summary.errors)],
-      ["Model latency p50", summary.modelLatencyP50Ms === null ? `${milliseconds(summary.latencyP50Ms)} end-to-end` : milliseconds(summary.modelLatencyP50Ms)]
+      ["Model latency p50", summary.modelLatencyP50Ms === null ? `${milliseconds(summary.latencyP50Ms)} end-to-end` : milliseconds(summary.modelLatencyP50Ms)],
+      // Scores the reported distribution rather than only the argmax. Null for an evaluator that
+      // returns a bare verdict, which is a fact about the model, not a gap in the recording.
+      ["Brier score", summary.brierScore === null ? "n/a - no distribution reported" : summary.brierScore.toFixed(3)]
     ]) {
       const item = element("div");
       item.append(element("span", "metric-label", label), element("strong", "", value));
@@ -171,6 +174,9 @@ function renderCases(data, filters) {
         const choice = result.decision.choice;
         const probabilities = Object.entries(choiceNames).map(([key, label]) => `${label} ${percent(choice.probabilities[key])}`).join(" · ");
         row.append(element("span", "choice-probabilities", `Choice confidence ${percent(choice.confidence)} · ${probabilities}`));
+      } else if (result.status !== "error") {
+        // Without this the empty space reads as "withheld" rather than "cannot produce one".
+        row.append(element("span", "no-probabilities", "No probability reported - this model returns a final verdict only, not a distribution."));
       }
       results.append(row);
     }

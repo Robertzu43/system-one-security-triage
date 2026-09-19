@@ -47,7 +47,7 @@ process.stderr.write(JSON.stringify({ args, cwd: process.cwd(), env: Object.keys
     }, { executable, outputDirectory: root, environment: { PATH: process.env.PATH, HOME: home, HTTP_PROXY: "http://must-not-pass", OUTSIDE_SECRET: outside }, environmentKeys: ["OUTSIDE_SECRET"] });
 
     const observed = JSON.parse(result.stderr);
-    assert.deepEqual(observed.args.slice(0, 12), ["exec", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check", "--model", "gpt-5.6-terra", "--dangerously-bypass-approvals-and-sandbox", "--cd", snapshot, "--output-schema", schemaPath]);
+    assert.deepEqual(observed.args.slice(0, 12), ["exec", "--json", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check", "--model", "gpt-5.6-terra", "--dangerously-bypass-approvals-and-sandbox", "--cd", snapshot, "--output-schema", schemaPath]);
     assert.equal(observed.args[12], "--output-last-message");
     assert.match(observed.args[13], new RegExp(`^${root.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/reasoning-`));
     assert.equal(observed.args[14], "-");

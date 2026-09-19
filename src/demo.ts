@@ -36,6 +36,14 @@ export interface EvaluatorMetadata {
   modelId: string;
   runner: string;
   runnerVersion: string;
+  /**
+   * Hash of the exact prompt text this evaluator was given.
+   *
+   * corpusHash already stops two runs over different corpora being pooled, but says nothing about
+   * the prompt. Without this, editing a criterion between recordings produces two runs that look
+   * comparable and are not — an "accuracy improved" story that is really "the wording changed".
+   */
+  promptSpecHash: string;
 }
 
 /** An adapter's decision plus, when it can measure it, the time spent in the model request alone. */
@@ -205,6 +213,46 @@ export function assertNoFixtureLeakage(item: Pick<DemoCase, "caseId" | "state">)
   }
 }
 
+export interface PathTokenSignal { token: string; count: number; label: string; share: number; }
+
+/**
+ * Model-visible path tokens that concentrate in one label.
+ *
+ * A word blocklist only catches words someone thought of, and a token-frequency classifier
+ * cannot catch this either — filenames barely repeat across cases, so it scores at chance on a
+ * corpus that a reader with world knowledge solves easily. What is measurable is concentration:
+ * the real leak here was `allowlist` appearing only on safe cases and `policy` only on
+ * insufficient-context ones. Any repeated token that is near-pure in one label is a shortcut
+ * available to a model that reads the word, whatever a classifier scores.
+ */
+export function pathTokenSignals(cases: readonly DemoCase[], minimumCount = 3, maximumShare = 0.9): PathTokenSignal[] {
+  const counts = new Map<string, Map<string, number>>();
+  for (const item of cases) {
+    const tokens = new Set((item.state.spans as Array<{ path?: unknown }>)
+      .map((span) => typeof span.path === "string" ? span.path : "")
+      .join(" ").toLowerCase().split(/[^a-z]+/).filter((token) => token.length > 2));
+    for (const token of tokens) {
+      const byLabel = counts.get(token) ?? new Map<string, number>();
+      byLabel.set(item.expected.disposition, (byLabel.get(item.expected.disposition) ?? 0) + 1);
+      counts.set(token, byLabel);
+    }
+  }
+  const signals: PathTokenSignal[] = [];
+  for (const [token, byLabel] of counts) {
+    const count = [...byLabel.values()].reduce((sum, value) => sum + value, 0);
+    if (count < minimumCount) continue;
+    const [label, best] = [...byLabel].reduce((top, entry) => entry[1] > top[1] ? entry : top);
+    if (best / count >= maximumShare) signals.push({ token, count, label, share: best / count });
+  }
+  return signals.sort((left, right) => right.count - left.count);
+}
+
+/** Throws when a repeated model-visible path token concentrates in one label. */
+export function assertNoPathLabelSignal(cases: readonly DemoCase[]): void {
+  const signals = pathTokenSignals(cases);
+  if (signals.length > 0) throw new Error(`span path tokens predict the label: ${signals.map((signal) => `${signal.token} (${signal.count}x, ${(signal.share * 100).toFixed(0)}% ${signal.label})`).join(", ")}; rename them to carry no label signal`);
+}
+
 export async function loadDemoCases(path: string): Promise<DemoCase[]> {
   const value: unknown = JSON.parse(await readFile(path, "utf8"));
   if (!Array.isArray(value) || value.length === 0) throw new Error("demo cases must be a non-empty array");
@@ -223,6 +271,7 @@ export async function loadDemoCases(path: string): Promise<DemoCase[]> {
     return parsed;
   });
   if (new Set(cases.map((item) => item.caseId)).size !== cases.length) throw new Error("caseId must be unique");
+  assertNoPathLabelSignal(cases);
   return cases;
 }
 
