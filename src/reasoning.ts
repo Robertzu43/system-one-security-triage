@@ -30,7 +30,8 @@ export interface ReasoningConfig {
 export interface ReasoningResult {
   readonly finalOutcome: "alert" | "no_alert" | "manual_review";
   readonly output: StructuredReview | null;
-  readonly usage: { inputTokens: number; outputTokens: number } | null;
+  /** Cached tokens stay separate from fresh input: they bill at a tenth (read) or 1.25x (write). */
+  readonly usage: { inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheWriteTokens: number } | null;
   readonly usageStatus: "available" | "inconclusive";
   readonly chargeUsd: number | null;
   readonly costStatus: "available" | "inconclusive";
@@ -214,6 +215,10 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
   }
 }
 
+function total(usage: NonNullable<ReasoningResult["usage"]>): number {
+  return usage.inputTokens + usage.outputTokens + usage.cacheReadTokens + usage.cacheWriteTokens;
+}
+
 /** Token counts carried directly on one object, under any of the spellings the two CLIs use. */
 function tokenCounts(value: unknown): ReasoningResult["usage"] {
   const parsed = record(value);
@@ -221,9 +226,15 @@ function tokenCounts(value: unknown): ReasoningResult["usage"] {
   const input = parsed.input_tokens ?? parsed.inputTokens ?? parsed.prompt_tokens;
   const output = parsed.output_tokens ?? parsed.outputTokens ?? parsed.completion_tokens;
   if (typeof input !== "number" || !Number.isInteger(input) || input < 0 || typeof output !== "number" || !Number.isInteger(output) || output < 0) return null;
-  // Claude Code reports uncached input separately from cache reads and cache writes; all three were sent to the model.
-  const cached = [parsed.cache_read_input_tokens, parsed.cache_creation_input_tokens].map((entry) => typeof entry === "number" && Number.isInteger(entry) && entry >= 0 ? entry : 0);
-  return { inputTokens: input + cached[0]! + cached[1]!, outputTokens: output };
+  // Claude Code reports uncached input separately from cache reads and writes. They are kept apart
+  // because they bill at different rates; summing them would price a cache hit at ten times its cost.
+  const count = (entry: unknown): number => typeof entry === "number" && Number.isInteger(entry) && entry >= 0 ? entry : 0;
+  return {
+    inputTokens: input,
+    outputTokens: output,
+    cacheReadTokens: count(parsed.cache_read_input_tokens ?? parsed.cached_tokens),
+    cacheWriteTokens: count(parsed.cache_creation_input_tokens)
+  };
 }
 
 /**
@@ -239,7 +250,7 @@ function searchUsage(value: unknown): ReasoningResult["usage"] {
   if (value !== null && typeof value === "object") {
     for (const child of Object.values(value as Record<string, unknown>)) {
       const nested = searchUsage(child);
-      if (nested !== null && (best === null || nested.inputTokens + nested.outputTokens > best.inputTokens + best.outputTokens)) best = nested;
+      if (nested !== null && (best === null || total(nested) > total(best))) best = nested;
     }
   }
   return best;
@@ -253,7 +264,7 @@ function usageFrom(stdout: string): ReasoningResult["usage"] {
     let parsed: unknown;
     try { parsed = JSON.parse(trimmed); } catch { continue; }
     const found = searchUsage(parsed);
-    if (found !== null && (best === null || found.inputTokens + found.outputTokens > best.inputTokens + best.outputTokens)) best = found;
+    if (found !== null && (best === null || total(found) > total(best))) best = found;
   }
   return best;
 }

@@ -86,7 +86,12 @@ export function createReasoningDemoAdapter(evaluator: Exclude<DemoEvaluator, "je
       return {
         disposition,
         family: disposition === "vulnerable" ? output.family : null,
-        ...(result.usage === null ? {} : { inputTokens: result.usage.inputTokens, outputTokens: result.usage.outputTokens }),
+        ...(result.usage === null ? {} : {
+          inputTokens: result.usage.inputTokens,
+          outputTokens: result.usage.outputTokens,
+          cacheReadTokens: result.usage.cacheReadTokens,
+          cacheWriteTokens: result.usage.cacheWriteTokens
+        }),
         ...(result.chargeUsd === null ? {} : { costUsd: result.chargeUsd }),
         modelLatencyMs: result.modelLatencyMs
       };
