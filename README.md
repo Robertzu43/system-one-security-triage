@@ -12,7 +12,7 @@ Jev is the model making the first set of decisions—not the name of the benchma
 
 > Dashboard URL: [https://robertzu43.github.io/system-one-security-triage/](https://robertzu43.github.io/system-one-security-triage/)
 
-> **Measurement status (2026-09-19).** Both recorded runs so far (`2026-09-19-public-v2` and `-v3`) were made on a corpus whose model-visible file paths contained the expected label and whose context-resolution flags marked the insufficient-context cases. The corpus is now label-neutral, so all three evaluators must be re-recorded before any number is cited. Read [MVP measurement validation](docs/superpowers/specs/2026-09-19-mvp-measurement-validation.md) first.
+> **Measurement status (2026-09-19).** The committed runs (`2026-09-19-public-v2` and `-v3`) were made on a corpus whose model-visible file paths contained the expected label and whose context-resolution flags marked the insufficient-context cases. A first label-neutral recording then showed that the broken access control vulnerabilities were not decidable from the evidence without those flags, so those cases now show the route registration and middleware chain. All three evaluators must be re-recorded on the current corpus before any number is cited. Read [MVP measurement validation](docs/superpowers/specs/2026-09-19-mvp-measurement-validation.md) first.
 
 ## The 100-case demo
 
@@ -54,11 +54,11 @@ The older terminal summary remains available with `npm run demo`. It also uses e
 
 ## Record a real three-model run
 
-The corpus hash changed when the fixture was de-leaked, so the committed `2026-09-19-public-v2` and `-v3` artifacts no longer validate and cannot be reused as controls. Record all three evaluators under one run ID (Terra and Opus need macOS, Codex CLI 0.147.0, and Claude Code 2.1.278):
+The corpus hash changed when the fixture was de-leaked and again when the access-control evidence was made decidable, so the committed `2026-09-19-public-v2` and `-v3` artifacts no longer validate and cannot be reused as controls. Record all three evaluators under one run ID (Terra and Opus need macOS, Codex CLI 0.147.0, and Claude Code 2.1.278):
 
 ```bash
 export TYPESAFE_API_KEY='...'
-export RUN_ID="$(date -u +%Y-%m-%d)-public-v4"
+export RUN_ID="$(date -u +%Y-%m-%d)-public-v5"
 
 npm run demo:record -- --models jev,terra --run-id "$RUN_ID"
 npm run demo:record -- --models opus --run-id "$RUN_ID"
