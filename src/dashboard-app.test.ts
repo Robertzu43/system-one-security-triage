@@ -16,6 +16,9 @@ test("dashboard explains recorded synthetic model comparison accessibly", async 
   assert.match(html, /<noscript>/);
   assert.match(css, /prefers-reduced-motion/);
   assert.match(css, /:focus-visible/);
+  assert.match(css, /--surface:\s*#101210/);
+  assert.match(css, /--signal:\s*#caff4a/);
+  assert.match(css, /linear-gradient\([^;]*rgba\(202,255,74/);
   assert.doesNotMatch(js, /fetch\((?!["']\.\/data\/latest\.json["'])/);
   assert.doesNotMatch(js, /TypeSafeClient|TYPESAFE_API_KEY|ANTHROPIC_API_KEY|OPENAI_API_KEY/);
 });
