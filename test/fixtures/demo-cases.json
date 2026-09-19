@@ -8,15 +8,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-011.ts",
-          "startLine": 10,
-          "endLine": 10,
+          "startLine": 6,
+          "endLine": 6,
           "text": "const query = `SELECT * FROM users WHERE id = ${req.query.id}`;"
         },
         {
           "id": "s2",
           "path": "src/demo/case-011.ts",
-          "startLine": 11,
-          "endLine": 11,
+          "startLine": 7,
+          "endLine": 7,
           "text": "return db.query(query);"
         }
       ],
@@ -51,15 +51,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-003.ts",
-          "startLine": 20,
-          "endLine": 20,
+          "startLine": 19,
+          "endLine": 19,
           "text": "const id = Number.parseInt(req.query.id, 10);"
         },
         {
           "id": "s2",
           "path": "src/demo/case-003.ts",
-          "startLine": 21,
-          "endLine": 21,
+          "startLine": 20,
+          "endLine": 20,
           "text": "return db.query('SELECT * FROM users WHERE id = $1', [id]);"
         }
       ],
@@ -94,8 +94,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-030.ts",
-          "startLine": 30,
-          "endLine": 30,
+          "startLine": 32,
+          "endLine": 32,
           "text": "return lookupUser(req.query.id);"
         }
       ],
@@ -124,15 +124,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-094.ts",
-          "startLine": 10,
-          "endLine": 11,
+          "startLine": 45,
+          "endLine": 46,
           "text": "const authenticatedUserId = req.user.id;\nconst requestedAccountId = req.params.accountId;"
         },
         {
           "id": "s2",
           "path": "src/demo/case-094.ts",
-          "startLine": 12,
-          "endLine": 12,
+          "startLine": 47,
+          "endLine": 47,
           "text": "return db.accounts.findById(requestedAccountId);"
         }
       ],
@@ -167,15 +167,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-052.ts",
-          "startLine": 20,
-          "endLine": 20,
+          "startLine": 11,
+          "endLine": 11,
           "text": "if (req.user.accountId !== req.params.accountId) return res.sendStatus(403);"
         },
         {
           "id": "s2",
           "path": "src/demo/case-052.ts",
-          "startLine": 21,
-          "endLine": 21,
+          "startLine": 12,
+          "endLine": 12,
           "text": "return db.accounts.findById(req.params.accountId);"
         }
       ],
@@ -210,15 +210,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-039.ts",
-          "startLine": 30,
-          "endLine": 30,
+          "startLine": 24,
+          "endLine": 24,
           "text": "await authorize(req, req.params.accountId);"
         },
         {
           "id": "s2",
           "path": "src/demo/case-039.ts",
-          "startLine": 31,
-          "endLine": 31,
+          "startLine": 25,
+          "endLine": 25,
           "text": "return db.accounts.findById(req.params.accountId);"
         }
       ],
@@ -253,8 +253,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-068.ts",
-          "startLine": 10,
-          "endLine": 10,
+          "startLine": 37,
+          "endLine": 37,
           "text": "return fetch(req.query.url);"
         }
       ],
@@ -283,15 +283,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-066.ts",
-          "startLine": 20,
-          "endLine": 20,
+          "startLine": 50,
+          "endLine": 50,
           "text": "const target = new URL(req.query.url); if (!ALLOWED_HOSTS.has(target.hostname)) return res.sendStatus(400);"
         },
         {
           "id": "s2",
           "path": "src/demo/case-066.ts",
-          "startLine": 21,
-          "endLine": 21,
+          "startLine": 51,
+          "endLine": 51,
           "text": "return fetch(target);"
         }
       ],
@@ -326,8 +326,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-051.ts",
-          "startLine": 30,
-          "endLine": 30,
+          "startLine": 16,
+          "endLine": 16,
           "text": "return fetch(resolveServiceUrl(req.query.service));"
         }
       ],
@@ -356,8 +356,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-065.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 29,
+          "endLine": 29,
           "text": "db.query(`SELECT * FROM orders ORDER BY ${req.query.sort}`);"
         }
       ],
@@ -386,8 +386,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-057.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 42,
+          "endLine": 42,
           "text": "reports.raw(`status = '${req.body.status}'`);"
         }
       ],
@@ -416,8 +416,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-062.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 8,
+          "endLine": 8,
           "text": "exec(`tar -czf export.tgz ${req.query.folder}`);"
         }
       ],
@@ -446,8 +446,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-096.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 21,
+          "endLine": 21,
           "text": "spawnSync('sh',['-c',`git show ${req.params.ref}`]);"
         }
       ],
@@ -476,8 +476,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-008.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 34,
+          "endLine": 34,
           "text": "eval(req.body.formula);"
         }
       ],
@@ -506,8 +506,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-024.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 47,
+          "endLine": 47,
           "text": "new vm.Script(req.body.script).runInContext(context);"
         }
       ],
@@ -536,8 +536,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-027.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 13,
+          "endLine": 13,
           "text": "handlebars.compile(req.body.template)(data);"
         }
       ],
@@ -566,8 +566,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-022.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 26,
+          "endLine": 26,
           "text": "res.render(req.query.view,model);"
         }
       ],
@@ -596,8 +596,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-063.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 39,
+          "endLine": 39,
           "text": "readFile(join('/exports',req.params.name));"
         }
       ],
@@ -626,8 +626,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-058.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 52,
+          "endLine": 52,
           "text": "User.findAll({order:literal(req.query.order)});"
         }
       ],
@@ -656,8 +656,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-077.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 18,
+          "endLine": 18,
           "text": "repository.query(req.body.rawFilter);"
         }
       ],
@@ -686,8 +686,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-023.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 31,
+          "endLine": 31,
           "text": "db.query('SELECT * FROM users WHERE email = $1',[req.query.email]);"
         }
       ],
@@ -716,8 +716,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-069.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 44,
+          "endLine": 44,
           "text": "db('users').where({id:req.params.id}).first();"
         }
       ],
@@ -746,8 +746,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-009.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 10,
+          "endLine": 10,
           "text": "execFile('/usr/bin/convert',[inputPath,outputPath]);"
         }
       ],
@@ -776,8 +776,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-042.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 23,
+          "endLine": 23,
           "text": "if(!COMMANDS.has(req.body.action)) throw Error('invalid'); run(COMMANDS.get(req.body.action));"
         }
       ],
@@ -806,8 +806,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-026.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 36,
+          "endLine": 36,
           "text": "JSON.parse(req.body.settings);"
         }
       ],
@@ -836,8 +836,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-020.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 49,
+          "endLine": 49,
           "text": "templates.render('profile',{name:req.body.name},{autoescape:true});"
         }
       ],
@@ -866,8 +866,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-083.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 15,
+          "endLine": 15,
           "text": "readFile(join(ROOT,basename(req.params.file)));"
         }
       ],
@@ -896,8 +896,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-061.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 28,
+          "endLine": 28,
           "text": "const f=resolve(ROOT,req.params.file); if(!f.startsWith(ROOT+sep)) throw Error('outside');"
         }
       ],
@@ -926,8 +926,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-092.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 41,
+          "endLine": 41,
           "text": "const s=SORT_FIELDS[req.query.sort]; if(!s) throw Error('invalid'); User.findAll({order:[[s,'ASC']]});"
         }
       ],
@@ -956,15 +956,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-085.ts",
-          "startLine": 17,
-          "endLine": 18,
+          "startLine": 7,
+          "endLine": 8,
           "text": "const OPERATORS = new Set(['add', 'subtract', 'multiply']);\nif (!OPERATORS.has(req.body.operator)) return res.sendStatus(400);"
         },
         {
           "id": "s2",
           "path": "src/demo/case-085.ts",
-          "startLine": 20,
-          "endLine": 20,
+          "startLine": 9,
+          "endLine": 9,
           "text": "return parser.execute(req.body.operator, Number(req.body.left), Number(req.body.right));"
         }
       ],
@@ -999,8 +999,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-033.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 20,
+          "endLine": 20,
           "text": "findUsers(req.query.filter);"
         }
       ],
@@ -1029,8 +1029,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-086.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 33,
+          "endLine": 33,
           "text": "repository.search(req.body.term);"
         }
       ],
@@ -1059,8 +1059,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-046.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 46,
+          "endLine": 46,
           "text": "commandService.run(req.body.job);"
         }
       ],
@@ -1089,8 +1089,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-071.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 12,
+          "endLine": 12,
           "text": "exportService.create(req.query.format);"
         }
       ],
@@ -1119,8 +1119,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-018.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 25,
+          "endLine": 25,
           "text": "formulaEngine.calculate(req.body.formula);"
         }
       ],
@@ -1149,8 +1149,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-048.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 38,
+          "endLine": 38,
           "text": "pageRenderer.render(req.body.content);"
         }
       ],
@@ -1179,8 +1179,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-037.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 51,
+          "endLine": 51,
           "text": "archive.open(req.params.entry);"
         }
       ],
@@ -1209,8 +1209,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-025.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 17,
+          "endLine": 17,
           "text": "uploads.read(normalizeUploadName(req.params.name));"
         }
       ],
@@ -1239,8 +1239,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-021.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 30,
+          "endLine": 30,
           "text": "products.applyFilter(req.query.filter);"
         }
       ],
@@ -1269,8 +1269,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-087.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 43,
+          "endLine": 43,
           "text": "queryLanguage.parse(req.body.query);"
         }
       ],
@@ -1299,15 +1299,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-095.ts",
-          "startLine": 12,
-          "endLine": 13,
+          "startLine": 9,
+          "endLine": 10,
           "text": "const sessionUserId = req.user.id;\nconst requestedInvoiceId = req.params.invoiceId;"
         },
         {
           "id": "s2",
           "path": "src/demo/case-095.ts",
-          "startLine": 14,
-          "endLine": 14,
+          "startLine": 11,
+          "endLine": 11,
           "text": "return invoices.findById(requestedInvoiceId);"
         }
       ],
@@ -1342,15 +1342,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-078.ts",
-          "startLine": 20,
-          "endLine": 21,
+          "startLine": 22,
+          "endLine": 23,
           "text": "const sessionUserId = req.user.id;\nconst targetUserId = req.params.userId;"
         },
         {
           "id": "s2",
           "path": "src/demo/case-078.ts",
-          "startLine": 22,
-          "endLine": 22,
+          "startLine": 24,
+          "endLine": 24,
           "text": "return users.update(targetUserId, req.body);"
         }
       ],
@@ -1385,15 +1385,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-073.ts",
-          "startLine": 31,
-          "endLine": 32,
+          "startLine": 35,
+          "endLine": 36,
           "text": "const sessionTenantId = req.user.tenantId;\nconst requestedTenantId = req.query.tenantId;"
         },
         {
           "id": "s2",
           "path": "src/demo/case-073.ts",
-          "startLine": 33,
-          "endLine": 33,
+          "startLine": 37,
+          "endLine": 37,
           "text": "return reports.forTenant(requestedTenantId);"
         }
       ],
@@ -1428,15 +1428,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-013.ts",
-          "startLine": 9,
-          "endLine": 9,
+          "startLine": 48,
+          "endLine": 48,
           "text": "const sessionRole = req.user.role;"
         },
         {
           "id": "s2",
           "path": "src/demo/case-013.ts",
-          "startLine": 11,
-          "endLine": 11,
+          "startLine": 49,
+          "endLine": 49,
           "text": "return exportAllUsers();"
         }
       ],
@@ -1471,15 +1471,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-014.ts",
-          "startLine": 44,
-          "endLine": 45,
+          "startLine": 14,
+          "endLine": 15,
           "text": "const sessionUserId = req.user.id;\nconst targetProjectId = req.params.projectId;"
         },
         {
           "id": "s2",
           "path": "src/demo/case-014.ts",
-          "startLine": 46,
-          "endLine": 46,
+          "startLine": 16,
+          "endLine": 16,
           "text": "return projects.delete(targetProjectId);"
         }
       ],
@@ -1514,15 +1514,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-056.ts",
-          "startLine": 18,
-          "endLine": 19,
+          "startLine": 27,
+          "endLine": 28,
           "text": "const sessionUserId = req.user.id;\nconst requestedDocumentId = req.params.documentId;"
         },
         {
           "id": "s2",
           "path": "src/demo/case-056.ts",
-          "startLine": 20,
-          "endLine": 20,
+          "startLine": 29,
+          "endLine": 29,
           "text": "return documents.download(requestedDocumentId);"
         }
       ],
@@ -1557,15 +1557,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-038.ts",
-          "startLine": 55,
-          "endLine": 56,
+          "startLine": 40,
+          "endLine": 41,
           "text": "const sessionUserId = req.user.id;\nconst targetOrderId = req.params.orderId;"
         },
         {
           "id": "s2",
           "path": "src/demo/case-038.ts",
-          "startLine": 57,
-          "endLine": 57,
+          "startLine": 42,
+          "endLine": 42,
           "text": "return refunds.create(targetOrderId, req.body.amount);"
         }
       ],
@@ -1600,15 +1600,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-089.ts",
-          "startLine": 27,
-          "endLine": 28,
+          "startLine": 6,
+          "endLine": 7,
           "text": "const sessionUserId = req.user.id;\nconst targetTeamId = req.params.teamId;"
         },
         {
           "id": "s2",
           "path": "src/demo/case-089.ts",
-          "startLine": 29,
-          "endLine": 29,
+          "startLine": 8,
+          "endLine": 8,
           "text": "return teams.invite(targetTeamId, req.body.email);"
         }
       ],
@@ -1643,15 +1643,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-010.ts",
-          "startLine": 38,
-          "endLine": 39,
+          "startLine": 19,
+          "endLine": 20,
           "text": "const sessionUserId = req.user.id;\nconst targetUserId = req.params.userId;"
         },
         {
           "id": "s2",
           "path": "src/demo/case-010.ts",
-          "startLine": 40,
-          "endLine": 40,
+          "startLine": 21,
+          "endLine": 21,
           "text": "return apiKeys.rotate(targetUserId);"
         }
       ],
@@ -1686,8 +1686,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-074.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 32,
+          "endLine": 32,
           "text": "users.update(req.user.id,req.body);"
         }
       ],
@@ -1716,8 +1716,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-050.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 45,
+          "endLine": 45,
           "text": "invoices.findOne({id:req.params.invoiceId,ownerId:req.user.id});"
         }
       ],
@@ -1746,8 +1746,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-049.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 11,
+          "endLine": 11,
           "text": "if(req.params.userId!==req.user.id) return res.sendStatus(403); users.update(req.user.id,req.body);"
         }
       ],
@@ -1776,8 +1776,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-081.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 24,
+          "endLine": 24,
           "text": "reports.find({tenantId:req.user.tenantId,id:req.params.reportId});"
         }
       ],
@@ -1806,15 +1806,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-075.ts",
-          "startLine": 9,
-          "endLine": 9,
+          "startLine": 37,
+          "endLine": 37,
           "text": "if (req.user.role !== 'admin') return res.sendStatus(403);"
         },
         {
           "id": "s2",
           "path": "src/demo/case-075.ts",
-          "startLine": 11,
-          "endLine": 11,
+          "startLine": 38,
+          "endLine": 38,
           "text": "return exportAllUsers();"
         }
       ],
@@ -1849,8 +1849,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-091.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 50,
+          "endLine": 50,
           "text": "const p=await projects.get(req.params.projectId); if(p.ownerId!==req.user.id) return res.sendStatus(403);"
         }
       ],
@@ -1879,15 +1879,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-100.ts",
-          "startLine": 33,
-          "endLine": 34,
+          "startLine": 16,
+          "endLine": 17,
           "text": "const membership = await memberships.find({ userId: req.user.id, documentId: req.params.documentId });\nif (!membership) return res.sendStatus(403);"
         },
         {
           "id": "s2",
           "path": "src/demo/case-100.ts",
-          "startLine": 36,
-          "endLine": 36,
+          "startLine": 18,
+          "endLine": 18,
           "text": "return documents.download(req.params.documentId);"
         }
       ],
@@ -1922,8 +1922,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-015.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 29,
+          "endLine": 29,
           "text": "if(!req.user.permissions.includes('refund:create')) return res.sendStatus(403); refunds.create(req.params.orderId);"
         }
       ],
@@ -1952,15 +1952,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-079.ts",
-          "startLine": 48,
-          "endLine": 49,
+          "startLine": 42,
+          "endLine": 43,
           "text": "const team = await teams.get(req.params.teamId);\nif (team.ownerId !== req.user.id) return res.sendStatus(403);"
         },
         {
           "id": "s2",
           "path": "src/demo/case-079.ts",
-          "startLine": 51,
-          "endLine": 51,
+          "startLine": 44,
+          "endLine": 44,
           "text": "return teams.invite(req.params.teamId, req.body.email);"
         }
       ],
@@ -1995,15 +1995,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-055.ts",
-          "startLine": 24,
-          "endLine": 24,
+          "startLine": 8,
+          "endLine": 8,
           "text": "const sessionUserId = req.user.id;"
         },
         {
           "id": "s2",
           "path": "src/demo/case-055.ts",
-          "startLine": 26,
-          "endLine": 26,
+          "startLine": 9,
+          "endLine": 9,
           "text": "return apiKeys.rotate(sessionUserId);"
         }
       ],
@@ -2038,8 +2038,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-031.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 21,
+          "endLine": 21,
           "text": "users.update(req.user.id,pick(req.body,['displayName','timezone']));"
         }
       ],
@@ -2068,8 +2068,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-005.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 34,
+          "endLine": 34,
           "text": "authorizeInvoice(req.user,req.params.invoiceId);"
         }
       ],
@@ -2098,8 +2098,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-064.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 47,
+          "endLine": 47,
           "text": "canEditProfile(req);"
         }
       ],
@@ -2128,8 +2128,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-084.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 13,
+          "endLine": 13,
           "text": "tenantRepository(req).reports.get(req.params.reportId);"
         }
       ],
@@ -2158,8 +2158,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-036.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 26,
+          "endLine": 26,
           "text": "router.get('/admin/audit',adminPolicy,auditLog);"
         }
       ],
@@ -2188,8 +2188,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-097.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 39,
+          "endLine": 39,
           "text": "permissionService.check(req.user,'delete',req.params.projectId);"
         }
       ],
@@ -2218,8 +2218,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-093.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 52,
+          "endLine": 52,
           "text": "secureDocuments(req.user).download(req.params.documentId);"
         }
       ],
@@ -2248,8 +2248,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-098.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 18,
+          "endLine": 18,
           "text": "refundPolicy.enforce(req);"
         }
       ],
@@ -2278,8 +2278,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-002.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 31,
+          "endLine": 31,
           "text": "requireTeamRole(req);"
         }
       ],
@@ -2308,8 +2308,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-054.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 44,
+          "endLine": 44,
           "text": "authorizeKeyRotation(req);"
         }
       ],
@@ -2338,8 +2338,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-028.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 10,
+          "endLine": 10,
           "text": "allowedProfileChanges(req.user,req.body);"
         }
       ],
@@ -2368,8 +2368,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-001.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 23,
+          "endLine": 23,
           "text": "fetch(req.body.avatarUrl);"
         }
       ],
@@ -2398,8 +2398,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-040.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 36,
+          "endLine": 36,
           "text": "http.post(req.body.callbackUrl,testPayload);"
         }
       ],
@@ -2428,8 +2428,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-043.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 49,
+          "endLine": 49,
           "text": "pdf.renderFromUrl(req.query.page);"
         }
       ],
@@ -2458,8 +2458,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-029.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 15,
+          "endLine": 15,
           "text": "fetch(req.query.url,{redirect:'follow'});"
         }
       ],
@@ -2488,8 +2488,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-035.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 28,
+          "endLine": 28,
           "text": "request(`http://${req.query.host}/status`);"
         }
       ],
@@ -2518,8 +2518,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-034.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 41,
+          "endLine": 41,
           "text": "fetch(new URL(req.body.url));"
         }
       ],
@@ -2548,8 +2548,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-090.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 7,
+          "endLine": 7,
           "text": "proxy.forward(req.query.destination);"
         }
       ],
@@ -2578,15 +2578,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-076.ts",
-          "startLine": 15,
-          "endLine": 15,
+          "startLine": 20,
+          "endLine": 20,
           "text": "const source = req.body.source;"
         },
         {
           "id": "s2",
           "path": "src/demo/case-076.ts",
-          "startLine": 17,
-          "endLine": 17,
+          "startLine": 21,
+          "endLine": 21,
           "text": "const response = await fetch(source);"
         }
       ],
@@ -2621,8 +2621,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-059.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 33,
+          "endLine": 33,
           "text": "feeds.parse(await fetch(req.body.feedUrl));"
         }
       ],
@@ -2651,8 +2651,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-012.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 46,
+          "endLine": 46,
           "text": "jwksClient(req.body.jwksUri).getSigningKey();"
         }
       ],
@@ -2681,8 +2681,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-007.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 12,
+          "endLine": 12,
           "text": "const u=new URL(req.body.avatarUrl); if(!AVATAR_HOSTS.has(u.hostname)) throw Error('blocked'); fetch(u);"
         }
       ],
@@ -2711,8 +2711,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-019.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 25,
+          "endLine": 25,
           "text": "const u=new URL(req.body.callbackUrl); if(u.protocol!=='https:'||!u.hostname.endsWith('.hooks.example.com')) throw Error('blocked'); fetch(u);"
         }
       ],
@@ -2741,8 +2741,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-004.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 38,
+          "endLine": 38,
           "text": "pdf.renderFromUrl(`https://docs.example.com/${encodeURIComponent(req.params.slug)}`);"
         }
       ],
@@ -2771,15 +2771,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-070.ts",
-          "startLine": 26,
-          "endLine": 28,
+          "startLine": 51,
+          "endLine": 53,
           "text": "const ALLOWED = new Map([['status', 'https://status.internal/health']]);\nconst approvedUrl = ALLOWED.get(req.query.target);\nif (!approvedUrl) return res.sendStatus(404);"
         },
         {
           "id": "s2",
           "path": "src/demo/case-070.ts",
-          "startLine": 30,
-          "endLine": 30,
+          "startLine": 54,
+          "endLine": 54,
           "text": "const response = await fetch(approvedUrl, { redirect: 'error' });"
         }
       ],
@@ -2814,8 +2814,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-099.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 17,
+          "endLine": 17,
           "text": "const a=await resolvePublicAddress(req.query.host); if(isPrivate(a)) throw Error('blocked'); fetch(`https://${a}`);"
         }
       ],
@@ -2844,15 +2844,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-045.ts",
-          "startLine": 21,
-          "endLine": 22,
+          "startLine": 30,
+          "endLine": 31,
           "text": "const address = await resolve4(new URL(req.body.url).hostname);\nif (!/^203\\.0\\.113\\./.test(address)) return res.sendStatus(400);"
         },
         {
           "id": "s2",
           "path": "src/demo/case-045.ts",
-          "startLine": 24,
-          "endLine": 24,
+          "startLine": 32,
+          "endLine": 32,
           "text": "const response = await fetch(`https://${address}/feed`);"
         }
       ],
@@ -2887,8 +2887,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-082.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 43,
+          "endLine": 43,
           "text": "const o=SERVICE_ORIGINS[req.query.service]; if(!o) throw Error('unknown'); fetch(o);"
         }
       ],
@@ -2917,15 +2917,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-047.ts",
-          "startLine": 11,
-          "endLine": 11,
+          "startLine": 9,
+          "endLine": 9,
           "text": "const client = new StorageClient({ endpoint: 'https://storage.internal' });"
         },
         {
           "id": "s2",
           "path": "src/demo/case-047.ts",
-          "startLine": 13,
-          "endLine": 13,
+          "startLine": 10,
+          "endLine": 10,
           "text": "return client.getObject({ Bucket: 'user-uploads', Key: req.params.objectKey });"
         }
       ],
@@ -2960,15 +2960,15 @@
         {
           "id": "s1",
           "path": "src/demo/case-041.ts",
-          "startLine": 6,
-          "endLine": 6,
+          "startLine": 22,
+          "endLine": 22,
           "text": "const FEEDS = new Map([['news', 'https://feeds.internal/news.xml'], ['jobs', 'https://feeds.internal/jobs.xml']]);"
         },
         {
           "id": "s2",
           "path": "src/demo/case-041.ts",
-          "startLine": 30,
-          "endLine": 32,
+          "startLine": 23,
+          "endLine": 25,
           "text": "const feed = FEEDS.get(req.params.feedId);\nif (!feed) return res.sendStatus(404);\nconst response = await fetch(feed);"
         }
       ],
@@ -3003,8 +3003,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-088.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 35,
+          "endLine": 35,
           "text": "const u=TRUSTED_ISSUERS[claims.iss]?.jwksUri; if(!u) throw Error('issuer'); fetch(u);"
         }
       ],
@@ -3033,8 +3033,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-072.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 48,
+          "endLine": 48,
           "text": "avatarService.fetch(validateAvatarUrl(req.body.avatarUrl));"
         }
       ],
@@ -3063,8 +3063,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-080.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 14,
+          "endLine": 14,
           "text": "webhookPolicy(req.user).send(req.body.callbackUrl);"
         }
       ],
@@ -3093,8 +3093,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-060.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 27,
+          "endLine": 27,
           "text": "pdf.renderFromUrl(resolveDocumentUrl(req.params.document));"
         }
       ],
@@ -3123,8 +3123,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-067.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 40,
+          "endLine": 40,
           "text": "safeHttpClient.get(req.query.url);"
         }
       ],
@@ -3153,8 +3153,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-017.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 6,
+          "endLine": 6,
           "text": "fetch(filterNetworkTarget(req.body.url));"
         }
       ],
@@ -3183,8 +3183,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-053.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 19,
+          "endLine": 19,
           "text": "pinnedDnsClient.request(req.body.url);"
         }
       ],
@@ -3213,8 +3213,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-006.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 32,
+          "endLine": 32,
           "text": "serviceProxy.forward(req.query.service,req.path);"
         }
       ],
@@ -3243,8 +3243,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-032.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 45,
+          "endLine": 45,
           "text": "remoteImageStore.import(req.body.source);"
         }
       ],
@@ -3273,8 +3273,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-044.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 11,
+          "endLine": 11,
           "text": "feeds.load(resolveFeed(req.params.feedId));"
         }
       ],
@@ -3303,8 +3303,8 @@
         {
           "id": "s1",
           "path": "src/demo/case-016.ts",
-          "startLine": 1,
-          "endLine": 1,
+          "startLine": 24,
+          "endLine": 24,
           "text": "oidcClient(req.body.issuer).discoverKeys();"
         }
       ],

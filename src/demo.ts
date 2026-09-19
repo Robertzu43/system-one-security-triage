@@ -277,6 +277,25 @@ function pathOf(item: DemoCase): string {
   return typeof path === "string" ? path : "";
 }
 
+/**
+ * Throws when a case's spans are not contiguous.
+ *
+ * Line numbers mean nothing in a synthetic corpus, so any pattern in them is confound rather than
+ * evidence — and one had formed: among multi-span cases a gap between spans ran 9-to-3 safe while
+ * contiguous ran 10-to-2 vulnerable, because guards were written with a gap and taint flows
+ * without one. Requiring contiguity everywhere removes the tell by construction.
+ */
+export function assertContiguousSpans(cases: readonly DemoCase[]): void {
+  for (const item of cases) {
+    const spans = item.state.spans as Array<{ startLine?: unknown; endLine?: unknown }>;
+    for (const [index, span] of spans.slice(1).entries()) {
+      const previous = spans[index]!;
+      if (typeof span.startLine !== "number" || typeof previous.endLine !== "number") throw new Error(`${item.caseId} has spans without line numbers`);
+      if (span.startLine !== previous.endLine + 1) throw new Error(`${item.caseId} leaves a line gap between spans; gaps correlate with the label, so spans must be contiguous`);
+    }
+  }
+}
+
 /** Throws when model-visible span paths predict the label, by wording or by ordering. */
 export function assertNoPathLabelSignal(cases: readonly DemoCase[], maximumRun = 6): void {
   const signals = pathTokenSignals(cases);
@@ -304,6 +323,7 @@ export async function loadDemoCases(path: string): Promise<DemoCase[]> {
   });
   if (new Set(cases.map((item) => item.caseId)).size !== cases.length) throw new Error("caseId must be unique");
   assertNoPathLabelSignal(cases);
+  assertContiguousSpans(cases);
   return cases;
 }
 
