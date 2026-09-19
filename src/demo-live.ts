@@ -1,23 +1,9 @@
-import type { JevJudgment, RouterConfig } from "./contracts.js";
-import type { DemoAdapter, DemoDecision, DemoEvaluator } from "./demo.js";
-import { jevModel } from "./jev.js";
-import type { EvidencePacket } from "./packets.js";
+import { decisionForChoice, type DemoAdapter, type DemoEvaluator } from "./demo.js";
+import { jevModel, type JevDemoJudgment } from "./jev.js";
 import { reasoningRunnerVersions, type ReasoningConfig, type ReasoningRequest, type ReasoningResult, runReasoningReview } from "./reasoning.js";
-import { parseRouterConfig, route } from "./router.js";
 
-type JudgeJev = (stateJson: string) => Promise<JevJudgment>;
+type JudgeJev = (stateJson: string) => Promise<JevDemoJudgment>;
 type RunReasoning = (request: ReasoningRequest, config: ReasoningConfig) => Promise<ReasoningResult>;
-
-const routerConfig: RouterConfig = parseRouterConfig({
-  contextMin: 0.70,
-  safeRiskMax: 0.20,
-  highRiskMin: 0.80,
-  pathMin: 0.70,
-  controlEffectiveMin: 0.80,
-  controlAbsentMax: 0.20,
-  impactMin: 0.70,
-  directExploitabilityMin: 2.50
-});
 
 const reasoningInstructions = "Classify the supplied code evidence as vulnerable, safe, or insufficient_context. For vulnerable, return exactly one family: injection, broken_access_control, or ssrf. For safe and insufficient_context, return family null. Missing code is not evidence that a control is absent or that code is safe; use insufficient_context whenever a required authorization, sanitization, middleware, upstream-flow, or call-path fact is not shown.";
 
@@ -30,15 +16,6 @@ function diagnostic(text: string): string {
     .slice(0, 500);
 }
 
-function jevFamily(judgment: Exclude<JevJudgment, { kind: "abstain" }>): DemoDecision["family"] {
-  const values = [
-    ["injection", judgment.answers.is_injection.noul],
-    ["broken_access_control", judgment.answers.is_broken_access_control.noul],
-    ["ssrf", judgment.answers.is_ssrf.noul]
-  ] as const;
-  return values.reduce((best, value) => value[1] > best[1] ? value : best)[0];
-}
-
 export function createJevDemoAdapter(judge: JudgeJev): DemoAdapter {
   return {
     name: "jev",
@@ -46,11 +23,12 @@ export function createJevDemoAdapter(judge: JudgeJev): DemoAdapter {
     evaluate: async (stateJson, item) => {
       const judgment = await judge(stateJson);
       if (judgment.kind === "abstain") throw new Error(`${judgment.error.name}: ${judgment.error.message}`);
-      const outcome = route({ contextResolution: item.state.contextResolution } as EvidencePacket, judgment, routerConfig);
-      const base = { inputTokens: judgment.usage.input_tokens, outputTokens: judgment.usage.output_tokens };
-      if (outcome === "likely_vulnerability") return { disposition: "vulnerable", family: jevFamily(judgment), ...base };
-      if (outcome === "likely_safe") return { disposition: "safe", family: null, ...base };
-      return { disposition: "insufficient_context", family: null, ...base };
+      return {
+        ...decisionForChoice(judgment.choice.selected),
+        choice: judgment.choice,
+        inputTokens: judgment.usage.input_tokens,
+        outputTokens: judgment.usage.output_tokens
+      };
     }
   };
 }

@@ -169,11 +169,9 @@ test("live adapters normalize native decisions while preserving the exact eviden
     jevState = state;
     return {
       kind: "judgment", model: "jev-1.13.0", usage: { input_tokens: 7, output_tokens: 3 },
-      answers: {
-        untrusted_influence: { type: "noul", noul: 0.99 }, reaches_sensitive_operation: { type: "noul", noul: 0.99 }, validation_blocks_attack: { type: "noul", noul: 0.01 },
-        crosses_authorization_boundary: { type: "noul", noul: 0.01 }, authorization_enforced: { type: "noul", noul: 0.01 }, security_impact: { type: "noul", noul: 0.99 },
-        is_injection: { type: "noul", noul: 0.99 }, is_broken_access_control: { type: "noul", noul: 0.01 }, is_ssrf: { type: "noul", noul: 0.01 }, enough_context: { type: "noul", noul: 0.99 },
-        exploitability: { type: "score", score: 3, confidence: 1, legend: { 0: "", 1: "", 2: "", 3: "" }, probabilities: { 0: 0, 1: 0, 2: 0, 3: 1 } }
+      choice: {
+        selected: "vulnerable_ssrf", confidence: 0.1,
+        probabilities: { vulnerable_injection: 0.1, vulnerable_broken_access_control: 0.1, vulnerable_ssrf: 0.3, safe: 0.25, insufficient_context: 0.25 }
       }
     };
   });
@@ -185,7 +183,10 @@ test("live adapters normalize native decisions while preserving the exact eviden
     assert.equal(request.prompt.split(stateJson).length, 2);
     return { finalOutcome: "no_alert", output: { decision: "safe", family: "injection", evidence_span_ids: [] }, usage: null, usageStatus: "inconclusive", chargeUsd: null, costStatus: "inconclusive", attempts: 1, stdout: "", stderr: "", error: null };
   });
-  assert.deepEqual(await jev.evaluate(stateJson, item), { disposition: "vulnerable", family: "injection", inputTokens: 7, outputTokens: 3 });
+  assert.deepEqual(await jev.evaluate(stateJson, item), {
+    disposition: "vulnerable", family: "ssrf", inputTokens: 7, outputTokens: 3,
+    choice: { selected: "vulnerable_ssrf", confidence: 0.1, probabilities: { vulnerable_injection: 0.1, vulnerable_broken_access_control: 0.1, vulnerable_ssrf: 0.3, safe: 0.25, insufficient_context: 0.25 } }
+  });
   assert.equal(jevState, stateJson);
   assert.deepEqual(await terra.evaluate(stateJson, item), { disposition: "safe", family: null });
 });

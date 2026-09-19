@@ -9,7 +9,7 @@ import { buildPublishedDemoData, writePublishedDemoData } from "./dashboard.js";
 import { parseRecordedDemoRun, writeRecordedDemoRuns, type RecordedDemoRun } from "./demo-record.js";
 import { loadDemoCases, runDemo, type DemoAdapter, type DemoEvaluator, type EvaluatorMetadata } from "./demo.js";
 import { createJevDemoAdapter, createReasoningDemoAdapter } from "./demo-live.js";
-import { judgeWithJev } from "./jev.js";
+import { judgeDemoWithJev } from "./jev.js";
 import { canonicalJson } from "./jsonl.js";
 import { runArm, type PublishedRun } from "./pipeline.js";
 import { type ReasoningResult } from "./reasoning.js";
@@ -113,7 +113,7 @@ async function liveAdapters(selected: readonly DemoEvaluator[], emptySnapshot: s
   const adapters: DemoAdapter[] = [];
   if (selected.includes("jev")) {
     const client = new TypeSafeClient({ timeout: 30_000, retry: { maxRetries: 0 }, logLevel: "off" });
-    adapters.push(createJevDemoAdapter((stateJson) => judgeWithJev(stateJson, client)));
+    adapters.push(createJevDemoAdapter((stateJson) => judgeDemoWithJev(stateJson, client)));
   }
   if (selected.includes("terra")) adapters.push(createReasoningDemoAdapter("terra", emptySnapshot, undefined, { outputDirectory }));
   if (selected.includes("opus")) adapters.push(createReasoningDemoAdapter("opus", emptySnapshot, undefined, { outputDirectory }));
