@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { loadDemoCases, runDemo, type DemoAdapter } from "./demo.js";
+import { loadDemoCases, runDemo, summarizeDemoResults, type DemoAdapter, type DemoResult } from "./demo.js";
 import { createJevDemoAdapter, createReasoningDemoAdapter } from "./demo-live.js";
 import { stableHash } from "./jsonl.js";
 
@@ -57,6 +57,19 @@ test("triage accuracy scores disposition and vulnerable family", async () => {
   assert.equal(report.results[0]?.correct, true);
   assert.equal(report.summary.jev!.vulnerabilityRecall, 1);
   assert.deepEqual(Object.keys(report.summary), ["jev"]);
+});
+
+test("summary keeps explicit errors in both denominators", async () => {
+  const cases = await loadDemoCases("test/fixtures/demo-cases.json");
+  const results: DemoResult[] = cases.map((item) => ({
+    caseId: item.caseId, evaluator: "jev", status: "valid", decision: item.expected,
+    correct: true, latencyMs: 1, error: null
+  }));
+  results[0] = { ...results[0]!, status: "error", decision: null, correct: false, error: "service unavailable" };
+  const summary = summarizeDemoResults(cases, results, ["jev"]);
+  assert.equal(summary.jev!.accuracy, 0.99);
+  assert.equal(summary.jev!.errors, 1);
+  assert.ok(summary.jev!.vulnerabilityRecall < 1);
 });
 
 test("fixture CLI prints an explicitly simulated three-model report", async () => {

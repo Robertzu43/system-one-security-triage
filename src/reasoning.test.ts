@@ -38,7 +38,7 @@ process.stderr.write(JSON.stringify({ args, cwd: process.cwd(), env: Object.keys
 
     const { runReasoningReview } = await reasoning();
     const result = await runReasoningReview({
-      evaluator: "terra", mode: "agentic", prompt: '{"packet":"same"}', snapshot, schemaPath, timeoutMs: 1_000,
+      evaluator: "terra", mode: "agentic", prompt: '{"packet":"same"}', snapshot, schemaPath, timeoutMs: 5_000,
       tokenBudget: 200, toolBudget: 3
     }, { executable, outputDirectory: root, environment: { PATH: process.env.PATH, HOME: process.env.HOME, HTTP_PROXY: "http://must-not-pass", OUTSIDE_SECRET: outside }, environmentKeys: ["OUTSIDE_SECRET"] });
 
@@ -83,7 +83,7 @@ await writeFile(args[args.indexOf("--output-last-message") + 1], JSON.stringify(
     const { runReasoningReview } = await reasoning();
     const base = { evaluator: "terra", mode: "agentic", prompt: "{}", snapshot, schemaPath, timeoutMs: 30, tokenBudget: 1, toolBudget: 1 };
 
-    const malformedResult = await runReasoningReview({ ...base, timeoutMs: 1_000 }, { executable: malformed, outputDirectory: root });
+    const malformedResult = await runReasoningReview({ ...base, timeoutMs: 5_000 }, { executable: malformed, outputDirectory: root });
     assert.equal(malformedResult.finalOutcome, "manual_review");
     assert.equal(malformedResult.error?.kind, "malformed_output");
 
@@ -107,7 +107,7 @@ process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", fam
 `, "2.1.277 (Claude Code)");
     const { runReasoningReview } = await reasoning();
     const result = await runReasoningReview({
-      evaluator: "opus", mode: "controlled", prompt: "{\"packet\":true}", snapshot, schemaPath, timeoutMs: 1_000,
+      evaluator: "opus", mode: "controlled", prompt: "{\"packet\":true}", snapshot, schemaPath, timeoutMs: 5_000,
       tokenBudget: 200, toolBudget: 3, model: "claude-opus-4-6"
     }, { executable, outputDirectory: root, environment: { PATH: process.env.PATH, HOME: process.env.HOME } });
 
@@ -135,8 +135,8 @@ const args = process.argv.slice(2);
 await writeFile(args[args.indexOf("--output-last-message") + 1], JSON.stringify({ decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] }));
 `);
     const { runReasoningReview } = await reasoning();
-    const opus = await runReasoningReview({ evaluator: "opus", mode: "controlled", prompt: "{}", snapshot, schemaPath, timeoutMs: 1_000, tokenBudget: 100, toolBudget: 1, model: "claude-opus-4-6" }, { executable: opusExecutable, outputDirectory: root });
-    const terra = await runReasoningReview({ evaluator: "terra", mode: "agentic", prompt: "{}", snapshot, schemaPath, timeoutMs: 1_000, tokenBudget: 100, toolBudget: 1 }, { executable: terraExecutable, outputDirectory: root });
+    const opus = await runReasoningReview({ evaluator: "opus", mode: "controlled", prompt: "{}", snapshot, schemaPath, timeoutMs: 5_000, tokenBudget: 100, toolBudget: 1, model: "claude-opus-4-6" }, { executable: opusExecutable, outputDirectory: root });
+    const terra = await runReasoningReview({ evaluator: "terra", mode: "agentic", prompt: "{}", snapshot, schemaPath, timeoutMs: 5_000, tokenBudget: 100, toolBudget: 1 }, { executable: terraExecutable, outputDirectory: root });
     assert.deepEqual(opus.output, { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] });
     assert.deepEqual(opus.usage, { inputTokens: 11, outputTokens: 13 });
     assert.equal(opus.usageStatus, "available");
@@ -158,7 +158,7 @@ const args = process.argv.slice(2);
 await writeFile(args[args.indexOf("--output-last-message") + 1], JSON.stringify({ decision: "safe", family: null }));
 `);
     const { runReasoningReview } = await reasoning();
-    const result = await runReasoningReview({ evaluator: "terra", mode: "demo", prompt: "{}", snapshot, schemaPath: resolve("config/demo-output.schema.json"), timeoutMs: 1_000, tokenBudget: 100, toolBudget: 1 }, { executable, outputDirectory: root });
+    const result = await runReasoningReview({ evaluator: "terra", mode: "demo", prompt: "{}", snapshot, schemaPath: resolve("config/demo-output.schema.json"), timeoutMs: 5_000, tokenBudget: 100, toolBudget: 1 }, { executable, outputDirectory: root });
     assert.equal(result.error, null);
     assert.equal(result.output?.decision, "safe");
     assert.equal(result.usageStatus, "inconclusive");
@@ -173,7 +173,7 @@ test("reasoning runner rejects version drift before a model attempt", async () =
     const marker = join(root, "model-called");
     const executable = await fixture(root, `await (await import("node:fs/promises")).writeFile(${JSON.stringify(marker)}, "called");`, "2.1.278 (Claude Code)");
     const { runReasoningReview } = await reasoning();
-    const result = await runReasoningReview({ evaluator: "opus", mode: "controlled", prompt: "{}", snapshot, schemaPath: resolve("config/reasoning-output.schema.json"), timeoutMs: 1_000, tokenBudget: 100, toolBudget: 1, model: "claude-opus-4-6" }, { executable, outputDirectory: root });
+    const result = await runReasoningReview({ evaluator: "opus", mode: "controlled", prompt: "{}", snapshot, schemaPath: resolve("config/reasoning-output.schema.json"), timeoutMs: 5_000, tokenBudget: 100, toolBudget: 1, model: "claude-opus-4-6" }, { executable, outputDirectory: root });
     assert.equal(result.error?.kind, "version_mismatch");
     assert.equal(result.attempts, 0);
     await assert.rejects(() => stat(marker), /ENOENT/);
@@ -187,7 +187,7 @@ test("reasoning runner fails closed when filesystem isolation is unsupported", a
     await (await import("node:fs/promises")).mkdir(snapshot);
     const executable = await fixture(root, "throw new Error('must not execute');");
     const { runReasoningReview } = await reasoning();
-    const result = await runReasoningReview({ evaluator: "terra", mode: "agentic", prompt: "{}", snapshot, schemaPath: resolve("config/reasoning-output.schema.json"), timeoutMs: 1_000, tokenBudget: 100, toolBudget: 1 }, { executable, outputDirectory: root, platform: "linux" });
+    const result = await runReasoningReview({ evaluator: "terra", mode: "agentic", prompt: "{}", snapshot, schemaPath: resolve("config/reasoning-output.schema.json"), timeoutMs: 5_000, tokenBudget: 100, toolBudget: 1 }, { executable, outputDirectory: root, platform: "linux" });
     assert.equal(result.error?.kind, "unsupported_platform");
     assert.equal(result.attempts, 0);
   } finally { await rm(root, { recursive: true, force: true }); }

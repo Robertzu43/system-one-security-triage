@@ -128,6 +128,22 @@ function optionalSum(rows: DemoResult[], key: "inputTokens" | "outputTokens" | "
   return values.some((value) => value === undefined) ? null : (values as number[]).reduce((sum, value) => sum + value, 0);
 }
 
+export function summarizeDemoResults(cases: readonly DemoCase[], results: readonly DemoResult[], evaluators: readonly DemoEvaluator[]): Record<string, DemoSummary> {
+  return Object.fromEntries(evaluators.map((evaluator) => {
+    const rows = results.filter((row) => row.evaluator === evaluator);
+    const vulnerable = rows.filter((row) => cases.find((item) => item.caseId === row.caseId)?.expected.disposition === "vulnerable");
+    return [evaluator, {
+      accuracy: rows.length === 0 ? 0 : rows.filter((row) => row.correct).length / rows.length,
+      vulnerabilityRecall: vulnerable.length === 0 ? 0 : vulnerable.filter((row) => row.correct).length / vulnerable.length,
+      errors: rows.filter((row) => row.status === "error").length,
+      meanLatencyMs: mean(rows.map((row) => row.latencyMs)),
+      inputTokens: optionalSum(rows, "inputTokens"),
+      outputTokens: optionalSum(rows, "outputTokens"),
+      costUsd: optionalSum(rows, "costUsd")
+    }];
+  }));
+}
+
 export async function runDemo(cases: readonly DemoCase[], adapters: readonly DemoAdapter[], mode: DemoReport["mode"]): Promise<DemoReport> {
   if (cases.length === 0 || adapters.length === 0) throw new Error("demo needs cases and adapters");
   if (new Set(adapters.map((adapter) => adapter.name)).size !== adapters.length) throw new Error("demo evaluator names must be unique");
@@ -144,19 +160,7 @@ export async function runDemo(cases: readonly DemoCase[], adapters: readonly Dem
       }
     }
   }
-  const summary = Object.fromEntries(adapters.map(({ name: evaluator }) => {
-    const rows = results.filter((row) => row.evaluator === evaluator);
-    const vulnerable = rows.filter((row) => cases.find((item) => item.caseId === row.caseId)?.expected.disposition === "vulnerable");
-    return [evaluator, {
-      accuracy: rows.length === 0 ? 0 : rows.filter((row) => row.correct).length / rows.length,
-      vulnerabilityRecall: vulnerable.length === 0 ? 0 : vulnerable.filter((row) => row.correct).length / vulnerable.length,
-      errors: rows.filter((row) => row.status === "error").length,
-      meanLatencyMs: mean(rows.map((row) => row.latencyMs)),
-      inputTokens: optionalSum(rows, "inputTokens"),
-      outputTokens: optionalSum(rows, "outputTokens"),
-      costUsd: optionalSum(rows, "costUsd")
-    }];
-  }));
+  const summary = summarizeDemoResults(cases, results, adapters.map(({ name }) => name));
   return {
     mode,
     disclaimer: mode === "fixture" ? "SIMULATED ADAPTERS — not model benchmark results" : "SMALL DEMO — descriptive results, not a statistical benchmark",
