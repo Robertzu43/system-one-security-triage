@@ -7,6 +7,7 @@ import { TypeSafeClient } from "@typesafe-ai/sdk";
 import { inventoryAst } from "./discover.js";
 import type { Candidate, ControlledEvaluator, Repetition, ScoreInput } from "./contracts.js";
 import { buildPublishedDemoData, writePublishedDemoData } from "./dashboard.js";
+import { loadPriceTable } from "./pricing.js";
 import { parseRecordedDemoRun, writeRecordedDemoRuns, type RecordedDemoRun } from "./demo-record.js";
 import { loadDemoCases, runDemo, type DemoAdapter, type DemoEvaluator, type EvaluatorMetadata } from "./demo.js";
 import { createJevDemoAdapter, createReasoningDemoAdapter } from "./demo-live.js";
@@ -197,14 +198,15 @@ async function dashboardBuild(values: Values): Promise<unknown> {
     }
   }
   const generatedAt = runs.map((run) => run.recordedAt).sort().at(-1) ?? "1970-01-01T00:00:00.000Z";
-  const data = buildPublishedDemoData(cases, runs, generatedAt, { allowDegenerate: values["allow-degenerate"] === true });
+  const prices = await loadPriceTable(values.prices === undefined ? "config/pricing.json" : String(values.prices));
+  const data = buildPublishedDemoData(cases, runs, generatedAt, { allowDegenerate: values["allow-degenerate"] === true, prices });
   await writePublishedDemoData(output, data);
   return { output: basename(output), corpusHash: data.corpusHash, sourceHashes: Object.fromEntries(data.sourceArtifacts.map(({ evaluator, artifactSha256 }) => [evaluator, artifactSha256])) };
 }
 
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({ args: process.argv.slice(2), allowPositionals: true, strict: true, options: {
-    source: { type: "string" }, destination: { type: "string" }, commit: { type: "string" }, snapshot: { type: "string" }, input: { type: "string" }, output: { type: "string" }, fixture: { type: "string" }, evaluator: { type: "string" }, "run-id": { type: "string" }, "run-dir": { type: "string" }, live: { type: "boolean" }, models: { type: "string" }, details: { type: "boolean" }, "allow-degenerate": { type: "boolean" }, repetitions: { type: "string" }
+    source: { type: "string" }, destination: { type: "string" }, commit: { type: "string" }, snapshot: { type: "string" }, input: { type: "string" }, output: { type: "string" }, fixture: { type: "string" }, evaluator: { type: "string" }, "run-id": { type: "string" }, "run-dir": { type: "string" }, live: { type: "boolean" }, models: { type: "string" }, details: { type: "boolean" }, "allow-degenerate": { type: "boolean" }, repetitions: { type: "string" }, prices: { type: "string" }
   } });
   const command = positionals[0];
   const result = command === "sanitize" ? await sanitize(values) : command === "discover" ? await discover(values) : command === "score" ? await score(values) : command === "run" ? await runFixture(values) : command === "demo" ? await demo(values) : command === "demo-record" ? await demoRecord(values) : command === "dashboard-build" ? await dashboardBuild(values) : (() => { throw new Error("expected sanitize, discover, run, score, demo, demo-record, or dashboard-build"); })();

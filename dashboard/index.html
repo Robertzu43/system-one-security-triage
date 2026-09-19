@@ -82,8 +82,18 @@
       </section>
     </div>
 
+    <section class="panel" aria-labelledby="race-title">
+      <div class="section-heading compact">
+        <div><p class="section-number">05 / Speed</p><h2 id="race-title">The same 100 cases, in real time</h2></div>
+        <button id="race-play" type="button">Play the recorded race <span aria-hidden="true">▶</span></button>
+      </div>
+      <p class="race-note">Each lane replays that model&rsquo;s own recorded per-decision latencies, compressed so the slowest finishes in about twelve seconds. Nothing is animated for effect &mdash; the pacing is the measured time each decision actually took.</p>
+      <div id="race" class="race"></div>
+      <p class="race-note">Speed alone is easy to make flattering, so the counter shows decisions made <em>and</em> how many were right. A model can win the race and still be the wrong choice.</p>
+    </section>
+
     <section class="method" aria-labelledby="method-title">
-      <p class="section-number">05 / Method</p>
+      <p class="section-number">06 / Method</p>
       <h2 id="method-title">Same evidence in.<br>Saved decisions out.</h2>
       <div class="method-copy">
         <p>Every evaluator received identical canonical evidence for 100 synthetic TypeScript/Node.js cases across injection, broken access control, and SSRF. Span paths are numbered rather than named, span text is label-neutral, and no context-resolution flags are shown to any model. The expected labels are part of the frozen corpus but never part of the evidence. A build-time check fails if any repeated path token concentrates in one label.</p>
@@ -97,7 +107,7 @@
 
     <section class="explorer" aria-labelledby="explorer-title">
       <div class="section-heading">
-        <div><p class="section-number">06 / Evidence</p><h2 id="explorer-title">Case explorer</h2></div>
+        <div><p class="section-number">07 / Evidence</p><h2 id="explorer-title">Case explorer</h2></div>
         <p id="results-count" aria-live="polite">Loading cases…</p>
       </div>
       <form class="filters" aria-label="Filter cases">
