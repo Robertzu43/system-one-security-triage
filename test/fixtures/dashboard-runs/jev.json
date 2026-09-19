@@ -10,8 +10,9 @@
   "schemaVersion": 1,
   "promptSpecHash": "jev-prompt",
   "gitSha": "0000000000000000000000000000000000000000",
-  "corpusHash": "4ef7801ff54fc9139c879cfd6bcde78c3a16fd36d9d5f84df9d405c8377cc07d",
+  "corpusHash": "d029e855bcf51d490c37a5ecf1fa0c1ac0cb5de590a322cb0994a24c09c8cf28",
   "caseCount": 100,
+  "repetitions": 1,
   "results": [
     {
       "caseId": "injection-vulnerable",
@@ -38,7 +39,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe",
@@ -65,7 +67,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient",
@@ -92,7 +95,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable",
@@ -119,7 +123,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe",
@@ -146,7 +151,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient",
@@ -173,7 +179,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable",
@@ -200,7 +207,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe",
@@ -227,7 +235,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient",
@@ -254,7 +263,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-sql-order-sort",
@@ -281,7 +291,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-sql-report-filter",
@@ -308,7 +319,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-shell-export",
@@ -335,7 +347,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-shell-git-ref",
@@ -362,7 +375,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-eval-formula",
@@ -389,7 +403,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-vm-script",
@@ -416,7 +431,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-template-helper",
@@ -443,7 +459,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-template-name",
@@ -470,7 +487,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-path-archive",
@@ -497,7 +515,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-orm-order",
@@ -524,7 +543,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-vulnerable-graphql-raw-filter",
@@ -551,7 +571,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-sql-placeholder-email",
@@ -578,7 +599,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-query-builder-eq",
@@ -605,7 +627,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-shell-execfile-args",
@@ -632,7 +655,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-shell-command-allowlist",
@@ -659,7 +683,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-json-parse",
@@ -686,7 +711,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-template-autoescape",
@@ -713,7 +739,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-path-basename-root",
@@ -740,7 +767,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-path-resolve-root",
@@ -767,7 +795,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-orm-enum-sort",
@@ -794,7 +823,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-safe-parser-schema-validation",
@@ -821,7 +851,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-sql-helper-hidden",
@@ -848,7 +879,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-db-wrapper-hidden",
@@ -875,7 +907,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-command-builder-hidden",
@@ -902,7 +935,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-process-service-hidden",
@@ -929,7 +963,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-expression-compiler-hidden",
@@ -956,7 +991,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-template-sanitizer-hidden",
@@ -983,7 +1019,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-archive-path-guard-hidden",
@@ -1010,7 +1047,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-upload-normalizer-hidden",
@@ -1037,7 +1075,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-orm-filter-helper-hidden",
@@ -1064,7 +1103,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "injection-insufficient-parser-policy-hidden",
@@ -1091,7 +1131,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-invoice-read",
@@ -1118,7 +1159,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-profile-update",
@@ -1145,7 +1187,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-tenant-report",
@@ -1172,7 +1215,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-admin-export",
@@ -1199,7 +1243,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-project-delete",
@@ -1226,7 +1271,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-document-download",
@@ -1253,7 +1299,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-order-refund",
@@ -1280,7 +1327,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-team-invite",
@@ -1307,7 +1355,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-api-key-rotate",
@@ -1334,7 +1383,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-vulnerable-mass-assignment-role",
@@ -1361,7 +1411,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-invoice-owner-query",
@@ -1388,7 +1439,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-profile-self-id",
@@ -1415,7 +1467,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-tenant-scope-query",
@@ -1442,7 +1495,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-admin-middleware",
@@ -1469,7 +1523,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-project-owner-check",
@@ -1496,7 +1551,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-document-membership",
@@ -1523,7 +1579,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-refund-permission",
@@ -1550,7 +1607,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-team-owner-guard",
@@ -1577,7 +1635,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-api-key-session-user",
@@ -1604,7 +1663,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-safe-mass-assignment-allowlist",
@@ -1631,7 +1691,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-invoice-policy-hidden",
@@ -1658,7 +1719,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-profile-auth-helper",
@@ -1685,7 +1747,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-tenant-context-hidden",
@@ -1712,7 +1775,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-admin-middleware-hidden",
@@ -1739,7 +1803,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-project-permission-service",
@@ -1766,7 +1831,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-document-acl-hidden",
@@ -1793,7 +1859,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-refund-policy-hidden",
@@ -1820,7 +1887,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-team-role-hidden",
@@ -1847,7 +1915,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-api-key-authorization-hidden",
@@ -1874,7 +1943,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "access-insufficient-field-policy-hidden",
@@ -1901,7 +1971,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-avatar-url",
@@ -1928,7 +1999,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-webhook-test-url",
@@ -1955,7 +2027,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-pdf-render-url",
@@ -1982,7 +2055,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-redirect-follow",
@@ -2009,7 +2083,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-metadata-host",
@@ -2036,7 +2111,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-dns-rebind-host",
@@ -2063,7 +2139,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-proxy-destination",
@@ -2090,7 +2167,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-image-import-url",
@@ -2117,7 +2195,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-feed-fetch-url",
@@ -2144,7 +2223,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-vulnerable-oauth-jwks-url",
@@ -2171,7 +2251,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-avatar-host-allowlist",
@@ -2198,7 +2279,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-webhook-https-domain",
@@ -2225,7 +2307,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-pdf-fixed-origin",
@@ -2252,7 +2335,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-redirect-disabled",
@@ -2279,7 +2363,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-private-ip-block",
@@ -2306,7 +2391,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-dns-pin-check",
@@ -2333,7 +2419,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-proxy-service-enum",
@@ -2360,7 +2447,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-image-object-key",
@@ -2387,7 +2475,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-feed-registry",
@@ -2414,7 +2503,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-safe-jwks-issuer-map",
@@ -2441,7 +2531,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-avatar-validator-hidden",
@@ -2468,7 +2559,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-webhook-policy-hidden",
@@ -2495,7 +2587,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-pdf-resolver-hidden",
@@ -2522,7 +2615,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-redirect-config-hidden",
@@ -2549,7 +2643,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-ip-filter-hidden",
@@ -2576,7 +2671,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-dns-cache-hidden",
@@ -2603,7 +2699,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-proxy-map-hidden",
@@ -2630,7 +2727,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-image-fetcher-hidden",
@@ -2657,7 +2755,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-feed-resolver-hidden",
@@ -2684,7 +2783,8 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     },
     {
       "caseId": "ssrf-insufficient-jwks-discovery-hidden",
@@ -2711,8 +2811,9 @@
       "evaluator": "jev",
       "latencyMs": 1,
       "modelLatencyMs": 1,
-      "status": "valid"
+      "status": "valid",
+      "repetition": 1
     }
   ],
-  "artifactSha256": "4e3edd4ec8a024aa5ec308e1519a715ca85fc6aa11f0e81b90218b031d4ed726"
+  "artifactSha256": "d3d1f1176f0654000ae207f9080c4f1cc6ec5b8836a52a4ba29f1b1032f8f798"
 }

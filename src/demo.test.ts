@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { assertNoFixtureLeakage, decisionForChoice, loadDemoCases, parseDemoDecision, runDemo, summarizeDemoResults, type DemoAdapter, type DemoCase, type DemoDecision, type DemoResult } from "./demo.js";
+import { assertNoFixtureLeakage, assertNoPathLabelSignal, longestPathOrderedLabelRun, pathTokenSignals, decisionForChoice, loadDemoCases, parseDemoDecision, runDemo, summarizeDemoResults, type DemoAdapter, type DemoCase, type DemoDecision, type DemoResult } from "./demo.js";
 import { demoCriteria } from "./jev.js";
 import { createJevDemoAdapter, createReasoningDemoAdapter } from "./demo-live.js";
 import { stableHash } from "./jsonl.js";
@@ -113,8 +113,42 @@ test("fixture leakage check rejects label-bearing paths, text, and metadata keys
   assert.throws(() => assertNoFixtureLeakage({ caseId: "case-1", state: { spans: [{ id: "s1", path: "src/case-1.ts", text: "x" }] } }), /contains the case ID/);
 });
 
+const labelled = (disposition: DemoDecision["disposition"], path: string): DemoCase => ({
+  caseId: `case-${path}`, family: "injection",
+  state: { entryKind: "call", spans: [{ id: "s1", path, startLine: 1, endLine: 1, text: "x" }], relationships: [] },
+  expected: disposition === "vulnerable" ? { disposition, family: "injection" } : { disposition, family: null },
+  ledger: null
+});
+
+test("the path gate catches a label-correlated filename word", () => {
+  // Exactly the leak the old word blocklist missed: "allowlist" only ever appears on safe cases.
+  const leaky = [
+    ...Array.from({ length: 4 }, (_value, index) => labelled("safe", `src/demo/allowlist-${index}.ts`)),
+    ...Array.from({ length: 4 }, (_value, index) => labelled("vulnerable", `src/demo/raw-${index}.ts`))
+  ];
+  assert.deepEqual(pathTokenSignals(leaky).map(({ token, label }) => `${token}:${label}`), ["allowlist:safe", "raw:vulnerable"]);
+  assert.throws(() => assertNoPathLabelSignal(leaky), /span path tokens predict the label/);
+});
+
+test("the path gate catches label-ordered numbering that carries no leaky word", () => {
+  // Numbered paths share every letter, so token concentration alone reports nothing here.
+  const grouped = [
+    ...Array.from({ length: 8 }, (_value, index) => labelled("vulnerable", `src/demo/case-00${index}.ts`)),
+    ...Array.from({ length: 8 }, (_value, index) => labelled("safe", `src/demo/case-01${index}.ts`))
+  ];
+  assert.deepEqual(pathTokenSignals(grouped), []);
+  assert.equal(longestPathOrderedLabelRun(grouped), 8);
+  assert.throws(() => assertNoPathLabelSignal(grouped), /case ordering predicts the label/);
+});
+
+test("the shipped corpus passes both halves of the path gate", async () => {
+  const cases = await loadDemoCases("test/fixtures/demo-cases.json");
+  assert.deepEqual(pathTokenSignals(cases), []);
+  assert.ok(longestPathOrderedLabelRun(cases) <= 6, "case numbering groups dispositions");
+});
+
 const validResult = (item: DemoCase, overrides: Partial<DemoResult> = {}): DemoResult => ({
-  caseId: item.caseId, evaluator: "jev", status: "valid", decision: item.expected, correct: true, latencyMs: 1, modelLatencyMs: 1, error: null, ...overrides
+  caseId: item.caseId, repetition: 1, evaluator: "jev", status: "valid", decision: item.expected, correct: true, latencyMs: 1, modelLatencyMs: 1, error: null, ...overrides
 });
 
 test("recall is reported with and without family; family accuracy and precision are separate", async () => {
@@ -226,7 +260,7 @@ test("triage accuracy scores disposition and vulnerable family", async () => {
 test("summary keeps explicit errors in both denominators", async () => {
   const cases = await loadDemoCases("test/fixtures/demo-cases.json");
   const results: DemoResult[] = cases.map((item) => ({
-    caseId: item.caseId, evaluator: "jev", status: "valid", decision: item.expected,
+    caseId: item.caseId, repetition: 1, evaluator: "jev", status: "valid", decision: item.expected,
     correct: true, latencyMs: 1, modelLatencyMs: 1, error: null
   }));
   results[0] = { ...results[0]!, status: "error", decision: null, correct: false, error: "service unavailable" };
@@ -244,7 +278,7 @@ test("live recording aborts an evaluator after three consecutive failures", asyn
     metadata: { provider: "Fixture", modelId: "terra", runner: "fixture", runnerVersion: "1", promptSpecHash: "fixture" },
     evaluate: async () => { attempts += 1; throw new Error("nonzero_exit: review exited 1"); }
   };
-  await assert.rejects(() => runDemo(cases, [adapter], "live", 3), /terra aborted after 3 consecutive errors: nonzero_exit: review exited 1/);
+  await assert.rejects(() => runDemo(cases, [adapter], "live", { maxConsecutiveErrors: 3 }), /terra aborted after 3 consecutive errors: nonzero_exit: review exited 1/);
   assert.equal(attempts, 3);
 });
 
