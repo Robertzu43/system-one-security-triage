@@ -41,7 +41,7 @@ function abstain(error: unknown): JevJudgment {
   return { kind: "abstain", error: { name: value.name, message: value.message } };
 }
 
-export async function judgeWithJev(packet: EvidencePacket, client: Pick<TypeSafeClient, "systemOne">): Promise<JevJudgment> {
+export async function judgeWithJev(packet: EvidencePacket | string, client: Pick<TypeSafeClient, "systemOne">): Promise<JevJudgment> {
   try {
     const response: unknown = await client.systemOne({ state: packet as unknown as EntryType, model: "jev-1.13.0", questions });
     const result = record(response); const usage = record(result?.usage);

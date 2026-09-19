@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["decision", "family"],
+  "properties": {
+    "decision": { "enum": ["vulnerable", "safe", "insufficient_context"] },
+    "family": { "enum": ["injection", "broken_access_control", "ssrf", null] }
+  }
+}

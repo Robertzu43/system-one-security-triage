@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { delimiter, isAbsolute, join, resolve, sep } from "node:path";
 
 export type ReasoningEvaluator = "terra" | "opus";
-export type ReasoningMode = "agentic" | "controlled";
+export type ReasoningMode = "agentic" | "controlled" | "demo";
 export type StructuredReview = { decision: "vulnerable" | "safe" | "abstain"; family: "injection" | "broken_access_control" | "ssrf"; evidence_span_ids: string[]; };
 export type ReasoningFailureKind = "timeout" | "malformed_output" | "tool_denied" | "budget_exhausted" | "budget_unverifiable" | "version_mismatch" | "unsupported_platform" | "nonzero_exit" | "spawn_error";
 export interface ReasoningRequest {
@@ -44,7 +44,7 @@ interface ProcessResult { code: number; stdout: string; stderr: string; timedOut
 
 const decisions = new Set<StructuredReview["decision"]>(["vulnerable", "safe", "abstain"]);
 const families = new Set<StructuredReview["family"]>(["injection", "broken_access_control", "ssrf"]);
-const expectedVersions: Readonly<Record<ReasoningEvaluator, string>> = { terra: "codex-cli 0.147.0", opus: "2.1.276 (Claude Code)" };
+const expectedVersions: Readonly<Record<ReasoningEvaluator, string>> = { terra: "codex-cli 0.147.0", opus: "2.1.277 (Claude Code)" };
 
 function record(value: unknown): Record<string, unknown> | null { return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null; }
 function usage(value: unknown): ReasoningResult["usage"] {
@@ -58,12 +58,23 @@ function parseStructured(value: unknown): StructuredReview {
   if (root === null || Object.keys(root).length !== 3 || !("decision" in root) || !("family" in root) || !("evidence_span_ids" in root) || !decisions.has(root.decision as StructuredReview["decision"]) || !families.has(root.family as StructuredReview["family"]) || !Array.isArray(root.evidence_span_ids) || !root.evidence_span_ids.every((id) => typeof id === "string" && /^s[1-9][0-9]*$/.test(id)) || new Set(root.evidence_span_ids).size !== root.evidence_span_ids.length) throw new Error("malformed structured output");
   return { decision: root.decision as StructuredReview["decision"], family: root.family as StructuredReview["family"], evidence_span_ids: [...root.evidence_span_ids] as string[] };
 }
-function finalOutput(text: string): StructuredReview {
+function parseDemoStructured(value: unknown): StructuredReview {
+  const root = record(value);
+  if (root === null || Object.keys(root).length !== 2 || !("decision" in root) || !("family" in root)) throw new Error("malformed demo output");
+  const decision = root.decision;
+  if (decision !== "vulnerable" && decision !== "safe" && decision !== "insufficient_context") throw new Error("malformed demo output");
+  if (decision === "vulnerable") {
+    if (!families.has(root.family as StructuredReview["family"])) throw new Error("malformed demo output");
+    return { decision, family: root.family as StructuredReview["family"], evidence_span_ids: [] };
+  }
+  if (root.family !== null) throw new Error("malformed demo output");
+  return { decision: decision === "safe" ? "safe" : "abstain", family: "injection", evidence_span_ids: [] };
+}
+function finalOutput(text: string, mode: ReasoningMode): StructuredReview {
   const parsed = JSON.parse(text) as unknown;
   const outer = record(parsed);
-  if (outer !== null && outer.structured_output !== undefined) return parseStructured(outer.structured_output);
-  if (outer !== null && typeof outer.result === "string") return parseStructured(JSON.parse(outer.result));
-  return parseStructured(parsed);
+  const value = outer !== null && outer.structured_output !== undefined ? outer.structured_output : outer !== null && typeof outer.result === "string" ? JSON.parse(outer.result) : parsed;
+  return mode === "demo" ? parseDemoStructured(value) : parseStructured(value);
 }
 function failure(kind: ReasoningFailureKind, message: string, result: Omit<ReasoningResult, "finalOutcome" | "output" | "error">): ReasoningResult {
   return { ...result, finalOutcome: "manual_review", output: null, error: { kind, message } };
@@ -86,10 +97,10 @@ function command(request: ReasoningRequest, executable: string, outputPath: stri
     cwd: request.snapshot
   };
   if (request.model === undefined || request.model.length === 0) throw new Error("Opus requires a frozen full model ID");
-  const tools = request.mode === "controlled" ? "" : "Read,Grep,Glob";
+  const tools = request.mode === "agentic" ? "Read,Grep,Glob" : "";
   return {
     command: executable,
-    args: ["--print", "--safe-mode", "--no-session-persistence", "--restricted", "--permission-mode", "dontAsk", "--allowedTools", tools, "--model", request.model, "--json-schema", compactSchema, "--output-format", "json"],
+    args: ["--print", "--bare", "--no-session-persistence", "--restricted", "--strict-mcp-config", "--permission-mode", "dontAsk", "--permission-prompts", "none", "--tools", tools, "--model", request.model, "--json-schema", compactSchema, "--output-format", "json"],
     cwd: request.snapshot
   };
 }
@@ -175,12 +186,12 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
     let text = processResult.stdout;
     try { text = await readFile(outputPath, "utf8"); } catch { /* Opus returns final output on stdout. */ }
     try {
-      const output = finalOutput(text);
-      if (observedUsage === null) return failure("budget_unverifiable", "token usage is unavailable from the frozen CLI output", resultBase);
-      if (observedUsage.inputTokens + observedUsage.outputTokens > request.tokenBudget) return failure("budget_exhausted", `review used more than ${request.tokenBudget} tokens`, resultBase);
+      const output = finalOutput(text, request.mode);
+      if (observedUsage === null && request.mode !== "demo") return failure("budget_unverifiable", "token usage is unavailable from the frozen CLI output", resultBase);
+      if (observedUsage !== null && observedUsage.inputTokens + observedUsage.outputTokens > request.tokenBudget) return failure("budget_exhausted", `review used more than ${request.tokenBudget} tokens`, resultBase);
       const toolCalls = request.mode === "controlled" ? 0 : toolCallsFrom(processResult.stdout);
-      if (toolCalls === null) return failure("budget_unverifiable", "tool-call usage is unavailable from the frozen CLI output", resultBase);
-      if (toolCalls > request.toolBudget) return failure("budget_exhausted", `review used more than ${request.toolBudget} tool calls`, resultBase);
+      if (toolCalls === null && request.mode !== "demo") return failure("budget_unverifiable", "tool-call usage is unavailable from the frozen CLI output", resultBase);
+      if (toolCalls !== null && toolCalls > request.toolBudget) return failure("budget_exhausted", `review used more than ${request.toolBudget} tool calls`, resultBase);
       return { ...resultBase, finalOutcome: output.decision === "vulnerable" ? "alert" : output.decision === "safe" ? "no_alert" : "manual_review", output, error: null };
     } catch (error) {
       return failure("malformed_output", error instanceof Error ? error.message : "malformed structured output", resultBase);

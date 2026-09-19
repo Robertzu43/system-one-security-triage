@@ -104,7 +104,7 @@ test("controlled Opus uses the frozen full model and an empty allowed-tool list"
     const executable = await fixture(root, `
 process.stderr.write(JSON.stringify({ args: process.argv.slice(2), cwd: process.cwd() }));
 process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] }, usage: { input_tokens: 11, output_tokens: 13 } }));
-`, "2.1.276 (Claude Code)");
+`, "2.1.277 (Claude Code)");
     const { runReasoningReview } = await reasoning();
     const result = await runReasoningReview({
       evaluator: "opus", mode: "controlled", prompt: "{\"packet\":true}", snapshot, schemaPath, timeoutMs: 1_000,
@@ -112,7 +112,7 @@ process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", fam
     }, { executable, outputDirectory: root, environment: { PATH: process.env.PATH, HOME: process.env.HOME } });
 
     const observed = JSON.parse(result.stderr);
-    assert.deepEqual(observed.args, ["--print", "--safe-mode", "--no-session-persistence", "--restricted", "--permission-mode", "dontAsk", "--allowedTools", "", "--model", "claude-opus-4-6", "--json-schema", JSON.stringify(JSON.parse(await readFile(schemaPath, "utf8"))), "--output-format", "json"]);
+    assert.deepEqual(observed.args, ["--print", "--bare", "--no-session-persistence", "--restricted", "--strict-mcp-config", "--permission-mode", "dontAsk", "--permission-prompts", "none", "--tools", "", "--model", "claude-opus-4-6", "--json-schema", JSON.stringify(JSON.parse(await readFile(schemaPath, "utf8"))), "--output-format", "json"]);
     assert.equal(observed.cwd, await realpath(snapshot));
     assert.equal(result.finalOutcome, "no_alert");
   } finally {
@@ -126,7 +126,7 @@ test("Claude structured_output envelopes preserve output and usage while unsuppo
     const snapshot = join(root, "snapshot");
     const schemaPath = resolve("config/reasoning-output.schema.json");
     await (await import("node:fs/promises")).mkdir(snapshot);
-    const opusExecutable = await fixture(root, 'process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] }, usage: { input_tokens: 11, output_tokens: 13 } }));', "2.1.276 (Claude Code)");
+    const opusExecutable = await fixture(root, 'process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] }, usage: { input_tokens: 11, output_tokens: 13 } }));', "2.1.277 (Claude Code)");
     const terraRoot = join(root, "terra");
     await (await import("node:fs/promises")).mkdir(terraRoot);
     const terraExecutable = await fixture(terraRoot, `
@@ -147,13 +147,31 @@ await writeFile(args[args.indexOf("--output-last-message") + 1], JSON.stringify(
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
+test("demo mode keeps a valid Terra decision when CLI usage metadata is unavailable", async () => {
+  const root = await mkdtemp(join(tmpdir(), "reasoning-demo-test-"));
+  try {
+    const snapshot = join(root, "empty");
+    await (await import("node:fs/promises")).mkdir(snapshot);
+    const executable = await fixture(root, `
+const { writeFile } = await import("node:fs/promises");
+const args = process.argv.slice(2);
+await writeFile(args[args.indexOf("--output-last-message") + 1], JSON.stringify({ decision: "safe", family: null }));
+`);
+    const { runReasoningReview } = await reasoning();
+    const result = await runReasoningReview({ evaluator: "terra", mode: "demo", prompt: "{}", snapshot, schemaPath: resolve("config/demo-output.schema.json"), timeoutMs: 1_000, tokenBudget: 100, toolBudget: 1 }, { executable, outputDirectory: root });
+    assert.equal(result.error, null);
+    assert.equal(result.output?.decision, "safe");
+    assert.equal(result.usageStatus, "inconclusive");
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
 test("reasoning runner rejects version drift before a model attempt", async () => {
   const root = await mkdtemp(join(tmpdir(), "reasoning-version-test-"));
   try {
     const snapshot = join(root, "snapshot");
     await (await import("node:fs/promises")).mkdir(snapshot);
     const marker = join(root, "model-called");
-    const executable = await fixture(root, `await (await import("node:fs/promises")).writeFile(${JSON.stringify(marker)}, "called");`, "2.1.277 (Claude Code)");
+    const executable = await fixture(root, `await (await import("node:fs/promises")).writeFile(${JSON.stringify(marker)}, "called");`, "2.1.278 (Claude Code)");
     const { runReasoningReview } = await reasoning();
     const result = await runReasoningReview({ evaluator: "opus", mode: "controlled", prompt: "{}", snapshot, schemaPath: resolve("config/reasoning-output.schema.json"), timeoutMs: 1_000, tokenBudget: 100, toolBudget: 1, model: "claude-opus-4-6" }, { executable, outputDirectory: root });
     assert.equal(result.error?.kind, "version_mismatch");

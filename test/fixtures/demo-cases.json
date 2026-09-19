@@ -1,0 +1,119 @@
+[
+  {
+    "caseId": "injection-vulnerable",
+    "family": "injection",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        { "id": "s1", "path": "src/users.ts", "startLine": 10, "endLine": 10, "text": "const query = `SELECT * FROM users WHERE id = ${req.query.id}`;" },
+        { "id": "s2", "path": "src/users.ts", "startLine": 11, "endLine": 11, "text": "return db.query(query);" }
+      ],
+      "relationships": [{ "from": "s1", "to": "s2", "kind": "flows_to" }],
+      "contextResolution": { "middleware": "resolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "resolved", "callPath": "resolved" }
+    },
+    "expected": { "disposition": "vulnerable", "family": "injection" }
+  },
+  {
+    "caseId": "injection-safe",
+    "family": "injection",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        { "id": "s1", "path": "src/users.ts", "startLine": 20, "endLine": 20, "text": "const id = Number.parseInt(req.query.id, 10);" },
+        { "id": "s2", "path": "src/users.ts", "startLine": 21, "endLine": 21, "text": "return db.query('SELECT * FROM users WHERE id = $1', [id]);" }
+      ],
+      "relationships": [{ "from": "s1", "to": "s2", "kind": "flows_to" }],
+      "contextResolution": { "middleware": "resolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "resolved", "callPath": "resolved" }
+    },
+    "expected": { "disposition": "safe", "family": null }
+  },
+  {
+    "caseId": "injection-insufficient",
+    "family": "injection",
+    "state": {
+      "entryKind": "call",
+      "spans": [{ "id": "s1", "path": "src/users.ts", "startLine": 30, "endLine": 30, "text": "return lookupUser(req.query.id);" }],
+      "relationships": [],
+      "contextResolution": { "middleware": "unresolved", "upstreamDataFlow": "resolved", "sanitizers": "unresolved", "authorization": "unresolved", "callPath": "unresolved" }
+    },
+    "expected": { "disposition": "insufficient_context", "family": null }
+  },
+  {
+    "caseId": "access-vulnerable",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        { "id": "s1", "path": "src/accounts.ts", "startLine": 10, "endLine": 11, "text": "const authenticatedUserId = req.user.id;\nconst requestedAccountId = req.params.accountId;" },
+        { "id": "s2", "path": "src/accounts.ts", "startLine": 12, "endLine": 12, "text": "return db.accounts.findById(requestedAccountId);" }
+      ],
+      "relationships": [{ "from": "s1", "to": "s2", "kind": "flows_to" }],
+      "contextResolution": { "middleware": "resolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "resolved", "callPath": "resolved" }
+    },
+    "expected": { "disposition": "vulnerable", "family": "broken_access_control" }
+  },
+  {
+    "caseId": "access-safe",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        { "id": "s1", "path": "src/accounts.ts", "startLine": 20, "endLine": 20, "text": "if (req.user.accountId !== req.params.accountId) return res.sendStatus(403);" },
+        { "id": "s2", "path": "src/accounts.ts", "startLine": 21, "endLine": 21, "text": "return db.accounts.findById(req.params.accountId);" }
+      ],
+      "relationships": [{ "from": "s1", "to": "s2", "kind": "guards" }],
+      "contextResolution": { "middleware": "resolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "resolved", "callPath": "resolved" }
+    },
+    "expected": { "disposition": "safe", "family": null }
+  },
+  {
+    "caseId": "access-insufficient",
+    "family": "broken_access_control",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        { "id": "s1", "path": "src/accounts.ts", "startLine": 30, "endLine": 30, "text": "await authorize(req, req.params.accountId);" },
+        { "id": "s2", "path": "src/accounts.ts", "startLine": 31, "endLine": 31, "text": "return db.accounts.findById(req.params.accountId);" }
+      ],
+      "relationships": [{ "from": "s1", "to": "s2", "kind": "guards" }],
+      "contextResolution": { "middleware": "unresolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "unresolved", "callPath": "unresolved" }
+    },
+    "expected": { "disposition": "insufficient_context", "family": null }
+  },
+  {
+    "caseId": "ssrf-vulnerable",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "route",
+      "spans": [{ "id": "s1", "path": "src/proxy.ts", "startLine": 10, "endLine": 10, "text": "return fetch(req.query.url);" }],
+      "relationships": [],
+      "contextResolution": { "middleware": "resolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "resolved", "callPath": "resolved" }
+    },
+    "expected": { "disposition": "vulnerable", "family": "ssrf" }
+  },
+  {
+    "caseId": "ssrf-safe",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "route",
+      "spans": [
+        { "id": "s1", "path": "src/proxy.ts", "startLine": 20, "endLine": 20, "text": "const target = new URL(req.query.url); if (!ALLOWED_HOSTS.has(target.hostname)) return res.sendStatus(400);" },
+        { "id": "s2", "path": "src/proxy.ts", "startLine": 21, "endLine": 21, "text": "return fetch(target);" }
+      ],
+      "relationships": [{ "from": "s1", "to": "s2", "kind": "guards" }],
+      "contextResolution": { "middleware": "resolved", "upstreamDataFlow": "resolved", "sanitizers": "resolved", "authorization": "resolved", "callPath": "resolved" }
+    },
+    "expected": { "disposition": "safe", "family": null }
+  },
+  {
+    "caseId": "ssrf-insufficient",
+    "family": "ssrf",
+    "state": {
+      "entryKind": "call",
+      "spans": [{ "id": "s1", "path": "src/proxy.ts", "startLine": 30, "endLine": 30, "text": "return fetch(resolveServiceUrl(req.query.service));" }],
+      "relationships": [],
+      "contextResolution": { "middleware": "unresolved", "upstreamDataFlow": "unresolved", "sanitizers": "unresolved", "authorization": "resolved", "callPath": "unresolved" }
+    },
+    "expected": { "disposition": "insufficient_context", "family": null }
+  }
+]

@@ -1,9 +1,13 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
+import { TypeSafeClient } from "@typesafe-ai/sdk";
 import { inventoryAst } from "./discover.js";
 import type { Candidate, ControlledEvaluator, Repetition, ScoreInput } from "./contracts.js";
+import { loadDemoCases, runDemo, type DemoAdapter } from "./demo.js";
+import { createJevDemoAdapter, createReasoningDemoAdapter } from "./demo-live.js";
+import { judgeWithJev } from "./jev.js";
 import { canonicalJson } from "./jsonl.js";
 import { runArm, type PublishedRun } from "./pipeline.js";
 import { type ReasoningResult } from "./reasoning.js";
@@ -93,12 +97,42 @@ async function runFixture(values: Values): Promise<unknown> {
   }
 }
 
+async function demo(values: Values): Promise<unknown> {
+  const output = (report: Awaited<ReturnType<typeof runDemo>>): unknown => values.details === true ? report : ({ mode: report.mode, disclaimer: report.disclaimer, caseCount: report.caseCount, summary: report.summary });
+  const cases = await loadDemoCases(required(values, "fixture"));
+  if (values.live === true) {
+    const selected = (typeof values.models === "string" ? values.models : "jev,terra").split(",");
+    if (selected.length === 0 || selected.some((name) => !["jev", "terra", "opus"].includes(name)) || new Set(selected).size !== selected.length) throw new Error("--models must be a unique comma-separated subset of jev,terra,opus");
+    if (selected.includes("jev") && !(process.env.TYPESAFE_API_KEY?.trim())) throw new Error("TYPESAFE_API_KEY is required for live Jev evaluation");
+    const root = await mkdtemp(join(tmpdir(), "triage-demo-"));
+    const emptySnapshot = join(root, "empty");
+    await mkdir(emptySnapshot);
+    try {
+      const adapters: DemoAdapter[] = [];
+      if (selected.includes("jev")) {
+        const client = new TypeSafeClient({ timeout: 30_000, retry: { maxRetries: 0 }, logLevel: "off" });
+        adapters.push(createJevDemoAdapter((stateJson) => judgeWithJev(stateJson, client)));
+      }
+      if (selected.includes("terra")) adapters.push(createReasoningDemoAdapter("terra", emptySnapshot, undefined, { outputDirectory: root }));
+      if (selected.includes("opus")) adapters.push(createReasoningDemoAdapter("opus", emptySnapshot, undefined, { outputDirectory: root }));
+      return output(await runDemo(cases, adapters, "live"));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  }
+  const adapters = (["jev", "terra", "opus"] as const).map((name): DemoAdapter => ({
+    name,
+    evaluate: async (_stateJson, item) => ({ ...item.expected, inputTokens: 0, outputTokens: 0, costUsd: 0 })
+  }));
+  return output(await runDemo(cases, adapters, "fixture"));
+}
+
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({ args: process.argv.slice(2), allowPositionals: true, strict: true, options: {
-    source: { type: "string" }, destination: { type: "string" }, commit: { type: "string" }, snapshot: { type: "string" }, input: { type: "string" }, fixture: { type: "string" }, evaluator: { type: "string" }, "run-id": { type: "string" }
+    source: { type: "string" }, destination: { type: "string" }, commit: { type: "string" }, snapshot: { type: "string" }, input: { type: "string" }, fixture: { type: "string" }, evaluator: { type: "string" }, "run-id": { type: "string" }, live: { type: "boolean" }, models: { type: "string" }, details: { type: "boolean" }
   } });
   const command = positionals[0];
-  const result = command === "sanitize" ? await sanitize(values) : command === "discover" ? await discover(values) : command === "score" ? await score(values) : command === "run" ? await runFixture(values) : (() => { throw new Error("expected sanitize, discover, run, or score"); })();
+  const result = command === "sanitize" ? await sanitize(values) : command === "discover" ? await discover(values) : command === "score" ? await score(values) : command === "run" ? await runFixture(values) : command === "demo" ? await demo(values) : (() => { throw new Error("expected sanitize, discover, run, score, or demo"); })();
   process.stdout.write(`${canonicalJson(result)}\n`);
 }
 
