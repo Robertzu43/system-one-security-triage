@@ -1,18 +1,22 @@
 # System One Security Triage
 
-Status: approved design
+Status: approved revised design
 Date: 2026-09-18
 
 ## Objective
 
 Build a reproducible TypeScript/Node cybersecurity benchmark and static dashboard
-showing how Jev can triage security candidates before expensive reasoning models
-investigate them.
+that compares Jev, Terra, and Opus as bounded security-triage decision makers over
+the same redacted evidence. Measure decision quality, evidence localization,
+abstention behavior, latency, and cost without pretending that System One and
+reasoning models use the same internal mechanism.
 
-The repository name is `system-one-security-triage`. The public demo may use the
-competitive framing **Jev vs Opus vs Terra**. Claim 1 below is the preregistered
-primary claim. The eventual publication title may emphasize a supported result but
-must not replace, broaden, or obscure that primary claim after results are known.
+The repository name is `system-one-security-triage`. The public framing is
+**Jev vs Terra vs Opus: security-triage decision quality**. The controlled
+comparison below is the preregistered primary experiment. A Jev-routed cascade is
+an applied secondary experiment whose design may use only calibration results.
+The eventual publication title may emphasize a supported result but must not
+replace, broaden, or obscure the frozen primary question after results are known.
 
 ## Scope
 
@@ -30,23 +34,26 @@ while keeping ground-truth validation tractable.
 
 ## Claims under test
 
-1. A Jev-routed cascade can preserve vulnerability recall while reducing cost and
-   latency relative to sending every candidate to a reasoning model.
-2. Jev can reduce the false-alert burden of a frozen Semgrep configuration without
-   sacrificing the preregistered recall target.
-3. A broad deterministic inventory plus Jev can produce independently validated
-   findings missed by that exact Semgrep version, ruleset, and configuration.
+1. On identical bounded evidence, Jev can achieve non-inferior balanced triage
+   accuracy and vulnerability recall relative to Terra and Opus within the frozen
+   two-percentage-point margins.
+2. Jev can make those bounded decisions with lower observed latency and, when
+   defensible provider charges are available, lower cost than the frontier models.
+3. A Jev-routed cascade can reduce frontier-model invocations while satisfying the
+   same frozen vulnerability-recall guardrail.
 
-The third claim must be stated narrowly. It is not evidence that the system finds
-everything missed by security scanners generally.
+Semgrep false-alert reduction and additional validated AST yield remain exploratory
+secondary analyses. They must not replace the controlled model comparison in the
+headline result, and AST yield must be stated narrowly rather than generalized to
+security scanners as a category.
 
 ## Corpus
 
 ### OWASP Juice Shop
 
-Use a frozen, redacted Juice Shop revision only for development, prompt design,
-dashboard examples, and qualitative case studies. Do not use Juice Shop to select
-thresholds or escalation budgets.
+Use a frozen, redacted Juice Shop revision only for development, question and packet
+design, dashboard examples, and qualitative case studies. Do not use Juice Shop to
+select decision mappings, thresholds, abstention policies, or escalation budgets.
 
 Juice Shop is not the sole or primary holdout because it is public training
 software. Challenge identifiers, solutions, marker comments, tests, and tutorial
@@ -57,9 +64,10 @@ underlying vulnerability root causes.
 ### Calibration repositories
 
 Reserve separate JavaScript/TypeScript repositories for calibration. They must be
-repository-disjoint from Juice Shop and the final holdout. Use them to select
-thresholds and escalation budgets after prompts, packet construction, and routing
-logic have been developed on Juice Shop.
+repository-disjoint from Juice Shop and the final holdout. Use them to freeze the
+shared output mapping, Jev thresholds, abstention policy, and later cascade routing
+after questions, model-native instructions, and packet construction have been
+developed on Juice Shop.
 
 ### OpenSSF CVE Benchmark
 
@@ -75,49 +83,65 @@ proof of model unfamiliarity.
 
 ### Safe controls
 
-Include patched counterparts and representative non-vulnerable routes, sinks, and
-authorization checks. A patch establishes that its target vulnerability was removed;
-it does not establish that the entire route, file, or repository is safe. Label the
-patched example as negative only for that target instance. Adjudicate unrelated
-findings as separate instances.
+Include patched counterparts, representative non-vulnerable routes, and deliberately
+context-incomplete packets. A patch establishes that its target vulnerability was
+removed; it does not establish that the entire route, file, or repository is safe.
+Label the patched example as negative only for that target instance. Adjudicate
+unrelated findings as separate instances.
 
 An absence of generated candidates is not proof that code is safe;
 candidate-generation coverage is measured separately.
 
 Split development, calibration, and holdout data by repository and underlying
-vulnerability root cause. Vulnerable/patched pairs and related examples must remain
-in the same split.
+vulnerability root cause. Vulnerable, patched, and deliberately context-incomplete
+variants of one root cause must remain in the same split. The frozen controlled
+holdout must represent all three vulnerability families and all three dispositions:
+`vulnerable`, `safe`, and `insufficient_context`.
 
 ## Ground truth
 
-The unit of measurement is one deduplicated vulnerability instance, not one alert,
-line, file, or Juice Shop challenge. A record contains:
+The primary measurement unit is one frozen evidence packet linked to a target
+instance and context condition, not one alert, line, file, or Juice Shop challenge.
+Packets derived from the same vulnerability root cause form one statistical cluster.
+The end-to-end secondary analyses continue to use one deduplicated vulnerability
+instance as their unit. A ground-truth record contains:
 
 - repository and immutable commit;
 - vulnerability family and CWE;
 - attacker precondition and entry point;
 - affected operation, source/sink path, or authorization boundary;
+- expected disposition and required context dimensions;
 - vulnerable and patched locations;
 - a safe reproduction or regression test;
 - provenance and independent reviewer decisions.
 
-Before the holdout run, freeze a private matching ledger that maps every known
-evidence-packet ID to zero or more target-instance IDs. A prediction matches a known
-instance only when it comes from a mapped packet, selects the correct vulnerability
-family, and identifies a labeled vulnerable span or the labeled source-to-sink or
-authorization path. Multiple alerts matching the same target instance count as one
-true positive. One alert cannot satisfy multiple target instances unless the frozen
-ledger explicitly records that shared root cause. Unmatched predictions are
-adjudicated as possible new instances and then deduplicated by root cause.
+Before the holdout run, freeze a private matching ledger that maps every evidence
+packet ID to its target-instance ID, expected disposition, applicable family, and
+acceptable evidence spans or paths. The expected disposition is exactly one of:
 
-Known target instances that produce no candidate remain in the recall denominator
-and count as false negatives. A model abstention or final `manual_review` outcome on
-a known vulnerable instance also remains in the denominator and counts as a false
-negative for automated detection recall. Abstentions and manual-review outcomes are
-reported separately and never disappear from scoring.
+- `vulnerable`: the supplied evidence establishes the labeled target vulnerability;
+- `safe`: the supplied evidence establishes that the labeled target path is blocked
+  or protected; or
+- `insufficient_context`: the packet intentionally omits evidence required to decide
+  safely, regardless of the full repository's private target label.
 
-Claim 2 uses a different, explicitly named metric: retained-alert recall. Its
-denominator is the set of deduplicated known vulnerable target instances matched by
+A vulnerable prediction is fully correct only when it selects `vulnerable`, selects
+the correct family, and identifies a labeled vulnerable span or labeled path. Safe
+and insufficient-context correctness is scored separately from family and vulnerable
+span localization. Multiple packets derived from the same root cause remain one
+cluster and never become independent vulnerabilities merely because they expose
+different context conditions.
+
+For the primary controlled experiment, every evaluator receives every frozen packet.
+A missing, malformed, timed-out, or policy-invalid model response is a failed attempt,
+not `insufficient_context`, and remains in all denominators under the frozen failure
+mapping. A vulnerable packet classified as `safe` or `insufficient_context` is not a
+true positive. Failures, insufficient-context decisions, and frontier-model refusals
+are reported separately and never disappear from scoring.
+
+The exploratory Semgrep analysis uses a different, explicitly named metric:
+retained-alert recall. Its denominator is the set of deduplicated known vulnerable
+target instances matched by
 at least one raw Semgrep finding. A target instance is retained when at least one of
 its matching findings remains an alert after Jev filtering, including an unresolved
 finding sent to review. It is a false negative for retained-alert recall only when
@@ -126,10 +150,11 @@ detection; unresolved retained findings contribute to review workload, not autom
 detection recall. The scorer implements these as separate metrics with separate
 outcome mappings.
 
-Two security reviewers label real findings as `confirmed`, `not_vulnerable`, or
-`insufficient_evidence` while blinded to the system that produced them. A third
-review or consensus process adjudicates disagreements. Unresolved cases remain
-separate and are never silently counted as false positives.
+Two security reviewers independently label the target disposition, family, and
+acceptable evidence spans while blinded to model outputs. A third review or
+consensus process adjudicates disagreements. Unresolved ground truth makes the
+packet ineligible for the primary holdout; it is retained only as an explicitly
+unscored qualitative case.
 
 Every confirmed real vulnerability requires a non-destructive, sandboxed proof or
 a source/fix validation showing that the vulnerable behavior disappears after the
@@ -138,59 +163,47 @@ patch.
 ## Architecture
 
 ```text
-Pinned repository revision
-        |
-        +-- Semgrep -> ordinary security findings
-        |
-        +-- AST inventory -> routes, input sources, sinks,
-                             auth checks, dependency calls
-                           |
-                           v
-                    Evidence packets
-            code slice + one-hop context + metadata
-                           |
-             +-------------+-------------+
-             |                           |
-             v                           v
-   Controlled Jev/Terra/Opus      Jev security judgments
-       without tools              batched atomic questions
-             |                           |
-             |                           v
-             |                Deterministic router
-             |             +-------------+-------------+
-             |             |             |             |
-             |             v             v             v
-             |        likely_safe      likely_     needs_deep_review or
-             |          suppress    vulnerability  insufficient_context
-             |             |              |             |
-             |             |              |             v
-             |             |              |    Agentic Terra/Opus review
-             |             |              |             |
-             |             |              +------+------+
-             |             |                     |
-             +-------------+---------------------+
-                                   |
-                                   v
-                     Final no_alert / alert /
-                            manual_review
-                                   |
-                                   v
-                        Ground-truth validation
-                                   |
-                       +-----------+-----------+
-                       v                       v
-                Benchmark report       Interactive dashboard
+Pinned repository revision + private ground truth
+                         |
+             frozen redacted evidence packet
+                         |
+              +----------+----------+
+              |          |          |
+              v          v          v
+             Jev       Terra       Opus
+          typed atomic  structured  structured
+           judgments     output      output
+              |          |          |
+              +----------+----------+
+                         |
+        shared disposition / family / evidence spans
+                         |
+                  controlled scorer
+                         |
+        +----------------+----------------+
+        v                                 v
+ head-to-head report             secondary Jev router
+ decision quality, cost,          and cascade analysis
+ latency, abstention                       |
+        |                                  v
+        +----------------------- benchmark dashboard
 ```
 
-One TypeScript CLI performs discovery, packet construction, evaluator invocation,
-routing, and scoring. Inputs and outputs are immutable JSONL artifacts. Routing
-rules and thresholds live in one reviewable module. There is no database or
-workflow framework.
+One TypeScript CLI performs packet construction, controlled evaluator invocation,
+scoring, and the secondary routing experiment. Inputs and outputs are immutable
+JSONL artifacts. Model adapters may use model-native instructions and typed-output
+mechanisms, but the canonical evidence-state bytes and shared result schema are
+frozen. There is no database or workflow framework.
 
 ## Candidate generation
 
-Semgrep and the deterministic AST inventory are complementary candidate sources.
-The inventory must cover, at minimum:
+Semgrep and the deterministic AST inventory are complementary ways to propose packet
+candidates, but discovery quality is not part of the primary controlled comparison.
+Primary holdout packets are selected from the frozen ground-truth ledger before any
+model run, and every model receives the same packet IDs. Candidate-generation
+coverage is measured only in the exploratory end-to-end analysis.
+
+The inventory should cover, at minimum:
 
 - framework routes and handlers;
 - untrusted request inputs;
@@ -204,19 +217,24 @@ The evidence builder assigns neutral span identifiers and emits the smallest use
 packet. It removes CVE IDs, challenge names, solution comments, commit messages,
 scanner verdicts, vulnerable/fixed filenames, and other label-bearing metadata.
 
-Agentic review uses a sanitized repository snapshot, not the original checkout. The
-snapshot excludes answer-bearing tests, advisories, challenge metadata, solution
-material, vulnerable/fixed labels, and Git history while preserving executable code
-needed for analysis. Reproduction inputs, regression proofs, patches used as labels,
-and the private matching ledger remain available only to validators. Record the
-sanitization manifest and snapshot content hash. Terra-all and Jev-to-Terra receive
-the identical snapshot; apply the same rule to both Opus arms.
+The primary evaluators receive no repository, web, shell, or retrieval tools. They
+receive only the canonical evidence packet through their model-native input wrapper.
+The packet excludes answer-bearing tests, advisories, challenge metadata, solution
+material, vulnerable/fixed labels, and Git history. Reproduction inputs, regression
+proofs, patches used as labels, and the private matching ledger remain available
+only to validators. Record the sanitization manifest and packet hash.
+
+The secondary agentic cascade, if run, uses a sanitized repository snapshot rather
+than the original checkout. Terra-all and Jev-to-Terra receive the identical
+snapshot and permissions; apply the same rule to both Opus arms.
 
 One-hop context is a starting budget, not evidence that omitted controls do not
 exist. The packet records whether route middleware, upstream data flow, sanitizers,
-and authorization checks were resolved. If evidence needed for a decision lies
-outside the packet or cannot be resolved, the outcome is `insufficient_context` and
-must escalate. “Not shown” never means “not enforced,” “unsanitized,” or “safe.”
+authorization, and call-path evidence relevant to the labeled family were resolved.
+Irrelevant unresolved dimensions do not force abstention. If evidence required for
+the labeled decision lies outside the packet, the correct primary disposition is
+`insufficient_context`. “Not shown” never means “not enforced,” “unsanitized,” or
+“safe.”
 
 ## Jev judgments
 
@@ -236,14 +254,16 @@ Jev receives one packet once and answers independent questions together:
 
 Use Nouls for independent yes/no judgments, a Choice only where answers are
 mutually exclusive, and a Score for the ordered exploitability rubric. Raw
-probabilities are retained. Code combines them into routing outcomes; Jev does not
-own the control flow.
+probabilities are retained. A frozen mapping converts them to the shared primary
+disposition and family output; a separate frozen policy combines them into secondary
+routing outcomes. Jev does not own the control flow.
 
-Thresholds are tuned only on calibration data and frozen before the holdout.
-High-impact, uncertain, or context-incomplete cases escalate. Any required evidence
-dimension marked unresolved forces `insufficient_context`, regardless of other
-probabilities. The implementation must not compare Jev's probabilities directly
-with an LLM's self-reported confidence.
+Thresholds and disposition mappings are tuned only on calibration data and frozen
+before the holdout. Any evidence dimension required for the candidate family and
+marked unresolved forces `insufficient_context`; unresolved dimensions irrelevant
+to that family do not. High-impact or uncertain cases escalate only in the secondary
+cascade. The implementation must not compare Jev probabilities with an LLM's
+self-reported confidence.
 
 Routing outcomes have fixed operational meanings:
 
@@ -260,153 +280,132 @@ it is not silently converted to either safe or vulnerable.
 
 ## Experiments
 
-### Controlled model comparison
+### Primary: controlled Jev vs Terra vs Opus comparison
 
-Jev, Terra, and later Opus receive byte-identical redacted evidence with no web or
-repository tools. Each model uses a preregistered model-native rendering and output
-mechanism, then maps to the shared record:
+Jev, Terra, and Opus receive the same canonical redacted evidence-state bytes with
+no repository, web, shell, or retrieval tools. Model-native instructions and output
+mechanisms may differ because the systems have different interfaces, but their
+meaning is frozen before calibration and every output maps to this shared record:
 
 ```text
-decision: vulnerable | safe | abstain
-family: injection | broken_access_control | ssrf
+disposition: vulnerable | safe | insufficient_context
+family: injection | broken_access_control | ssrf | null
 evidence_span_ids: [...]
+status: valid | timeout | malformed_output | policy_failure | service_failure
 ```
 
-Jev uses typed atomic questions and supplied span choices. Terra and Opus use their
-native structured-output mechanism. Only the bounded decision, family, and evidence
-localization are compared. Prose quality and LLM self-confidence are not benchmark
-targets.
+`family` is required only for `vulnerable`; the other dispositions use `null`.
+Failures are represented by `status` and never disguised as
+`insufficient_context`. Jev uses typed atomic questions and supplied span choices.
+Terra and Opus use their native structured-output mechanisms. Prose quality,
+chain-of-thought, and LLM self-reported confidence are not benchmark targets.
 
-### Claim 1: cascade efficiency at matched recall
+The primary confirmatory claim is that Jev's balanced triage accuracy and
+vulnerability recall are each non-inferior within two percentage points to both
+Terra and Opus. Pairwise Terra-versus-Opus results are reported descriptively and do
+not change that claim. Precision, false-safe rate, insufficient-context recognition,
+family accuracy, evidence localization, latency, and cost are prespecified secondary
+outcomes of the same controlled run.
 
-Build one combined Semgrep-plus-AST candidate pool, then run these arms:
+### Secondary: Jev-routed cascade
 
-- Terra reviewing every candidate;
-- Jev routing the identical candidate pool, with Terra reviewing only
-  `needs_deep_review` and `insufficient_context` outcomes;
-- later, the equivalent all-Opus and Jev-to-Opus arms.
+Only after freezing the primary calibration results, build a combined
+Semgrep-plus-AST candidate pool and run:
 
-Terra receives identical agentic permissions and per-candidate budgets in the
-Terra-all and Jev-to-Terra arms: the same sanitized, read-only repository snapshot,
-network policy, command allowlist, tool-call limit, token budget, and wall-clock cap.
-Only the set of candidates sent to Terra differs. Apply the same rule to Opus. This
-is a system comparison, not a claim that Jev and a tool-using LLM perform the same
-task.
+- Terra or Opus reviewing every candidate; and
+- Jev routing the identical candidate pool, with the configured frontier model
+  reviewing only uncertain or context-incomplete outcomes.
 
-### Claim 2: Semgrep false-alert reduction
+The all-model and cascade arms receive identical agentic permissions and
+per-candidate budgets: the same sanitized, read-only repository snapshot, network
+policy, command allowlist, tool-call limit, token budget, and wall-clock cap. Only
+the set of candidates sent to the frontier model differs. This is a system
+comparison and must remain separate from the primary bounded decision comparison.
 
-Use only the frozen raw Semgrep findings as the candidate pool and compare:
+### Exploratory: Semgrep false-alert reduction
 
-- raw Semgrep, where every Semgrep finding is an alert;
-- Semgrep-to-Jev, where Jev suppresses only `likely_safe`, emits
-  `likely_vulnerability`, and retains `needs_deep_review` or
-  `insufficient_context` as unresolved alerts requiring review.
+Use only frozen raw Semgrep findings and compare raw Semgrep with Semgrep-to-Jev.
+Jev suppresses only `likely_safe`, emits `likely_vulnerability`, and retains uncertain
+or context-incomplete findings as unresolved alerts. Do not include AST-only
+candidates. Score retained-alert recall, retained-alert precision, and unresolved
+review workload; do not reuse the primary controlled outcome mapping.
 
-Do not include AST-only candidates in this comparison. The combined Semgrep-plus-AST
-pipeline is reported separately and cannot isolate filtering of Semgrep false alerts.
-Score this claim with retained-alert recall and retained-alert precision. Report the
-number and rate of unresolved retained alerts as review workload. Do not reuse the
-automated detection recall mapping from Claim 1.
-
-### Claim 3: validated yield beyond Semgrep
+### Exploratory: validated yield beyond Semgrep
 
 Run the frozen AST inventory alongside Semgrep. An AST-only candidate is not itself
 Semgrep-missed yield: Semgrep may flag the same deduplicated target instance at a
-different location. Report a confirmed instance as additional validated yield only
-when the frozen matching ledger shows that no Semgrep finding matches that target
-instance anywhere in the repository. Apply the ground-truth and adjudication rules
-above before counting it.
+different location. Count additional validated yield only when the frozen matching
+ledger shows that no Semgrep finding matches that target instance anywhere in the
+repository and independent adjudication confirms it.
 
-Pin exact model snapshots, SDKs, prompts, schemas, scanner versions, rules,
+Pin exact model snapshots, SDKs, instructions, schemas, scanner versions, rules,
 containers, concurrency, retry policies, and run dates. Do not use moving aliases in
 headline results.
 
 ## Metrics
 
-Report:
+The primary controlled report includes:
 
-- candidate-generation coverage, with known no-candidate instances counted as false
-  negatives in end-to-end recall;
-- automated detection recall for Claim 1;
-- retained-alert recall and retained-alert precision for Claim 2;
-- alert precision and verified false alerts per repository and KLOC;
-- abstention, manual-review, insufficient-context, escalation, and unresolved-review
-  workload rates;
-- recall lost at the router gate;
-- analyst success conditional on escalation;
-- validated yield missed by the frozen Semgrep configuration;
-- results by vulnerability family and severity;
-- actual tokens and fully loaded cost, including retries and escalations;
-- cold and warm end-to-end p50/p95 latency at fixed concurrency.
+- balanced triage accuracy: the unweighted mean of per-class recall for
+  `vulnerable`, `safe`, and `insufficient_context`;
+- vulnerability recall and vulnerable-prediction precision;
+- false-safe rate on vulnerable packets;
+- safe specificity and insufficient-context recall;
+- family accuracy and evidence-span hit rate on vulnerable packets;
+- valid-response, timeout, malformed-output, and policy/service-failure rates;
+- results by vulnerability family, severity, repository, and disposition;
+- actual tokens and defensible provider cost; and
+- cold per-packet p50/p95 end-to-end latency at fixed concurrency.
 
-The preregistered primary hypothesis is that Jev-to-Terra loses no more than two
-percentage points of automated detection recall versus Terra-all while reducing
-fully loaded cost and end-to-end latency. Fix that two-point margin before assessing
-sample size. Then determine whether the available repository count and vulnerable
-instance count can detect it with adequate power; do not widen the margin after
-seeing the corpus or results.
+Jev probability calibration is reported with Brier score and calibration plots for
+the underlying binary judgments. It is not compared with LLM verbal confidence.
+Terra or Opus calibration is included only if the frozen interface exposes a
+provider-supported probability with equivalent semantics; otherwise selective
+accuracy versus abstention coverage is the cross-model uncertainty comparison.
+
+Use five randomized, interleaved repetitions per packet and evaluator. Within each
+repetition, score exactly one attempt per evaluator/packet. A failed attempt receives
+zero for correct disposition and vulnerable recall and remains visible by failure
+type. For each packet and evaluator, average the five binary outcomes first; then
+compute target- and repository-level aggregates. Repetitions estimate one packet's
+stability and never become independent examples.
 
 Use 10,000 paired, repository-clustered percentile-bootstrap resamples with seed
-`20260918`. The two-sided 90% interval provides the lower and upper one-sided 95%
-bounds used for the preregistered decisions. Classify each component separately:
+`20260918`. A sampled repository carries every related target, vulnerable/patched/
+context-incomplete variant, evaluator, and repetition. The two-sided 90% interval
+provides the lower and upper one-sided 95% bounds used for decisions.
 
-- Recall is `supported` when the lower bound for
-  `recall(Jev-to-Terra) - recall(Terra-all)` is above `-0.02`, `contradicted` when
-  its upper bound is at or below `-0.02`, and `inconclusive` otherwise.
-- Cost or latency reduction is `supported` when the upper bound for its cascade/all
-  ratio is below `1.0`, `contradicted` when the lower bound is at or above `1.0`,
-  and `inconclusive` otherwise.
-- The primary hypothesis is `supported` only when all three components are
-  supported, `contradicted` when any component is contradicted, and `inconclusive`
-  otherwise. An invalid evaluation or insufficient ground truth is also
-  inconclusive; a valid interval entirely beyond the recall-loss margin is a
-  contradiction, not uncertainty.
+For each Jev-versus-frontier comparison and for both balanced accuracy and
+vulnerability recall, classify the difference with a frozen `-0.02` margin:
 
-Select thresholds and escalation budgets only on calibration data. Keep recall and
-precision separate rather than presenting F1 as the headline metric.
+- `supported` when the lower bound is above `-0.02`;
+- `contradicted` when the upper bound is at or below `-0.02`; and
+- `inconclusive` otherwise.
 
-Freeze the efficiency measurements before the holdout:
+The primary claim is `supported` only when both metrics are supported against both
+Terra and Opus. It is `contradicted` when any valid comparison is contradicted and
+`inconclusive` otherwise. Insufficient ground truth or an invalid evaluation is also
+inconclusive. Assess whether the frozen repository and target counts can detect the
+margin with adequate power before the holdout; do not widen the margin after seeing
+results.
 
-- The cost unit is fully loaded USD per repository. It is the actual model/API spend
-  plus discovery and packet-construction compute valued at one preregistered cloud
-  runner's hourly price. Include all retries, backoff time, and reasoning-model
-  escalations. Exclude one-time corpus download, dependency installation, container
-  image construction, private validation, and report rendering from both arms. A
-  subscription-backed call with no defensible per-call allocation is not free: it may
-  be used for development or calibration, but the primary cost component is
-  inconclusive unless every included model call has an actual provider charge or a
-  preregistered allocation backed by billing records.
-- The primary latency statistic is median cold end-to-end wall-clock time per
-  repository. Timing starts immediately before Semgrep and AST discovery and ends
-  after the final `no_alert`, `alert`, or `manual_review` records are durably written.
-  It includes discovery, packet construction, model requests, retries, backoff, and
-  escalations.
-- Run five timed repetitions of each arm for each repository in randomized,
-  interleaved order at the same fixed concurrency. Start each repetition from the
-  same preinstalled sanitized snapshot with local result/tool caches cleared. Do not
-  use provider batch APIs or prompt caching for the primary measurement. Report p95
-  latency and warm-cache behavior only as secondary diagnostics.
-- For recall, deduplicate predictions within each repetition first. For each target
-  instance and arm, average its five binary run outcomes, then average those
-  target-level detection rates across the unique target instances in the
-  denominator. A known instance with no candidate contributes zero in every
-  repetition. Exhausted model or tool failures use the frozen abstention mapping and
-  are not dropped. The five observations estimate one instance's repeated-run
-  detection rate; they never become five independent vulnerabilities. Apply the same
-  nesting to retained-alert recall for Claim 2.
-- For each arm and repository, average fully loaded cost and take the median latency
-  across its five repetitions. The primary cost ratio is the arithmetic mean of the
-  cascade repositories' mean costs divided by the arithmetic mean of the Terra-all
-  repositories' mean costs. The primary latency ratio is the arithmetic mean of the
-  cascade repositories' median latencies divided by the arithmetic mean of the
-  Terra-all repositories' median latencies. Neither estimand is the mean of
-  repository-level ratios.
-- Every bootstrap draw samples paired repositories with replacement. A sampled
-  repository carries both arms, all of its target instances, and all five
-  repetitions; the scorer then recomputes the nested recall aggregates, repository
-  cost means, repository latency medians, and ratio-of-means statistics. Apply the
-  three-outcome decision rules above rather than collapsing a contradicted result
-  into inconclusive.
+Efficiency is secondary and frozen before the holdout:
+
+- Cost is fully loaded USD per 1,000 controlled packet decisions at fixed
+  concurrency. Include model/API charges, retries, and the preregistered runner
+  compute allocation. A subscription-backed call without a defensible per-call
+  allocation is not free; its cost result is inconclusive.
+- Latency starts immediately before serializing the frozen request and ends after
+  the parsed result is durably recorded. The primary latency summary is cold
+  per-packet median and p95 at fixed concurrency. Warm behavior is diagnostic.
+- Do not use provider batch APIs or prompt caching for primary measurements.
+- Report ratio-of-mean cost and latency with paired repository bootstrap intervals;
+  do not average repository-level ratios.
+
+The secondary cascade retains the original automated-detection recall, retained-
+alert recall, escalation, unresolved workload, end-to-end repository cost, and
+repository latency metrics. Candidate-generation misses count only in that
+end-to-end analysis, not in the primary fixed-packet comparison.
 
 ## Report and dashboard
 
@@ -415,8 +414,13 @@ dashboard read the same scored result files.
 
 The dashboard provides:
 
-- a Jev vs Terra vs Opus comparison for recall, precision, cost, and latency;
-- a pipeline waterfall from candidates through escalations and confirmations;
+- a Jev vs Terra vs Opus comparison for balanced accuracy, vulnerability recall,
+  precision, false-safe rate, abstention/context handling, evidence localization,
+  cost, and latency;
+- pairwise uncertainty intervals and `supported`, `contradicted`, or `inconclusive`
+  labels attached to the actual preregistered claims;
+- a secondary pipeline waterfall from candidates through escalations and
+  confirmations;
 - a case explorer showing evidence, model decisions, ground truth, and patched code;
 - filters for corpus and vulnerability family;
 - explicit limitations and contamination disclosures.
@@ -446,15 +450,21 @@ Automated checks cover:
 - vulnerable/patched pair grouping;
 - target-instance matching and prediction deduplication;
 - AST/Semgrep overlap, where an AST-only candidate maps to a target instance already
-  matched by a Semgrep finding and therefore adds no Claim 3 yield;
+  matched by a Semgrep finding and therefore adds no exploratory validated yield;
 - router thresholds and boundary cases;
-- forced escalation for missing middleware, sanitizer, authorization, or call-path
-  context;
-- known vulnerable and safe fixtures for all three families;
+- primary insufficient-context classification and secondary forced escalation when
+  evidence required for the applicable family is unresolved;
+- known vulnerable, safe, and context-incomplete fixtures for all three families;
 - recall accounting for no-candidate, abstained, and manual-review positives;
 - separate retained-alert and automated-detection outcome mappings;
 - sanitized-snapshot exclusion and content-hash checks;
 - model-output parsing and failure classification;
+- identical packet-ID and canonical evidence-state checks across all three model
+  adapters;
+- correct-disposition, balanced-accuracy, false-safe, family, and evidence-span
+  scoring fixtures;
+- repetition nesting that never treats repeated observations as independent packets;
+- pairwise Jev/Terra and Jev/Opus non-inferiority boundaries;
 - metric calculations and confidence-interval inputs;
 - agreement between CLI results, report, and dashboard.
 
@@ -466,6 +476,9 @@ Live-model smoke tests remain explicit and separately reported.
 - Full OWASP Top Ten coverage in the first release.
 - Claims of exhaustive vulnerability discovery.
 - Comparing Jev probabilities with LLM verbal confidence.
+- Treating model-native instruction wrappers as byte-identical prompts; only the
+  canonical evidence state and shared decision meaning are identical.
+- Using agentic repository navigation in the primary model comparison.
 - A backend database or general-purpose scan service.
 - Network-enabled exploitation or testing third-party targets.
 
