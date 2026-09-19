@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { assertNoFixtureLeakage, assertNoPathLabelSignal, longestPathOrderedLabelRun, pathTokenSignals, decisionForChoice, loadDemoCases, parseDemoDecision, runDemo, summarizeDemoResults, type DemoAdapter, type DemoCase, type DemoDecision, type DemoResult } from "./demo.js";
+import { assertContiguousSpans, assertNoFixtureLeakage, assertNoPathLabelSignal, longestPathOrderedLabelRun, pathTokenSignals, decisionForChoice, loadDemoCases, parseDemoDecision, runDemo, summarizeDemoResults, type DemoAdapter, type DemoCase, type DemoDecision, type DemoResult } from "./demo.js";
 import { demoCriteria } from "./jev.js";
 import { createJevDemoAdapter, createReasoningDemoAdapter } from "./demo-live.js";
 import { stableHash } from "./jsonl.js";
@@ -139,6 +139,15 @@ test("the path gate catches label-ordered numbering that carries no leaky word",
   assert.deepEqual(pathTokenSignals(grouped), []);
   assert.equal(longestPathOrderedLabelRun(grouped), 8);
   assert.throws(() => assertNoPathLabelSignal(grouped), /case ordering predicts the label/);
+});
+
+test("span line gaps are rejected, because the gap pattern tracked the label", () => {
+  const gapped = [labelled("safe", "src/demo/case-001.ts")];
+  gapped[0]!.state.spans = [{ id: "s1", path: "src/demo/case-001.ts", startLine: 10, endLine: 10, text: "if (bad) return;" }, { id: "s2", path: "src/demo/case-001.ts", startLine: 13, endLine: 13, text: "run();" }];
+  assert.throws(() => assertContiguousSpans(gapped), /line gap between spans/);
+  (gapped[0]!.state.spans as Array<{ startLine: number; endLine: number }>)[1]!.startLine = 11;
+  (gapped[0]!.state.spans as Array<{ startLine: number; endLine: number }>)[1]!.endLine = 11;
+  assert.doesNotThrow(() => assertContiguousSpans(gapped));
 });
 
 test("the shipped corpus passes both halves of the path gate", async () => {

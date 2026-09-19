@@ -10,7 +10,7 @@
   "schemaVersion": 1,
   "promptSpecHash": "reasoning-prompt",
   "gitSha": "0000000000000000000000000000000000000000",
-  "corpusHash": "d029e855bcf51d490c37a5ecf1fa0c1ac0cb5de590a322cb0994a24c09c8cf28",
+  "corpusHash": "c4fe8e5deec865ac833bde4e2aa1d7dd3b65418ecada4b1b61f59db52a58de85",
   "caseCount": 100,
   "repetitions": 1,
   "results": [
@@ -1415,5 +1415,5 @@
       "repetition": 1
     }
   ],
-  "artifactSha256": "4022444480462f4688636fe4caf2a8956e832526707a9d6fb2f70e7995e4d9b6"
+  "artifactSha256": "521c48b764af7ef1a031f1e8a0d4ad6c2b4462c7003ef525196f433de773e26e"
 }
