@@ -27,18 +27,25 @@ const questions = {
 function record(value: unknown): Record<string, unknown> | undefined { return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : undefined; }
 function probability(value: unknown): value is number { return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1; }
 function noulAnswer(value: unknown): value is NoulAnswer { const answer = record(value); return answer?.type === "noul" && probability(answer.noul); }
-function scoreAnswer(value: unknown): value is ScoreAnswer {
+function scoreAnswerError(value: unknown): string | null {
   const answer = record(value); const probabilities = record(answer?.probabilities); const legend = record(answer?.legend);
   const levels = ["0", "1", "2", "3"] as const;
   const tolerance = 1e-5;
-  if (answer?.type !== "score" || typeof answer.score !== "number" || !Number.isFinite(answer.score) || answer.score < 0 || answer.score > 3 || !probability(answer.confidence) || probabilities === undefined || legend === undefined || !levels.every((key) => probability(probabilities[key])) || Object.keys(probabilities).length !== 4 || !levels.every((key) => key in legend) || Math.abs(levels.reduce((sum, key) => sum + (probabilities[key] as number), 0) - 1) >= tolerance) return false;
-  return Math.abs(answer.score - levels.reduce((sum, key) => sum + Number(key) * (probabilities[key] as number), 0)) < tolerance;
+  if (answer?.type !== "score") return "exploitability type is invalid";
+  if (typeof answer.score !== "number" || !Number.isFinite(answer.score) || answer.score < 0 || answer.score > 3) return "exploitability score is invalid";
+  if (!probability(answer.confidence)) return "exploitability confidence is invalid";
+  if (probabilities === undefined || !levels.every((key) => probability(probabilities[key])) || Object.keys(probabilities).length !== 4) return "exploitability probabilities are invalid";
+  if (legend === undefined || !levels.every((key) => key in legend)) return "exploitability legend is invalid";
+  const sum = levels.reduce((total, key) => total + (probabilities[key] as number), 0);
+  if (Math.abs(sum - 1) >= tolerance) return `exploitability probabilities sum to ${sum}`;
+  const weightedMean = levels.reduce((total, key) => total + Number(key) * (probabilities[key] as number), 0);
+  return Math.abs(answer.score - weightedMean) < tolerance ? null : `exploitability score ${answer.score} differs from weighted mean ${weightedMean}`;
 }
 function answersError(value: unknown): string | null {
   const result = record(value);
   if (result === undefined) return "answers must be an object";
   for (const id of questionIds.slice(0, -1)) if (!noulAnswer(result[id])) return `invalid ${id}`;
-  return scoreAnswer(result.exploitability) ? null : "invalid exploitability";
+  return scoreAnswerError(result.exploitability);
 }
 function abstain(error: unknown): JevJudgment {
   const value = error instanceof Error ? error : new Error(String(error));

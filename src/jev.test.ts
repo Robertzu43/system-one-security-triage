@@ -60,7 +60,7 @@ test("Jev abstains on invalid distributions and exhausted SDK failures", async (
   const invalid = response();
   invalid.answers.exploitability.probabilities = { 0: 0, 1: 0.8, 2: 0.8, 3: 0 };
   const malformedClient = { systemOne: async () => invalid } as unknown as TypeSafeClient;
-  assert.deepEqual(await judgeWithJev(packet, malformedClient), { kind: "abstain", error: { name: "Error", message: "malformed Jev response: invalid exploitability" } });
+  assert.deepEqual(await judgeWithJev(packet, malformedClient), { kind: "abstain", error: { name: "Error", message: "malformed Jev response: exploitability probabilities sum to 1.6" } });
 
   const failedClient = { systemOne: async () => { throw new Error("service unavailable"); } } as unknown as TypeSafeClient;
   assert.deepEqual(await judgeWithJev(packet, failedClient), { kind: "abstain", error: { name: "Error", message: "service unavailable" } });
@@ -71,7 +71,7 @@ test("Jev abstains when a Score does not equal its probability-weighted mean", a
   invalid.answers.exploitability.score = 3;
   invalid.answers.exploitability.probabilities = { 0: 1, 1: 0, 2: 0, 3: 0 };
   const client = { systemOne: async () => invalid } as unknown as TypeSafeClient;
-  assert.deepEqual(await judgeWithJev(packet, client), { kind: "abstain", error: { name: "Error", message: "malformed Jev response: invalid exploitability" } });
+  assert.deepEqual(await judgeWithJev(packet, client), { kind: "abstain", error: { name: "Error", message: "malformed Jev response: exploitability score 3 differs from weighted mean 0" } });
 });
 
 test("Jev accepts harmless rounding in Score probabilities", async () => {
