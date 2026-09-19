@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "system-one-security-triage",
+  "compatibility_date": "2026-09-19",
+  // Static assets only: the dashboard replays recorded runs and never calls a model,
+  // so there is no server code and no credential anywhere in the deployed site.
+  "assets": {
+    "directory": "./dashboard"
+  }
+}
