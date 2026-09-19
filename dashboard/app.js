@@ -139,7 +139,9 @@ function renderConfusionMatrices(data) {
       const row = element("tr");
       row.append(element("th", "", decisionName(expected)));
       for (const actual of outcomes) {
-        const count = data.cases.filter((item) => item.expected.disposition === expected && (item.results[evaluator].status === "error" ? "error" : item.results[evaluator].decision.disposition) === actual).length;
+        // Counts every pass, not just the first: with five passes a case can land in two cells.
+        const count = data.cases.reduce((total, item) => item.expected.disposition !== expected ? total
+          : total + item.results[evaluator].passes.filter((pass) => (pass.status === "error" ? "error" : pass.decision.disposition) === actual).length, 0);
         row.append(element("td", "", String(count)));
       }
       body.append(row);
@@ -189,8 +191,9 @@ function renderRace(data) {
       for (const lane of lanes) {
         const row = root.querySelector(`[data-evaluator="${lane.evaluator}"]`);
         const done = lane.cumulative.filter((value) => value <= elapsed).length;
-        const share = Math.min(1, elapsed / slowest);
-        row.querySelector(".race-fill").style.width = `${share * 100}%`;
+        // Each bar tracks its own lane's progress, so the fast lane visibly finishes while the
+        // others are still starting. Sizing every bar by elapsed time made them identical.
+        row.querySelector(".race-fill").style.width = `${(done / lane.passes.length) * 100}%`;
         const right = lane.passes.slice(0, done).filter((pass) => pass.correct).length;
         row.querySelector(".race-counter").textContent = `${done} decided · ${right} right`;
         if (done < lane.passes.length) running = true;
@@ -210,7 +213,7 @@ function renderCases(data, filters) {
     if (filters.caseId && item.caseId !== filters.caseId) return false;
     if (filters.family !== "all" && item.family !== filters.family) return false;
     if (filters.expected !== "all" && item.expected.disposition !== filters.expected) return false;
-    const results = filters.model === "all" ? evaluators.map((name) => item.results[name]) : [item.results[filters.model]];
+    const results = (filters.model === "all" ? evaluators.map((name) => item.results[name]) : [item.results[filters.model]]).map(firstPass);
     return results.some((result) => (filters.status === "all" || result.status === filters.status)
       && (filters.correct === "all" || String(result.correct) === filters.correct)
       && (filters.decision === "all" || (result.decision?.disposition ?? "error") === filters.decision));
