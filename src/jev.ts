@@ -30,12 +30,15 @@ function noulAnswer(value: unknown): value is NoulAnswer { const answer = record
 function scoreAnswer(value: unknown): value is ScoreAnswer {
   const answer = record(value); const probabilities = record(answer?.probabilities); const legend = record(answer?.legend);
   const levels = ["0", "1", "2", "3"] as const;
-  if (answer?.type !== "score" || typeof answer.score !== "number" || !Number.isFinite(answer.score) || answer.score < 0 || answer.score > 3 || !probability(answer.confidence) || probabilities === undefined || legend === undefined || !levels.every((key) => probability(probabilities[key])) || Object.keys(probabilities).length !== 4 || !levels.every((key) => key in legend) || Math.abs(levels.reduce((sum, key) => sum + (probabilities[key] as number), 0) - 1) >= 1e-9) return false;
-  return Math.abs(answer.score - levels.reduce((sum, key) => sum + Number(key) * (probabilities[key] as number), 0)) < 1e-9;
+  const tolerance = 1e-5;
+  if (answer?.type !== "score" || typeof answer.score !== "number" || !Number.isFinite(answer.score) || answer.score < 0 || answer.score > 3 || !probability(answer.confidence) || probabilities === undefined || legend === undefined || !levels.every((key) => probability(probabilities[key])) || Object.keys(probabilities).length !== 4 || !levels.every((key) => key in legend) || Math.abs(levels.reduce((sum, key) => sum + (probabilities[key] as number), 0) - 1) >= tolerance) return false;
+  return Math.abs(answer.score - levels.reduce((sum, key) => sum + Number(key) * (probabilities[key] as number), 0)) < tolerance;
 }
-function answers(value: unknown): value is JevAnswers {
+function answersError(value: unknown): string | null {
   const result = record(value);
-  return result !== undefined && noulAnswer(result.untrusted_influence) && noulAnswer(result.reaches_sensitive_operation) && noulAnswer(result.validation_blocks_attack) && noulAnswer(result.crosses_authorization_boundary) && noulAnswer(result.authorization_enforced) && noulAnswer(result.security_impact) && noulAnswer(result.is_injection) && noulAnswer(result.is_broken_access_control) && noulAnswer(result.is_ssrf) && noulAnswer(result.enough_context) && scoreAnswer(result.exploitability);
+  if (result === undefined) return "answers must be an object";
+  for (const id of questionIds.slice(0, -1)) if (!noulAnswer(result[id])) return `invalid ${id}`;
+  return scoreAnswer(result.exploitability) ? null : "invalid exploitability";
 }
 function abstain(error: unknown): JevJudgment {
   const value = error instanceof Error ? error : new Error(String(error));
@@ -46,8 +49,10 @@ export async function judgeWithJev(packet: EvidencePacket | string, client: Pick
   try {
     const response: unknown = await client.systemOne({ state: packet as unknown as EntryType, model: jevModel, questions });
     const result = record(response); const usage = record(result?.usage);
-    if (typeof result?.model !== "string" || result.model.length === 0 || usage === undefined || !Number.isInteger(usage.input_tokens) || (usage.input_tokens as number) < 0 || !Number.isInteger(usage.output_tokens) || (usage.output_tokens as number) < 0 || !answers(result.answers)) throw new Error("malformed Jev response");
-    return { kind: "judgment", model: result.model, usage: { input_tokens: usage.input_tokens as number, output_tokens: usage.output_tokens as number }, answers: result.answers };
+    if (typeof result?.model !== "string" || result.model.length === 0 || usage === undefined || !Number.isInteger(usage.input_tokens) || (usage.input_tokens as number) < 0 || !Number.isInteger(usage.output_tokens) || (usage.output_tokens as number) < 0) throw new Error("malformed Jev response: invalid envelope");
+    const answerProblem = answersError(result.answers);
+    if (answerProblem !== null) throw new Error(`malformed Jev response: ${answerProblem}`);
+    return { kind: "judgment", model: result.model, usage: { input_tokens: usage.input_tokens as number, output_tokens: usage.output_tokens as number }, answers: result.answers as JevAnswers };
   } catch (error) {
     return abstain(error);
   }

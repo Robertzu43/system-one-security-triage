@@ -156,7 +156,7 @@ async function demoRecord(values: Values): Promise<unknown> {
   await mkdir(emptySnapshot);
   try {
     const adapters = await liveAdapters(selected, emptySnapshot, root);
-    const report = await runDemo(cases, adapters, "live");
+    const report = await runDemo(cases, adapters, "live", 3);
     return writeRecordedDemoRuns({
       cases,
       report,

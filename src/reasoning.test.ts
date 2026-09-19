@@ -21,9 +21,12 @@ test("reasoning runner uses the fixed Terra command in a sanitized cwd with a mi
   const root = await mkdtemp(join(tmpdir(), "reasoning-test-"));
   try {
     const snapshot = join(root, "snapshot");
+    const home = join(root, "home");
     const schemaPath = resolve("config/reasoning-output.schema.json");
     const outside = join(root, "answer-bearing-advisory.txt");
     await (await import("node:fs/promises")).mkdir(snapshot);
+    await (await import("node:fs/promises")).mkdir(join(home, ".codex"), { recursive: true });
+    await writeFile(join(home, ".codex", "auth.json"), "fixture-auth", "utf8");
     await writeFile(outside, "CVE answer must remain private", "utf8");
     const executable = await fixture(root, `
 const { readFile, writeFile } = await import("node:fs/promises");
@@ -32,25 +35,27 @@ const output = args[args.indexOf("--output-last-message") + 1];
 await writeFile(output, JSON.stringify({ decision: "vulnerable", family: "injection", evidence_span_ids: ["s1"] }));
 let outsideReadable = true;
 try { await readFile(process.env.OUTSIDE_SECRET, "utf8"); } catch { outsideReadable = false; }
+const isolatedAuth = await readFile(process.env.CODEX_HOME + "/auth.json", "utf8");
 process.stdout.write(JSON.stringify({ usage: { input_tokens: 7, output_tokens: 3 }, tool_calls: 1 }));
-process.stderr.write(JSON.stringify({ args, cwd: process.cwd(), env: Object.keys(process.env).sort(), outsideReadable }));
+process.stderr.write(JSON.stringify({ args, cwd: process.cwd(), env: Object.keys(process.env).sort(), outsideReadable, isolatedAuth }));
 `);
 
     const { runReasoningReview } = await reasoning();
     const result = await runReasoningReview({
       evaluator: "terra", mode: "agentic", prompt: '{"packet":"same"}', snapshot, schemaPath, timeoutMs: 5_000,
       tokenBudget: 200, toolBudget: 3
-    }, { executable, outputDirectory: root, environment: { PATH: process.env.PATH, HOME: process.env.HOME, HTTP_PROXY: "http://must-not-pass", OUTSIDE_SECRET: outside }, environmentKeys: ["OUTSIDE_SECRET"] });
+    }, { executable, outputDirectory: root, environment: { PATH: process.env.PATH, HOME: home, HTTP_PROXY: "http://must-not-pass", OUTSIDE_SECRET: outside }, environmentKeys: ["OUTSIDE_SECRET"] });
 
     const observed = JSON.parse(result.stderr);
-    assert.deepEqual(observed.args.slice(0, 11), ["exec", "--ephemeral", "--ignore-user-config", "--model", "gpt-5.6-terra", "--sandbox", "read-only", "--cd", snapshot, "--output-schema", schemaPath]);
-    assert.equal(observed.args[11], "--output-last-message");
-    assert.match(observed.args[12], new RegExp(`^${root.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/reasoning-`));
-    assert.equal(observed.args[13], "-");
+    assert.deepEqual(observed.args.slice(0, 12), ["exec", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check", "--model", "gpt-5.6-terra", "--dangerously-bypass-approvals-and-sandbox", "--cd", snapshot, "--output-schema", schemaPath]);
+    assert.equal(observed.args[12], "--output-last-message");
+    assert.match(observed.args[13], new RegExp(`^${root.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/reasoning-`));
+    assert.equal(observed.args[14], "-");
     assert.equal(observed.cwd, await realpath(snapshot));
-    assert(observed.env.includes("OUTSIDE_SECRET") && observed.env.includes("HOME") && observed.env.includes("PATH"));
+    assert(observed.env.includes("CODEX_HOME") && observed.env.includes("OUTSIDE_SECRET") && observed.env.includes("HOME") && observed.env.includes("PATH"));
     assert(!observed.env.some((key: string) => /proxy|network/i.test(key)));
     assert.equal(observed.outsideReadable, false);
+    assert.equal(observed.isolatedAuth, "fixture-auth");
     assert.deepEqual(result, {
       finalOutcome: "alert",
       output: { decision: "vulnerable", family: "injection", evidence_span_ids: ["s1"] },
@@ -151,14 +156,16 @@ test("demo mode keeps a valid Terra decision when CLI usage metadata is unavaila
   const root = await mkdtemp(join(tmpdir(), "reasoning-demo-test-"));
   try {
     const snapshot = join(root, "empty");
+    const home = join(root, "home");
     await (await import("node:fs/promises")).mkdir(snapshot);
+    await (await import("node:fs/promises")).mkdir(home);
     const executable = await fixture(root, `
 const { writeFile } = await import("node:fs/promises");
 const args = process.argv.slice(2);
 await writeFile(args[args.indexOf("--output-last-message") + 1], JSON.stringify({ decision: "safe", family: null }));
 `);
     const { runReasoningReview } = await reasoning();
-    const result = await runReasoningReview({ evaluator: "terra", mode: "demo", prompt: "{}", snapshot, schemaPath: resolve("config/demo-output.schema.json"), timeoutMs: 5_000, tokenBudget: 100, toolBudget: 1 }, { executable, outputDirectory: root });
+    const result = await runReasoningReview({ evaluator: "terra", mode: "demo", prompt: "{}", snapshot, schemaPath: resolve("config/demo-output.schema.json"), timeoutMs: 5_000, tokenBudget: 100, toolBudget: 1 }, { executable, outputDirectory: root, environment: { PATH: process.env.PATH, HOME: home } });
     assert.equal(result.error, null);
     assert.equal(result.output?.decision, "safe");
     assert.equal(result.usageStatus, "inconclusive");

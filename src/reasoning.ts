@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { access, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { access, copyFile, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { delimiter, isAbsolute, join, resolve, sep } from "node:path";
 
@@ -93,7 +93,7 @@ function reasonForFailure(stderr: string, code: number): ReasoningFailureKind {
 function command(request: ReasoningRequest, executable: string, outputPath: string, compactSchema: string): Command {
   if (request.evaluator === "terra") return {
     command: executable,
-    args: ["exec", "--ephemeral", "--ignore-user-config", "--model", "gpt-5.6-terra", "--sandbox", "read-only", "--cd", request.snapshot, "--output-schema", resolve(request.schemaPath), "--output-last-message", outputPath, "-"],
+    args: ["exec", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check", "--model", "gpt-5.6-terra", "--dangerously-bypass-approvals-and-sandbox", "--cd", request.snapshot, "--output-schema", resolve(request.schemaPath), "--output-last-message", outputPath, "-"],
     cwd: request.snapshot
   };
   if (request.model === undefined || request.model.length === 0) throw new Error("Opus requires a frozen full model ID");
@@ -141,8 +141,9 @@ async function executablePath(executable: string, environment: NodeJS.ProcessEnv
 
 function sandboxProfile(snapshot: string, schemaPath: string, outputDirectory: string, executable: string, environment: NodeJS.ProcessEnv): string {
   const home = environment.HOME;
-  const authFiles = home === undefined ? [] : [join(home, ".codex/auth.json"), join(home, ".claude.json"), join(home, ".claude/.credentials.json")];
-  const subpaths = [snapshot].map((path) => `(subpath ${JSON.stringify(resolve(path))})`).join(" ");
+  const codexHome = environment.CODEX_HOME;
+  const authFiles = [codexHome === undefined ? undefined : join(codexHome, "auth.json"), home === undefined ? undefined : join(home, ".claude.json"), home === undefined ? undefined : join(home, ".claude/.credentials.json")].filter((path): path is string => path !== undefined);
+  const subpaths = [snapshot, outputDirectory].map((path) => `(subpath ${JSON.stringify(resolve(path))})`).join(" ");
   const literals = [schemaPath, executable, ...authFiles].map((path) => `(literal ${JSON.stringify(resolve(path))})`).join(" ");
   return `(version 1)\n(allow default)\n(deny file-read-data (subpath \"/Users\") (subpath \"/private/tmp\") (subpath \"/private/var/folders\") (subpath \"/Volumes\"))\n(allow file-read-data ${subpaths} ${literals})\n(deny file-write*)\n(allow file-write* (subpath ${JSON.stringify(outputDirectory)}) (literal \"/dev/null\"))\n`;
 }
@@ -167,6 +168,17 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
     if ((config.platform ?? process.platform) !== "darwin") return failure("unsupported_platform", "snapshot-only filesystem isolation is unavailable on this platform", emptyBase);
     if (request.evaluator === "terra" && request.mode === "controlled") return failure("budget_unverifiable", "controlled Terra cannot disable all repository tools with the frozen CLI", emptyBase);
     const environment = minimalEnvironment(config);
+    if (request.evaluator === "terra") {
+      if (environment.HOME === undefined) return failure("spawn_error", "HOME is required for Codex authentication", emptyBase);
+      const codexHome = join(outputDirectory, "codex-home");
+      await mkdir(codexHome);
+      try {
+        await copyFile(join(environment.HOME, ".codex", "auth.json"), join(codexHome, "auth.json"));
+      } catch (error) {
+        if (config.executable === undefined) return failure("spawn_error", "Codex authentication is unavailable", emptyBase);
+      }
+      environment.CODEX_HOME = codexHome;
+    }
     const executable = config.executable ?? (request.evaluator === "terra" ? "codex" : "claude");
     const version = await execute({ command: executable, args: ["--version"], cwd: request.snapshot }, "", request.timeoutMs, environment);
     if (version.timedOut) return failure("timeout", "CLI version check timed out", { ...emptyBase, stderr: version.stderr });

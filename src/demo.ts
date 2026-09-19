@@ -144,19 +144,25 @@ export function summarizeDemoResults(cases: readonly DemoCase[], results: readon
   }));
 }
 
-export async function runDemo(cases: readonly DemoCase[], adapters: readonly DemoAdapter[], mode: DemoReport["mode"]): Promise<DemoReport> {
+export async function runDemo(cases: readonly DemoCase[], adapters: readonly DemoAdapter[], mode: DemoReport["mode"], maxConsecutiveErrors = Number.POSITIVE_INFINITY): Promise<DemoReport> {
   if (cases.length === 0 || adapters.length === 0) throw new Error("demo needs cases and adapters");
   if (new Set(adapters.map((adapter) => adapter.name)).size !== adapters.length) throw new Error("demo evaluator names must be unique");
   const results: DemoResult[] = [];
+  const consecutiveErrors = new Map<DemoEvaluator, number>();
   for (const item of cases) {
     const stateJson = canonicalJson(item.state);
     for (const adapter of adapters) {
       const started = performance.now();
       try {
         const decision = parseDemoDecision(await adapter.evaluate(stateJson, item), `${adapter.name} decision`);
+        consecutiveErrors.set(adapter.name, 0);
         results.push({ caseId: item.caseId, evaluator: adapter.name, status: "valid", decision, correct: isCorrect(decision, item.expected), latencyMs: performance.now() - started, error: null });
       } catch (error) {
-        results.push({ caseId: item.caseId, evaluator: adapter.name, status: "error", decision: null, correct: false, latencyMs: performance.now() - started, error: error instanceof Error ? error.message : String(error) });
+        const message = error instanceof Error ? error.message : String(error);
+        const failures = (consecutiveErrors.get(adapter.name) ?? 0) + 1;
+        consecutiveErrors.set(adapter.name, failures);
+        if (failures >= maxConsecutiveErrors) throw new Error(`${adapter.name} aborted after ${failures} consecutive errors: ${message}`);
+        results.push({ caseId: item.caseId, evaluator: adapter.name, status: "error", decision: null, correct: false, latencyMs: performance.now() - started, error: message });
       }
     }
   }

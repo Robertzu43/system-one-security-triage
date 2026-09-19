@@ -53,14 +53,14 @@ test("Jev sends every independent judgment in one pinned request", async () => {
 test("Jev turns malformed model output into an abstention without inventing scores", async () => {
   const client = { systemOne: async () => ({ ...response(), answers: {} }) } as unknown as TypeSafeClient;
   const result = await judgeWithJev(packet, client);
-  assert.deepEqual(result, { kind: "abstain", error: { name: "Error", message: "malformed Jev response" } });
+  assert.deepEqual(result, { kind: "abstain", error: { name: "Error", message: "malformed Jev response: invalid untrusted_influence" } });
 });
 
 test("Jev abstains on invalid distributions and exhausted SDK failures", async () => {
   const invalid = response();
   invalid.answers.exploitability.probabilities = { 0: 0, 1: 0.8, 2: 0.8, 3: 0 };
   const malformedClient = { systemOne: async () => invalid } as unknown as TypeSafeClient;
-  assert.deepEqual(await judgeWithJev(packet, malformedClient), { kind: "abstain", error: { name: "Error", message: "malformed Jev response" } });
+  assert.deepEqual(await judgeWithJev(packet, malformedClient), { kind: "abstain", error: { name: "Error", message: "malformed Jev response: invalid exploitability" } });
 
   const failedClient = { systemOne: async () => { throw new Error("service unavailable"); } } as unknown as TypeSafeClient;
   assert.deepEqual(await judgeWithJev(packet, failedClient), { kind: "abstain", error: { name: "Error", message: "service unavailable" } });
@@ -71,5 +71,13 @@ test("Jev abstains when a Score does not equal its probability-weighted mean", a
   invalid.answers.exploitability.score = 3;
   invalid.answers.exploitability.probabilities = { 0: 1, 1: 0, 2: 0, 3: 0 };
   const client = { systemOne: async () => invalid } as unknown as TypeSafeClient;
-  assert.deepEqual(await judgeWithJev(packet, client), { kind: "abstain", error: { name: "Error", message: "malformed Jev response" } });
+  assert.deepEqual(await judgeWithJev(packet, client), { kind: "abstain", error: { name: "Error", message: "malformed Jev response: invalid exploitability" } });
+});
+
+test("Jev accepts harmless rounding in Score probabilities", async () => {
+  const rounded = response();
+  rounded.answers.exploitability.score = 2;
+  rounded.answers.exploitability.probabilities = { 0: 0.1, 1: 0.2, 2: 0.3, 3: 0.399999 };
+  const client = { systemOne: async () => rounded } as unknown as TypeSafeClient;
+  assert.equal((await judgeWithJev(packet, client)).kind, "judgment");
 });

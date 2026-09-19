@@ -72,6 +72,18 @@ test("summary keeps explicit errors in both denominators", async () => {
   assert.ok(summary.jev!.vulnerabilityRecall < 1);
 });
 
+test("live recording aborts an evaluator after three consecutive failures", async () => {
+  const cases = (await loadDemoCases("test/fixtures/demo-cases.json")).slice(0, 4);
+  let attempts = 0;
+  const adapter: DemoAdapter = {
+    name: "terra",
+    metadata: { provider: "Fixture", modelId: "terra", runner: "fixture", runnerVersion: "1" },
+    evaluate: async () => { attempts += 1; throw new Error("nonzero_exit: review exited 1"); }
+  };
+  await assert.rejects(() => runDemo(cases, [adapter], "live", 3), /terra aborted after 3 consecutive errors: nonzero_exit: review exited 1/);
+  assert.equal(attempts, 3);
+});
+
 test("fixture CLI prints an explicitly simulated three-model report", async () => {
   const result = await new Promise<{ code: number; stdout: string; stderr: string }>((done) => {
     execFile(process.execPath, ["dist/src/cli.js", "demo", "--fixture", "test/fixtures/demo-cases.json"], { cwd: process.cwd() }, (error, stdout, stderr) => {
@@ -129,4 +141,16 @@ test("live adapters normalize native decisions while preserving the exact eviden
   assert.deepEqual(await jev.evaluate(stateJson, item), { disposition: "vulnerable", family: "injection", inputTokens: 7, outputTokens: 3 });
   assert.equal(jevState, stateJson);
   assert.deepEqual(await terra.evaluate(stateJson, item), { disposition: "safe", family: null });
+});
+
+test("reasoning adapters retain useful CLI failures without leaking paths or credentials", async () => {
+  const item = (await loadDemoCases("test/fixtures/demo-cases.json"))[0]!;
+  const terra = createReasoningDemoAdapter("terra", "/empty", async () => ({
+    finalOutcome: "manual_review", output: null, usage: null, usageStatus: "inconclusive", chargeUsd: null, costStatus: "inconclusive", attempts: 1,
+    stdout: "", stderr: "failed reading /Users/roberto/private/config; token apikey_secret123", error: { kind: "nonzero_exit", message: "review exited 1" }
+  }));
+  await assert.rejects(
+    () => terra.evaluate(JSON.stringify(item.state), item),
+    /nonzero_exit: review exited 1; stderr: failed reading \[local-path\]; token \[redacted\]/
+  );
 });

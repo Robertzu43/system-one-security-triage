@@ -21,6 +21,15 @@ const routerConfig: RouterConfig = parseRouterConfig({
 
 const reasoningInstructions = "Classify the supplied code evidence as vulnerable, safe, or insufficient_context. For vulnerable, return exactly one family: injection, broken_access_control, or ssrf. For safe and insufficient_context, return family null. Missing code is not evidence that a control is absent or that code is safe; use insufficient_context whenever a required authorization, sanitization, middleware, upstream-flow, or call-path fact is not shown.";
 
+function diagnostic(text: string): string {
+  return text
+    .replace(/(?:apikey_|sk-)[A-Za-z0-9_-]+/gi, "[redacted]")
+    .replace(/\/(?:Users|private|Volumes)\/[^\s;,"'`]+/g, "[local-path]")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 500);
+}
+
 function jevFamily(judgment: Exclude<JevJudgment, { kind: "abstain" }>): DemoDecision["family"] {
   const values = [
     ["injection", judgment.answers.is_injection.noul],
@@ -64,7 +73,10 @@ export function createReasoningDemoAdapter(evaluator: Exclude<DemoEvaluator, "je
         toolBudget: 1,
         ...(evaluator === "opus" ? { model: "claude-opus-4-6" } : {})
       }, config);
-      if (result.error !== null || result.output === null) throw new Error(result.error?.message ?? "model returned no decision");
+      if (result.error !== null || result.output === null) {
+        const detail = diagnostic(result.stderr || result.stdout);
+        throw new Error(`${result.error?.kind ?? "no_output"}: ${result.error?.message ?? "model returned no decision"}${detail ? `; stderr: ${detail}` : ""}`);
+      }
       const output = result.output;
       const disposition = output.decision === "abstain" ? "insufficient_context" : output.decision;
       return {
