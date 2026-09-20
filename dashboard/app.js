@@ -1,6 +1,5 @@
 const evaluators = ["jev", "terra", "opus"];
 const names = { jev: "Jev", terra: "Terra", opus: "Opus" };
-const symbols = { vulnerable: "V", safe: "S", insufficient_context: "?", error: "!" };
 const choiceNames = { vulnerable_injection: "injection", vulnerable_broken_access_control: "broken access control", vulnerable_ssrf: "SSRF", safe: "safe", insufficient_context: "insufficient context" };
 let sourceData;
 
@@ -66,25 +65,7 @@ function renderScorecards(data) {
 
 const firstPass = (outcome) => outcome.passes[0];
 
-function decisionCell(item) {
-  const result = firstPass(item.results.jev);
-  const state = result.status === "error" ? "error" : result.decision.disposition;
-  const cell = element("button", `decision-cell ${state}`, symbols[state]);
-  cell.type = "button";
-  cell.setAttribute("role", "listitem");
-  cell.title = `${item.caseId}: ${decisionName(state)}`;
-  cell.setAttribute("aria-label", cell.title);
-  cell.addEventListener("click", () => {
-    byId("model-filter").value = "jev";
-    renderCases(sourceData, { ...selectedFilters(), caseId: item.caseId });
-    byId("explorer-title").scrollIntoView({ behavior: "smooth" });
-  });
-  return cell;
-}
 
-function renderDecisionGrid(data, visibleCount = 100) {
-  byId("decision-grid").replaceChildren(...data.cases.slice(0, visibleCount).map(decisionCell));
-}
 
 function renderComparisonBars(data) {
   const width = 520;
@@ -255,30 +236,6 @@ function renderCases(data, filters) {
   if (filters.caseId) root.querySelector("details")?.setAttribute("open", "");
 }
 
-function replayRecordedRun(data) {
-  const button = byId("replay");
-  const status = byId("replay-status");
-  button.disabled = true;
-  byId("decision-grid").replaceChildren();
-  byId("scorecards").replaceChildren();
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    renderDecisionGrid(data, 100);
-    renderScorecards(data);
-    status.textContent = "Recorded replay complete";
-    button.disabled = false;
-    return;
-  }
-  let visible = 0;
-  const frame = () => {
-    visible += 1;
-    // ponytail: fixed 100-case replay; switch to append-only rendering if the corpus grows.
-    renderDecisionGrid(data, visible);
-    status.textContent = `Replaying recorded result ${visible} of 100`;
-    if (visible < 100) requestAnimationFrame(frame);
-    else { renderScorecards(data); status.textContent = "Recorded replay complete"; button.disabled = false; }
-  };
-  requestAnimationFrame(frame);
-}
 
 async function start() {
   try {
@@ -287,8 +244,7 @@ async function start() {
     const data = await response.json();
     if (data.schemaVersion !== 1 || data.recorded !== true || data.synthetic !== true || data.caseCount !== 100 || typeof data.provenance?.description !== "string" || !Array.isArray(data.warnings)) throw new Error("dashboard data contract is invalid");
     sourceData = data;
-    renderMetadata(data); renderScorecards(data); renderDecisionGrid(data); renderComparisonBars(data); renderConfusionMatrices(data); renderRace(data); renderCases(data, selectedFilters());
-    byId("replay").addEventListener("click", () => replayRecordedRun(data));
+    renderMetadata(data); renderScorecards(data); renderComparisonBars(data); renderConfusionMatrices(data); renderRace(data); renderCases(data, selectedFilters());
     document.querySelectorAll(".filters select").forEach((control) => control.addEventListener("change", () => renderCases(data, selectedFilters())));
   } catch (error) {
     byId("results-count").textContent = `Unable to load recorded data: ${error instanceof Error ? error.message : String(error)}`;
