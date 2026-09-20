@@ -189,3 +189,18 @@ footer nav { display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: .82rem; }
 .race-note { font-size: 0.85rem; opacity: 0.75; max-width: 62ch; }
 .case-flip { grid-column: 1 / -1; font-size: 0.82rem; font-style: italic; opacity: 0.8; }
 #race-play { cursor: pointer; }
+
+.byline { margin: 0; color: var(--muted); font: .78rem var(--body); letter-spacing: .01em; }
+.byline strong { color: var(--ink); font-weight: 650; }
+.author-links { display: inline-flex; gap: .5rem; }
+.author-link {
+  display: inline-flex; align-items: center; padding: .34rem .78rem;
+  border: 1px solid var(--signal); border-radius: 999px;
+  color: var(--signal); background: transparent; text-decoration: none;
+  font: 650 .74rem var(--mono); letter-spacing: .06em; text-transform: uppercase;
+  transition: background .15s ease, color .15s ease;
+}
+.author-link:hover, .author-link:focus-visible { background: var(--signal); color: var(--surface); }
+/* The masthead holds four items now, so let it wrap rather than crush them on a phone. */
+.masthead { flex-wrap: wrap; gap: .75rem 1rem; }
+@media (max-width: 40rem) { .run-state { order: 4; } }
