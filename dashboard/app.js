@@ -1,7 +1,6 @@
 const evaluators = ["jev", "terra", "opus"];
 const names = { jev: "Jev", terra: "Terra", opus: "Opus" };
-const symbols = { vulnerable: "V", safe: "S", insufficient_context: "?", error: "!" };
-let sourceData;
+const choiceNames = { vulnerable_injection: "injection", vulnerable_broken_access_control: "broken access control", vulnerable_ssrf: "SSRF", safe: "safe", insufficient_context: "insufficient context" };
 
 const byId = (id) => document.getElementById(id);
 const element = (tag, className, text) => {
@@ -17,7 +16,14 @@ function renderMetadata(data) {
   byId("corpus-id").textContent = data.corpusHash.slice(0, 12);
   byId("recorded-at").textContent = new Date(data.models[0].recordedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
   byId("case-count").textContent = `${data.caseCount} synthetic`;
+  byId("provenance-note").textContent = data.provenance.description;
+  const warnings = byId("warnings");
+  warnings.replaceChildren(...(data.warnings ?? []).map((text) => element("li", "", text)));
+  warnings.parentElement.hidden = (data.warnings ?? []).length === 0;
 }
+const milliseconds = (value) => value === null || value === undefined ? "unavailable" : `${Math.round(value)} ms`;
+// An absent cost is shown as unpriced, never as $0.00: the two mean very different things.
+const money = (value, places = 4) => value === null || value === undefined ? "unpriced" : `$${value.toFixed(places)}`;
 
 function renderScorecards(data) {
   const root = byId("scorecards");
@@ -28,10 +34,26 @@ function renderScorecards(data) {
     card.dataset.index = String(index + 1).padStart(2, "0");
     card.append(element("p", "model-kicker", model.provider), element("h3", "", names[model.evaluator]), element("p", "model-id", `${model.modelId} · ${model.runner} ${model.runnerVersion}`));
     const hero = element("div", "hero-metric");
-    hero.append(element("span", "metric-label", "Accuracy"), element("strong", "metric-value", percent(summary.accuracy)));
+    hero.append(element("span", "metric-label", "Balanced accuracy"), element("strong", "metric-value", percent(summary.balancedAccuracy)));
     card.append(hero);
+    const economics = data.economics.find((row) => row.evaluator === model.evaluator);
+    const stability = data.stability[model.evaluator];
     const metrics = element("div", "metric-grid");
-    for (const [label, value] of [["Vuln. recall", percent(summary.vulnerabilityRecall)], ["Errors", String(summary.errors)], ["Mean latency", `${Math.round(summary.meanLatencyMs)} ms`]]) {
+    for (const [label, value] of [
+      ["Accuracy", percent(summary.accuracy)],
+      ["Vuln. recall", percent(summary.vulnerabilityRecall)],
+      ["False positive rate", percent(summary.falsePositiveRate)],
+      ["False safe rate", percent(summary.falseSafeRate)],
+      ["Errors", String(summary.errors)],
+      ["Model latency p50", summary.modelLatencyP50Ms === null ? `${milliseconds(summary.latencyP50Ms)} end-to-end` : milliseconds(summary.modelLatencyP50Ms)],
+      // Scores the reported distribution rather than only the argmax. Null for an evaluator that
+      // returns a bare verdict, which is a fact about the model, not a gap in the recording.
+      ["Brier score", summary.brierScore === null ? "n/a - no distribution reported" : summary.brierScore.toFixed(3)],
+      // Basis matters: a rate-card figure is computed from token counts, a provider figure is what was billed.
+      [economics ? `Run cost (${economics.basis})` : "Run cost", money(economics?.costUsd)],
+      ["Cost per correct", money(economics?.costPerCorrectUsd, 7)],
+      ["Stable across passes", stability === undefined ? "n/a" : `${stability.stableCases}/${data.caseCount}`]
+    ]) {
       const item = element("div");
       item.append(element("span", "metric-label", label), element("strong", "", value));
       metrics.append(item);
@@ -41,25 +63,7 @@ function renderScorecards(data) {
   }));
 }
 
-function decisionCell(item) {
-  const result = item.results.jev;
-  const state = result.status === "error" ? "error" : result.decision.disposition;
-  const cell = element("button", `decision-cell ${state}`, symbols[state]);
-  cell.type = "button";
-  cell.setAttribute("role", "listitem");
-  cell.title = `${item.caseId}: ${decisionName(state)}`;
-  cell.setAttribute("aria-label", cell.title);
-  cell.addEventListener("click", () => {
-    byId("model-filter").value = "jev";
-    renderCases(sourceData, { ...selectedFilters(), caseId: item.caseId });
-    byId("explorer-title").scrollIntoView({ behavior: "smooth" });
-  });
-  return cell;
-}
-
-function renderDecisionGrid(data, visibleCount = 100) {
-  byId("decision-grid").replaceChildren(...data.cases.slice(0, visibleCount).map(decisionCell));
-}
+const firstPass = (outcome) => outcome.passes[0];
 
 function renderComparisonBars(data) {
   const width = 520;
@@ -68,7 +72,7 @@ function renderComparisonBars(data) {
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
   svg.setAttribute("role", "img");
   svg.append(document.createElementNS(svg.namespaceURI, "title"));
-  svg.firstChild.textContent = "Accuracy and vulnerability recall by model";
+  svg.firstChild.textContent = "Balanced accuracy and vulnerability recall by model";
   for (let tick = 0; tick <= 4; tick += 1) {
     const x = 120 + tick * 90;
     const line = document.createElementNS(svg.namespaceURI, "line");
@@ -83,7 +87,7 @@ function renderComparisonBars(data) {
     const summary = data.summary[model.evaluator];
     const label = document.createElementNS(svg.namespaceURI, "text");
     label.setAttribute("x", "0"); label.setAttribute("y", String(y + 18)); label.textContent = names[model.evaluator]; svg.append(label);
-    [[summary.accuracy, "Accuracy", 0], [summary.vulnerabilityRecall, "Recall", 24]].forEach(([value, metric, offset]) => {
+    [[summary.balancedAccuracy, "Balanced accuracy", 0], [summary.vulnerabilityRecall, "Recall", 24]].forEach(([value, metric, offset]) => {
       const bar = document.createElementNS(svg.namespaceURI, "rect");
       bar.setAttribute("x", "120"); bar.setAttribute("y", String(y + offset)); bar.setAttribute("width", String(value * 360)); bar.setAttribute("height", "17"); bar.setAttribute("rx", "2"); bar.setAttribute("fill", `var(--${model.evaluator})`);
       const title = document.createElementNS(svg.namespaceURI, "title"); title.textContent = `${names[model.evaluator]} ${metric}: ${percent(value)}`; bar.append(title); svg.append(bar);
@@ -93,7 +97,8 @@ function renderComparisonBars(data) {
   const tbody = byId("comparison-table").querySelector("tbody");
   tbody.replaceChildren(...data.models.map((model) => {
     const row = element("tr");
-    row.append(element("th", "", names[model.evaluator]), element("td", "", percent(data.summary[model.evaluator].accuracy)), element("td", "", percent(data.summary[model.evaluator].vulnerabilityRecall)));
+    const summary = data.summary[model.evaluator];
+    row.append(element("th", "", names[model.evaluator]), element("td", "", percent(summary.balancedAccuracy)), element("td", "", percent(summary.vulnerabilityRecall)), element("td", "", percent(summary.falsePositiveRate)), element("td", "", percent(summary.falseSafeRate)));
     return row;
   }));
 }
@@ -113,13 +118,69 @@ function renderConfusionMatrices(data) {
       const row = element("tr");
       row.append(element("th", "", decisionName(expected)));
       for (const actual of outcomes) {
-        const count = data.cases.filter((item) => item.expected.disposition === expected && (item.results[evaluator].status === "error" ? "error" : item.results[evaluator].decision.disposition) === actual).length;
+        // Counts every pass, not just the first: with five passes a case can land in two cells.
+        const count = data.cases.reduce((total, item) => item.expected.disposition !== expected ? total
+          : total + item.results[evaluator].passes.filter((pass) => (pass.status === "error" ? "error" : pass.decision.disposition) === actual).length, 0);
         row.append(element("td", "", String(count)));
       }
       body.append(row);
     }
     table.append(body); wrap.append(table); return wrap;
   }));
+}
+
+/**
+ * Replays the recorded per-decision latencies as a race.
+ *
+ * Every tick is a real recorded decision, coloured by whether it was right. Nothing here is
+ * animated for effect: the pacing is the measured modelLatencyMs, compressed by a fixed factor.
+ */
+function renderRace(data) {
+  const root = byId("race");
+  if (root === null) return;
+  const lanes = evaluators.map((evaluator) => {
+    const passes = data.cases.map((item) => item.results[evaluator].passes[0]);
+    const timings = passes.map((pass) => pass.modelLatencyMs ?? pass.latencyMs ?? 0);
+    const cumulative = timings.reduce((list, value) => [...list, (list[list.length - 1] ?? 0) + value], []);
+    return { evaluator, passes, cumulative, total: cumulative[cumulative.length - 1] ?? 0 };
+  });
+  const slowest = Math.max(...lanes.map((lane) => lane.total));
+
+  root.replaceChildren(...lanes.map((lane) => {
+    const row = element("div", "race-lane");
+    const label = element("div", "race-label");
+    label.append(element("strong", "", names[lane.evaluator]), element("span", "race-total", `${(lane.total / 1000).toFixed(1)}s for ${lane.passes.length} cases`));
+    const track = element("div", "race-track");
+    const fill = element("div", "race-fill");
+    const counter = element("span", "race-counter", "0");
+    track.append(fill, counter);
+    row.append(label, track);
+    row.dataset.evaluator = lane.evaluator;
+    return row;
+  }));
+
+  const play = byId("race-play");
+  if (play === null) return;
+  play.onclick = () => {
+    const started = performance.now();
+    const compression = slowest / 12000;           // the slowest lane finishes in about twelve seconds
+    const step = () => {
+      const elapsed = (performance.now() - started) * compression;
+      let running = false;
+      for (const lane of lanes) {
+        const row = root.querySelector(`[data-evaluator="${lane.evaluator}"]`);
+        const done = lane.cumulative.filter((value) => value <= elapsed).length;
+        // Each bar tracks its own lane's progress, so the fast lane visibly finishes while the
+        // others are still starting. Sizing every bar by elapsed time made them identical.
+        row.querySelector(".race-fill").style.width = `${(done / lane.passes.length) * 100}%`;
+        const right = lane.passes.slice(0, done).filter((pass) => pass.correct).length;
+        row.querySelector(".race-counter").textContent = `${done} decided · ${right} right`;
+        if (done < lane.passes.length) running = true;
+      }
+      if (running) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
 }
 
 function selectedFilters() {
@@ -131,7 +192,7 @@ function renderCases(data, filters) {
     if (filters.caseId && item.caseId !== filters.caseId) return false;
     if (filters.family !== "all" && item.family !== filters.family) return false;
     if (filters.expected !== "all" && item.expected.disposition !== filters.expected) return false;
-    const results = filters.model === "all" ? evaluators.map((name) => item.results[name]) : [item.results[filters.model]];
+    const results = (filters.model === "all" ? evaluators.map((name) => item.results[name]) : [item.results[filters.model]]).map(firstPass);
     return results.some((result) => (filters.status === "all" || result.status === filters.status)
       && (filters.correct === "all" || String(result.correct) === filters.correct)
       && (filters.decision === "all" || (result.decision?.disposition ?? "error") === filters.decision));
@@ -149,10 +210,23 @@ function renderCases(data, filters) {
     evidence.textContent = JSON.stringify(item.state, null, 2);
     const results = element("div", "case-results");
     for (const evaluator of evaluators) {
-      const result = item.results[evaluator];
+      const outcome = item.results[evaluator];
+      const result = firstPass(outcome);
       const row = element("div", "case-result");
-      const outcome = result.status === "error" ? `error · ${result.error}` : `${decisionName(result.decision.disposition)}${result.decision.family ? ` · ${decisionName(result.decision.family)}` : ""}`;
-      row.append(element("strong", "", names[evaluator]), element("span", "outcome", outcome), element("span", `correctness ${result.correct ? "yes" : "no"}`, result.correct ? "✓ correct" : "× incorrect"));
+      const verdict = result.status === "error" ? `error · ${result.error}` : `${decisionName(result.decision.disposition)}${result.decision.family ? ` · ${decisionName(result.decision.family)}` : ""}`;
+      row.append(element("strong", "", names[evaluator]), element("span", "outcome", verdict), element("span", `correctness ${outcome.correctPasses}/${outcome.passes.length}`, `${outcome.correctPasses}/${outcome.passes.length} passes correct`));
+      if (evaluator === "jev" && result.decision?.choice) {
+        const choice = result.decision.choice;
+        const probabilities = Object.entries(choiceNames).map(([key, label]) => `${label} ${percent(choice.probabilities[key])}`).join(" · ");
+        row.append(element("span", "choice-probabilities", `Choice confidence ${percent(choice.confidence)} · ${probabilities}`));
+      } else if (result.status !== "error") {
+        // Without this the empty space reads as "withheld" rather than "cannot produce one".
+        row.append(element("span", "no-probabilities", "No probability reported - this model returns a final verdict only, not a distribution."));
+      }
+      if (!outcome.stable) {
+        // Identical evidence, different answers. One pass would have hidden this entirely.
+        row.append(element("span", "case-flip", `changed its mind across passes: ${outcome.passes.map((pass) => pass.decision ? decisionName(pass.decision.disposition) : "error").join(" | ")}`));
+      }
       results.append(row);
     }
     body.append(evidence, results); details.append(body); return details;
@@ -160,40 +234,14 @@ function renderCases(data, filters) {
   if (filters.caseId) root.querySelector("details")?.setAttribute("open", "");
 }
 
-function replayRecordedRun(data) {
-  const button = byId("replay");
-  const status = byId("replay-status");
-  button.disabled = true;
-  byId("decision-grid").replaceChildren();
-  byId("scorecards").replaceChildren();
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    renderDecisionGrid(data, 100);
-    renderScorecards(data);
-    status.textContent = "Recorded replay complete";
-    button.disabled = false;
-    return;
-  }
-  let visible = 0;
-  const frame = () => {
-    visible += 1;
-    // ponytail: fixed 100-case replay; switch to append-only rendering if the corpus grows.
-    renderDecisionGrid(data, visible);
-    status.textContent = `Replaying recorded result ${visible} of 100`;
-    if (visible < 100) requestAnimationFrame(frame);
-    else { renderScorecards(data); status.textContent = "Recorded replay complete"; button.disabled = false; }
-  };
-  requestAnimationFrame(frame);
-}
 
 async function start() {
   try {
     const response = await fetch("./data/latest.json");
     if (!response.ok) throw new Error(`data request failed: ${response.status}`);
     const data = await response.json();
-    if (data.schemaVersion !== 1 || data.recorded !== true || data.synthetic !== true || data.caseCount !== 100) throw new Error("dashboard data contract is invalid");
-    sourceData = data;
-    renderMetadata(data); renderScorecards(data); renderDecisionGrid(data); renderComparisonBars(data); renderConfusionMatrices(data); renderCases(data, selectedFilters());
-    byId("replay").addEventListener("click", () => replayRecordedRun(data));
+    if (data.schemaVersion !== 1 || data.recorded !== true || data.synthetic !== true || data.caseCount !== 100 || typeof data.provenance?.description !== "string" || !Array.isArray(data.warnings)) throw new Error("dashboard data contract is invalid");
+    renderMetadata(data); renderScorecards(data); renderComparisonBars(data); renderConfusionMatrices(data); renderRace(data); renderCases(data, selectedFilters());
     document.querySelectorAll(".filters select").forEach((control) => control.addEventListener("change", () => renderCases(data, selectedFilters())));
   } catch (error) {
     byId("results-count").textContent = `Unable to load recorded data: ${error instanceof Error ? error.message : String(error)}`;

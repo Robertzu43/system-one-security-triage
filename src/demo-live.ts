@@ -1,25 +1,33 @@
-import type { JevJudgment, RouterConfig } from "./contracts.js";
-import type { DemoAdapter, DemoDecision, DemoEvaluator } from "./demo.js";
-import { jevModel } from "./jev.js";
-import type { EvidencePacket } from "./packets.js";
+import { performance } from "node:perf_hooks";
+import { decisionForChoice, type DemoAdapter, type DemoEvaluator } from "./demo.js";
+import { demoCriteria, jevChoiceSpec, jevModel, type JevDemoJudgment } from "./jev.js";
+import { stableHash } from "./jsonl.js";
 import { reasoningRunnerVersions, type ReasoningConfig, type ReasoningRequest, type ReasoningResult, runReasoningReview } from "./reasoning.js";
-import { parseRouterConfig, route } from "./router.js";
 
-type JudgeJev = (stateJson: string) => Promise<JevJudgment>;
+/** Jev receives the canonical evidence as a JSON object, the form TypeSafe documents for structured state. */
+type JudgeJev = (state: Record<string, unknown>) => Promise<JevDemoJudgment>;
 type RunReasoning = (request: ReasoningRequest, config: ReasoningConfig) => Promise<ReasoningResult>;
 
-const routerConfig: RouterConfig = parseRouterConfig({
-  contextMin: 0.70,
-  safeRiskMax: 0.20,
-  highRiskMin: 0.80,
-  pathMin: 0.70,
-  controlEffectiveMin: 0.80,
-  controlAbsentMax: 0.20,
-  impactMin: 0.70,
-  directExploitabilityMin: 2.50
-});
+/**
+ * Built from the same `demoCriteria` Jev receives, so all three evaluators are held to one
+ * definition of each outcome. Jev takes the criteria as a typed Choice; the reasoning models take
+ * the identical text with the output contract their schema needs.
+ */
+export const reasoningInstructions = [
+  "Classify the supplied code evidence into exactly one outcome, using only facts present in the evidence.",
+  "",
+  "Outcomes:",
+  ...Object.entries(demoCriteria).map(([outcome, definition]) => `- ${outcome}: ${definition}`),
+  "",
+  "A vulnerability requires shown untrusted influence, a path to security-sensitive behavior, no effective shown control for that path, and plausible security impact.",
+  "Do not infer that omitted code is safe or unsafe; select insufficient_context when required evidence is not shown.",
+  "",
+  "Return decision \"vulnerable\" with exactly one family (injection, broken_access_control, or ssrf), or decision \"safe\" or \"insufficient_context\" with family null."
+].join("\n");
 
-const reasoningInstructions = "Classify the supplied code evidence as vulnerable, safe, or insufficient_context. For vulnerable, return exactly one family: injection, broken_access_control, or ssrf. For safe and insufficient_context, return family null. Missing code is not evidence that a control is absent or that code is safe; use insufficient_context whenever a required authorization, sanitization, middleware, upstream-flow, or call-path fact is not shown.";
+/** Identifies the exact prompt each evaluator received, so runs are only pooled when it matches. */
+export const jevPromptSpecHash = stableHash({ choice: jevChoiceSpec, criteria: demoCriteria });
+export const reasoningPromptSpecHash = stableHash(reasoningInstructions);
 
 function diagnostic(text: string): string {
   return text
@@ -30,27 +38,23 @@ function diagnostic(text: string): string {
     .slice(0, 500);
 }
 
-function jevFamily(judgment: Exclude<JevJudgment, { kind: "abstain" }>): DemoDecision["family"] {
-  const values = [
-    ["injection", judgment.answers.is_injection.noul],
-    ["broken_access_control", judgment.answers.is_broken_access_control.noul],
-    ["ssrf", judgment.answers.is_ssrf.noul]
-  ] as const;
-  return values.reduce((best, value) => value[1] > best[1] ? value : best)[0];
-}
-
 export function createJevDemoAdapter(judge: JudgeJev): DemoAdapter {
   return {
     name: "jev",
-    metadata: { provider: "TypeSafe", modelId: jevModel, runner: "@typesafe-ai/sdk", runnerVersion: "0.6.0" },
-    evaluate: async (stateJson, item) => {
-      const judgment = await judge(stateJson);
+    metadata: { provider: "TypeSafe", modelId: jevModel, runner: "@typesafe-ai/sdk", runnerVersion: "0.6.0", promptSpecHash: jevPromptSpecHash },
+    evaluate: async (stateJson) => {
+      const state = JSON.parse(stateJson) as Record<string, unknown>;
+      const started = performance.now();
+      const judgment = await judge(state);
+      const modelLatencyMs = performance.now() - started;
       if (judgment.kind === "abstain") throw new Error(`${judgment.error.name}: ${judgment.error.message}`);
-      const outcome = route({ contextResolution: item.state.contextResolution } as EvidencePacket, judgment, routerConfig);
-      const base = { inputTokens: judgment.usage.input_tokens, outputTokens: judgment.usage.output_tokens };
-      if (outcome === "likely_vulnerability") return { disposition: "vulnerable", family: jevFamily(judgment), ...base };
-      if (outcome === "likely_safe") return { disposition: "safe", family: null, ...base };
-      return { disposition: "insufficient_context", family: null, ...base };
+      return {
+        ...decisionForChoice(judgment.choice.selected),
+        choice: judgment.choice,
+        inputTokens: judgment.usage.input_tokens,
+        outputTokens: judgment.usage.output_tokens,
+        modelLatencyMs
+      };
     }
   };
 }
@@ -59,8 +63,8 @@ export function createReasoningDemoAdapter(evaluator: Exclude<DemoEvaluator, "je
   return {
     name: evaluator,
     metadata: evaluator === "terra"
-      ? { provider: "OpenAI", modelId: "gpt-5.6-terra", runner: "codex-cli", runnerVersion: reasoningRunnerVersions.terra.replace("codex-cli ", "") }
-      : { provider: "Anthropic", modelId: "claude-opus-4-6", runner: "claude-code", runnerVersion: reasoningRunnerVersions.opus.replace(" (Claude Code)", "") },
+      ? { provider: "OpenAI", modelId: "gpt-5.6-terra", runner: "codex-cli", runnerVersion: reasoningRunnerVersions.terra.replace("codex-cli ", ""), promptSpecHash: reasoningPromptSpecHash }
+      : { provider: "Anthropic", modelId: "claude-opus-4-6", runner: "claude-code", runnerVersion: reasoningRunnerVersions.opus.replace(" (Claude Code)", ""), promptSpecHash: reasoningPromptSpecHash },
     evaluate: async (stateJson) => {
       const result = await runner({
         evaluator,
@@ -69,7 +73,10 @@ export function createReasoningDemoAdapter(evaluator: Exclude<DemoEvaluator, "je
         snapshot: emptySnapshot,
         schemaPath: "config/demo-output.schema.json",
         timeoutMs: 120_000,
-        tokenBudget: 8_000,
+        // Both CLIs prepend a large system prompt of their own: a trivial Codex turn already
+        // reports ~13k input tokens before any evidence. The budget guards against a runaway turn,
+        // so it sits well above that floor rather than at the size of our own prompt.
+        tokenBudget: 80_000,
         toolBudget: 1,
         ...(evaluator === "opus" ? { model: "claude-opus-4-6" } : {})
       }, config);
@@ -82,8 +89,14 @@ export function createReasoningDemoAdapter(evaluator: Exclude<DemoEvaluator, "je
       return {
         disposition,
         family: disposition === "vulnerable" ? output.family : null,
-        ...(result.usage === null ? {} : { inputTokens: result.usage.inputTokens, outputTokens: result.usage.outputTokens }),
-        ...(result.chargeUsd === null ? {} : { costUsd: result.chargeUsd })
+        ...(result.usage === null ? {} : {
+          inputTokens: result.usage.inputTokens,
+          outputTokens: result.usage.outputTokens,
+          cacheReadTokens: result.usage.cacheReadTokens,
+          cacheWriteTokens: result.usage.cacheWriteTokens
+        }),
+        ...(result.chargeUsd === null ? {} : { costUsd: result.chargeUsd }),
+        modelLatencyMs: result.modelLatencyMs
       };
     }
   };

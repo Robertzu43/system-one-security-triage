@@ -9,7 +9,7 @@ async function reasoning(): Promise<any> {
 }
 
 async function fixture(root: string, source: string, version = "codex-cli 0.147.0"): Promise<string> {
-  const path = join(root, "fixture-runner");
+  const path = join(root, "fixture-runner.mjs"); // .mjs: node skips the package.json type lookup the sandbox would deny
   await writeFile(path, `#!/usr/bin/env node
 if (process.argv[2] === "--version") { process.stdout.write(${JSON.stringify(version)}); process.exit(0); }
 ${source}`, "utf8");
@@ -47,10 +47,10 @@ process.stderr.write(JSON.stringify({ args, cwd: process.cwd(), env: Object.keys
     }, { executable, outputDirectory: root, environment: { PATH: process.env.PATH, HOME: home, HTTP_PROXY: "http://must-not-pass", OUTSIDE_SECRET: outside }, environmentKeys: ["OUTSIDE_SECRET"] });
 
     const observed = JSON.parse(result.stderr);
-    assert.deepEqual(observed.args.slice(0, 12), ["exec", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check", "--model", "gpt-5.6-terra", "--dangerously-bypass-approvals-and-sandbox", "--cd", snapshot, "--output-schema", schemaPath]);
-    assert.equal(observed.args[12], "--output-last-message");
-    assert.match(observed.args[13], new RegExp(`^${root.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/reasoning-`));
-    assert.equal(observed.args[14], "-");
+    assert.deepEqual(observed.args.slice(0, 13), ["exec", "--json", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check", "--model", "gpt-5.6-terra", "--dangerously-bypass-approvals-and-sandbox", "--cd", snapshot, "--output-schema", schemaPath]);
+    assert.equal(observed.args[13], "--output-last-message");
+    assert.match(observed.args[14], new RegExp(`^${root.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}/reasoning-`));
+    assert.equal(observed.args[15], "-");
     assert.equal(observed.cwd, await realpath(snapshot));
     assert(observed.env.includes("CODEX_HOME") && observed.env.includes("OUTSIDE_SECRET") && observed.env.includes("HOME") && observed.env.includes("PATH"));
     assert(!observed.env.some((key: string) => /proxy|network/i.test(key)));
@@ -59,11 +59,12 @@ process.stderr.write(JSON.stringify({ args, cwd: process.cwd(), env: Object.keys
     assert.deepEqual(result, {
       finalOutcome: "alert",
       output: { decision: "vulnerable", family: "injection", evidence_span_ids: ["s1"] },
-      usage: { inputTokens: 7, outputTokens: 3 },
+      usage: { inputTokens: 7, outputTokens: 3, cacheReadTokens: 0, cacheWriteTokens: 0 },
       usageStatus: "available",
       chargeUsd: null,
       costStatus: "inconclusive",
       attempts: 1,
+      modelLatencyMs: result.modelLatencyMs,
       stdout: '{"usage":{"input_tokens":7,"output_tokens":3},"tool_calls":1}',
       stderr: result.stderr,
       error: null
@@ -139,7 +140,7 @@ test("Claude structured_output envelopes preserve output and usage while unsuppo
     const snapshot = join(root, "snapshot");
     const schemaPath = resolve("config/reasoning-output.schema.json");
     await (await import("node:fs/promises")).mkdir(snapshot);
-    const opusExecutable = await fixture(root, 'process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] }, usage: { input_tokens: 11, output_tokens: 13 } }));', "2.1.278 (Claude Code)");
+    const opusExecutable = await fixture(root, 'process.stdout.write(JSON.stringify({ structured_output: { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] }, usage: { input_tokens: 11, output_tokens: 13, cache_read_input_tokens: 40, cache_creation_input_tokens: 7 } }));', "2.1.278 (Claude Code)");
     const terraRoot = join(root, "terra");
     await (await import("node:fs/promises")).mkdir(terraRoot);
     const terraExecutable = await fixture(terraRoot, `
@@ -151,7 +152,8 @@ await writeFile(args[args.indexOf("--output-last-message") + 1], JSON.stringify(
     const opus = await runReasoningReview({ evaluator: "opus", mode: "controlled", prompt: "{}", snapshot, schemaPath, timeoutMs: 5_000, tokenBudget: 100, toolBudget: 1, model: "claude-opus-4-6" }, { executable: opusExecutable, outputDirectory: root });
     const terra = await runReasoningReview({ evaluator: "terra", mode: "agentic", prompt: "{}", snapshot, schemaPath, timeoutMs: 5_000, tokenBudget: 100, toolBudget: 1 }, { executable: terraExecutable, outputDirectory: root });
     assert.deepEqual(opus.output, { decision: "safe", family: "ssrf", evidence_span_ids: ["s2"] });
-    assert.deepEqual(opus.usage, { inputTokens: 11, outputTokens: 13 });
+    // Cache buckets stay separate: folding them into inputTokens would price a cache hit at ten times its rate.
+    assert.deepEqual(opus.usage, { inputTokens: 11, outputTokens: 13, cacheReadTokens: 40, cacheWriteTokens: 7 });
     assert.equal(opus.usageStatus, "available");
     assert.equal(terra.usage, null);
     assert.equal(terra.usageStatus, "inconclusive");

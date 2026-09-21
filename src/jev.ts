@@ -1,5 +1,6 @@
-import { noul, score, type EntryType, type TypeSafeClient } from "@typesafe-ai/sdk";
-import type { JevAnswers, JevJudgment, NoulAnswer, ScoreAnswer } from "./contracts.js";
+import { choice, noul, score, type EntryType, type TypeSafeClient } from "@typesafe-ai/sdk";
+import type { JevAbstention, JevAnswers, JevJudgment, NoulAnswer, ScoreAnswer } from "./contracts.js";
+import { parseDemoChoice, type DemoChoice } from "./demo.js";
 import type { EvidencePacket } from "./packets.js";
 
 export const questionIds = ["untrusted_influence", "reaches_sensitive_operation", "validation_blocks_attack", "crosses_authorization_boundary", "authorization_enforced", "security_impact", "is_injection", "is_broken_access_control", "is_ssrf", "enough_context", "exploitability"] as const;
@@ -23,6 +24,38 @@ const questions = {
     "Direct: an untrusted actor can reach the sensitive behavior with no effective shown control"
   ])
 } as const;
+
+/**
+ * The per-outcome definitions every evaluator is judged against.
+ *
+ * Exported so the reasoning adapters build their prompt from this same object: when only Jev
+ * received these definitions, a score gap measured prompt quality as much as model quality.
+ */
+export const demoCriteria = {
+  vulnerable_injection: "Shown evidence establishes untrusted influence over executable command, query, expression, template, interpreter, or equivalent syntax; the path reaches the sensitive operation; no effective shown control blocks it; and security impact is plausible.",
+  vulnerable_broken_access_control: "Shown evidence establishes that an actor can perform an operation or access a resource without the authorization required for that actor, operation, or resource.",
+  vulnerable_ssrf: "Shown evidence establishes that an actor can influence a server-side request to reach an unintended destination or network resource without an effective shown destination restriction.",
+  safe: "The relevant tested path is shown and an effective shown control prevents the tested vulnerability. Missing code or an unshown helper is not evidence of safety.",
+  insufficient_context: "Evidence required to establish vulnerability or safety is not shown, including a hidden helper, middleware, sanitizer, authorization check, upstream data flow, destination policy, or call path."
+} as const;
+
+/** The plain-text half of Jev's Choice, exported so a run can record exactly which prompt produced it. */
+export const jevChoiceSpec = {
+  task: "Classify the shown security evidence into exactly one outcome using only facts present in the state.",
+  vulnerable: "A vulnerability requires shown untrusted influence, a path to security-sensitive behavior, no effective shown control for that path, and plausible security impact.",
+  missing_evidence: "Do not infer that omitted code is safe or unsafe; select insufficient_context when required evidence is not shown."
+} as const;
+
+const demoQuestions = {
+  classification: choice(jevChoiceSpec, demoCriteria)
+} as const;
+
+export type JevDemoJudgment = {
+  readonly kind: "judgment";
+  readonly model: string;
+  readonly usage: { readonly input_tokens: number; readonly output_tokens: number };
+  readonly choice: DemoChoice;
+} | JevAbstention;
 
 function record(value: unknown): Record<string, unknown> | undefined { return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : undefined; }
 function probability(value: unknown): value is number { return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1; }
@@ -48,9 +81,22 @@ function answersError(value: unknown): string | null {
   for (const id of questionIds.slice(0, -1)) if (!noulAnswer(result[id])) return `invalid ${id}`;
   return scoreAnswerError(result.exploitability);
 }
-function abstain(error: unknown): JevJudgment {
+function abstain(error: unknown): JevAbstention {
   const value = error instanceof Error ? error : new Error(String(error));
   return { kind: "abstain", error: { name: value.name, message: value.message } };
+}
+
+export async function judgeDemoWithJev(state: string | Record<string, unknown>, client: Pick<TypeSafeClient, "systemOne">): Promise<JevDemoJudgment> {
+  try {
+    const response: unknown = await client.systemOne({ state: state as EntryType, model: jevModel, questions: demoQuestions });
+    const result = record(response); const usage = record(result?.usage); const answers = record(result?.answers); const answer = record(answers?.classification);
+    if (typeof result?.model !== "string" || result.model.length === 0 || usage === undefined || !Number.isInteger(usage.input_tokens) || (usage.input_tokens as number) < 0 || !Number.isInteger(usage.output_tokens) || (usage.output_tokens as number) < 0) throw new Error("malformed Jev response: invalid envelope");
+    if (answer?.type !== "choice") throw new Error("malformed Jev response: classification type is invalid");
+    const parsed = parseDemoChoice({ selected: answer.choice, confidence: answer.confidence, probabilities: answer.probabilities }, "classification");
+    return { kind: "judgment", model: result.model, usage: { input_tokens: usage.input_tokens as number, output_tokens: usage.output_tokens as number }, choice: parsed };
+  } catch (error) {
+    return abstain(error);
+  }
 }
 
 export async function judgeWithJev(packet: EvidencePacket | string, client: Pick<TypeSafeClient, "systemOne">): Promise<JevJudgment> {

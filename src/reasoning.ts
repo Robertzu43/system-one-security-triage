@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { access, copyFile, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { delimiter, isAbsolute, join, resolve, sep } from "node:path";
+import { performance } from "node:perf_hooks";
 
 export type ReasoningEvaluator = "terra" | "opus";
 export type ReasoningMode = "agentic" | "controlled" | "demo";
@@ -29,11 +30,14 @@ export interface ReasoningConfig {
 export interface ReasoningResult {
   readonly finalOutcome: "alert" | "no_alert" | "manual_review";
   readonly output: StructuredReview | null;
-  readonly usage: { inputTokens: number; outputTokens: number } | null;
+  /** Cached tokens stay separate from fresh input: they bill at a tenth (read) or 1.25x (write). */
+  readonly usage: { inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheWriteTokens: number } | null;
   readonly usageStatus: "available" | "inconclusive";
   readonly chargeUsd: number | null;
   readonly costStatus: "available" | "inconclusive";
   readonly attempts: number;
+  /** Wall time around the model CLI invocation only; excludes version checks, sandbox setup, and cleanup. */
+  readonly modelLatencyMs: number | null;
   readonly stdout: string;
   readonly stderr: string;
   readonly error: { kind: ReasoningFailureKind; message: string } | null;
@@ -47,12 +51,6 @@ const families = new Set<StructuredReview["family"]>(["injection", "broken_acces
 export const reasoningRunnerVersions: Readonly<Record<ReasoningEvaluator, string>> = { terra: "codex-cli 0.147.0", opus: "2.1.278 (Claude Code)" };
 
 function record(value: unknown): Record<string, unknown> | null { return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null; }
-function usage(value: unknown): ReasoningResult["usage"] {
-  const root = record(value); const parsed = record(root?.usage);
-  const input = parsed?.input_tokens ?? parsed?.inputTokens;
-  const output = parsed?.output_tokens ?? parsed?.outputTokens;
-  return typeof input === "number" && Number.isInteger(input) && input >= 0 && typeof output === "number" && Number.isInteger(output) && output >= 0 ? { inputTokens: input, outputTokens: output } : null;
-}
 function parseStructured(value: unknown): StructuredReview {
   const root = record(value);
   if (root === null || Object.keys(root).length !== 3 || !("decision" in root) || !("family" in root) || !("evidence_span_ids" in root) || !decisions.has(root.decision as StructuredReview["decision"]) || !families.has(root.family as StructuredReview["family"]) || !Array.isArray(root.evidence_span_ids) || !root.evidence_span_ids.every((id) => typeof id === "string" && /^s[1-9][0-9]*$/.test(id)) || new Set(root.evidence_span_ids).size !== root.evidence_span_ids.length) throw new Error("malformed structured output");
@@ -93,7 +91,8 @@ function reasonForFailure(stderr: string, code: number): ReasoningFailureKind {
 function command(request: ReasoningRequest, executable: string, outputPath: string, compactSchema: string): Command {
   if (request.evaluator === "terra") return {
     command: executable,
-    args: ["exec", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check", "--model", "gpt-5.6-terra", "--dangerously-bypass-approvals-and-sandbox", "--cd", request.snapshot, "--output-schema", resolve(request.schemaPath), "--output-last-message", outputPath, "-"],
+    // --json makes Codex emit JSONL events, the only form in which it reports token usage.
+    args: ["exec", "--json", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check", "--model", "gpt-5.6-terra", "--dangerously-bypass-approvals-and-sandbox", "--cd", request.snapshot, "--output-schema", resolve(request.schemaPath), "--output-last-message", outputPath, "-"],
     cwd: request.snapshot
   };
   if (request.model === undefined || request.model.length === 0) throw new Error("Opus requires a frozen full model ID");
@@ -163,7 +162,7 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
   const outputDirectory = await mkdtemp(join(outputRoot, "reasoning-"));
   const outputPath = join(outputDirectory, "last-message.json");
   const chargeUsd = request.providerChargeUsd ?? null;
-  const emptyBase = { usage: null, usageStatus: "inconclusive" as const, chargeUsd, costStatus: chargeUsd === null ? "inconclusive" as const : "available" as const, attempts: 0, stdout: "", stderr: "" };
+  const emptyBase = { usage: null, usageStatus: "inconclusive" as const, chargeUsd, costStatus: chargeUsd === null ? "inconclusive" as const : "available" as const, attempts: 0, modelLatencyMs: null, stdout: "", stderr: "" };
   try {
     if ((config.platform ?? process.platform) !== "darwin") return failure("unsupported_platform", "snapshot-only filesystem isolation is unavailable on this platform", emptyBase);
     if (request.evaluator === "terra" && request.mode === "controlled") return failure("budget_unverifiable", "controlled Terra cannot disable all repository tools with the frozen CLI", emptyBase);
@@ -190,9 +189,13 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
     const inner = command(request, await executablePath(executable, environment), outputPath, compactSchema);
     const profilePath = join(outputDirectory, "filesystem.sb");
     await writeFile(profilePath, sandboxProfile(await realpath(request.snapshot), await realpath(resolve(request.schemaPath)), await realpath(outputDirectory), inner.command, environment), { encoding: "utf8", mode: 0o600 });
+    const modelStarted = performance.now();
     const processResult = await execute({ command: "/usr/bin/sandbox-exec", args: ["-f", profilePath, inner.command, ...inner.args], cwd: inner.cwd }, request.prompt, request.timeoutMs, environment);
+    const modelLatencyMs = performance.now() - modelStarted;
     const observedUsage = usageFrom(processResult.stdout);
-    const resultBase = { ...emptyBase, usage: observedUsage, usageStatus: observedUsage === null ? "inconclusive" as const : "available" as const, attempts: 1, stdout: processResult.stdout, stderr: processResult.stderr };
+    // A cost the provider states beats one derived from a rate card, so it wins over the caller's figure.
+    const observedCharge = reportedCharge(processResult.stdout) ?? chargeUsd;
+    const resultBase = { ...emptyBase, usage: observedUsage, usageStatus: observedUsage === null ? "inconclusive" as const : "available" as const, chargeUsd: observedCharge, costStatus: observedCharge === null ? "inconclusive" as const : "available" as const, attempts: 1, modelLatencyMs, stdout: processResult.stdout, stderr: processResult.stderr };
     if (processResult.timedOut) return failure("timeout", `review exceeded ${request.timeoutMs}ms`, resultBase);
     if (processResult.spawnError !== null) return failure("spawn_error", processResult.spawnError.message, resultBase);
     if (processResult.code !== 0) return failure(reasonForFailure(processResult.stderr, processResult.code), `review exited ${processResult.code}`, resultBase);
@@ -214,6 +217,85 @@ export async function runReasoningReview(request: ReasoningRequest, config: Reas
   }
 }
 
+/**
+ * Provider-reported cost for the turn, when the CLI states one.
+ *
+ * Claude Code returns `total_cost_usd`, which is authoritative: it already accounts for the cache
+ * tier actually used. Re-deriving it from a rate card means guessing that tier — Claude Code takes
+ * a one-hour ephemeral cache, billed at 2x input, where a five-minute entry bills at 1.25x. Using
+ * the reported figure removes the guess entirely.
+ */
+function reportedCharge(stdout: string): number | null {
+  let best: number | null = null;
+  const find = (value: unknown): void => {
+    if (value === null || typeof value !== "object") return;
+    const row = value as Record<string, unknown>;
+    const charge = row.total_cost_usd;
+    if (typeof charge === "number" && Number.isFinite(charge) && charge >= 0 && (best === null || charge > best)) best = charge;
+    Object.values(row).forEach(find);
+  };
+  for (const line of stdout.split("\n")) {
+    const trimmed = line.trim();
+    if (trimmed.length === 0) continue;
+    try { find(JSON.parse(trimmed)); } catch { continue; }
+  }
+  return best;
+}
+
+function total(usage: NonNullable<ReasoningResult["usage"]>): number {
+  return usage.inputTokens + usage.outputTokens + usage.cacheReadTokens + usage.cacheWriteTokens;
+}
+
+/** Token counts carried directly on one object, under any of the spellings the two CLIs use. */
+function tokenCounts(value: unknown): ReasoningResult["usage"] {
+  const parsed = record(value);
+  if (parsed === null) return null;
+  const input = parsed.input_tokens ?? parsed.inputTokens ?? parsed.prompt_tokens;
+  const output = parsed.output_tokens ?? parsed.outputTokens ?? parsed.completion_tokens;
+  if (typeof input !== "number" || !Number.isInteger(input) || input < 0 || typeof output !== "number" || !Number.isInteger(output) || output < 0) return null;
+  // The two CLIs spell the cache buckets differently: Claude Code reports
+  // cache_read_input_tokens/cache_creation_input_tokens, Codex reports
+  // cached_input_tokens/cache_write_input_tokens. They stay apart from fresh input because they
+  // bill at different rates; summing them would price a cache hit at ten times its cost.
+  const count = (entry: unknown): number => typeof entry === "number" && Number.isInteger(entry) && entry >= 0 ? entry : 0;
+  // Reasoning tokens are generated and billed as output even though they never appear in the answer.
+  const reasoning = count(parsed.reasoning_output_tokens);
+  return {
+    inputTokens: input,
+    outputTokens: output + reasoning,
+    cacheReadTokens: count(parsed.cache_read_input_tokens ?? parsed.cached_input_tokens),
+    cacheWriteTokens: count(parsed.cache_creation_input_tokens ?? parsed.cache_write_input_tokens)
+  };
+}
+
+/**
+ * Largest token counts anywhere in a parsed payload.
+ *
+ * Claude Code returns one JSON object carrying `usage`; Codex `--json` streams JSONL events that
+ * report both a per-turn delta and a running total, nested at varying depths. Cumulative counters
+ * only grow, so taking the maximum picks the final total without depending on either CLI's event
+ * names — and returns null, as before, when a CLI reports no usage at all.
+ */
+function searchUsage(value: unknown): ReasoningResult["usage"] {
+  let best = tokenCounts(value);
+  if (value !== null && typeof value === "object") {
+    for (const child of Object.values(value as Record<string, unknown>)) {
+      const nested = searchUsage(child);
+      if (nested !== null && (best === null || total(nested) > total(best))) best = nested;
+    }
+  }
+  return best;
+}
+
 function usageFrom(stdout: string): ReasoningResult["usage"] {
-  try { return usage(JSON.parse(stdout)); } catch { return null; }
+  let best: ReasoningResult["usage"] = null;
+  for (const line of stdout.split("\n")) {
+    const trimmed = line.trim();
+    if (trimmed.length === 0) continue;
+    let parsed: unknown;
+    try { parsed = JSON.parse(trimmed); } catch { continue; }
+    const found = searchUsage(parsed);
+    if (found !== null && (best === null || total(found) > total(best))) best = found;
+  }
+  return best;
 }

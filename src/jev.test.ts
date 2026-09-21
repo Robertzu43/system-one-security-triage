@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { TypeSafeClient } from "@typesafe-ai/sdk";
-import { judgeWithJev, questionIds } from "./jev.js";
+import { judgeDemoWithJev, judgeWithJev, questionIds } from "./jev.js";
 import { buildEvidencePacket } from "./packets.js";
 
 const packet = buildEvidencePacket({
@@ -23,6 +23,77 @@ function response() {
     exploitability: { type: "score" as const, score: 1.5, confidence: 0.6, legend: { 0: "a", 1: "b", 2: "c", 3: "d" }, probabilities: { 0: 0, 1: 0.5, 2: 0.5, 3: 0 } }
   } };
 }
+
+function demoResponse() {
+  return {
+    model: "jev-1.13.0",
+    usage: { input_tokens: 10, output_tokens: 2 },
+    answers: {
+      classification: {
+        type: "choice" as const,
+        choice: "vulnerable_injection",
+        confidence: 0.82,
+        probabilities: {
+          vulnerable_injection: 0.86,
+          vulnerable_broken_access_control: 0.02,
+          vulnerable_ssrf: 0.01,
+          safe: 0.06,
+          insufficient_context: 0.05
+        }
+      }
+    }
+  };
+}
+
+test("demo Jev sends one direct five-outcome Choice over unchanged evidence", async () => {
+  let request: unknown;
+  const client = { systemOne: async (value: unknown) => { request = value; return demoResponse(); } } as unknown as TypeSafeClient;
+
+  const result = await judgeDemoWithJev(JSON.stringify(packet), client);
+
+  const sent = request as { state: unknown; model: unknown; questions: Record<string, { type: string; instructions: unknown; criteria: Record<string, string> }> };
+  assert.equal(sent.state, JSON.stringify(packet));
+  assert.equal(sent.model, "jev-1.13.0");
+  assert.deepEqual(Object.keys(sent.questions), ["classification"]);
+  assert.equal(sent.questions.classification?.type, "choice");
+  assert.deepEqual(Object.keys(sent.questions.classification!.criteria), ["vulnerable_injection", "vulnerable_broken_access_control", "vulnerable_ssrf", "safe", "insufficient_context"]);
+  assert.match(JSON.stringify(sent.questions.classification), /untrusted influence/i);
+  assert.match(JSON.stringify(sent.questions.classification), /broken access control|authorization required/i);
+  assert.match(JSON.stringify(sent.questions.classification), /server-side request/i);
+  assert.match(JSON.stringify(sent.questions.classification), /effective shown control/i);
+  assert.match(JSON.stringify(sent.questions.classification), /not shown/i);
+  assert.deepEqual(result, {
+    kind: "judgment",
+    model: "jev-1.13.0",
+    usage: { input_tokens: 10, output_tokens: 2 },
+    choice: { selected: "vulnerable_injection", confidence: 0.82, probabilities: demoResponse().answers.classification.probabilities }
+  });
+});
+
+test("demo Jev rejects malformed Choice distributions", async () => {
+  for (const mutate of [
+    (answer: ReturnType<typeof demoResponse>["answers"]["classification"]) => { (answer.probabilities as Record<string, number>).other = 0; },
+    (answer: ReturnType<typeof demoResponse>["answers"]["classification"]) => { answer.probabilities.vulnerable_injection = 0.5; answer.probabilities.safe = 0.5; },
+    (answer: ReturnType<typeof demoResponse>["answers"]["classification"]) => { answer.probabilities.vulnerable_injection = 0.1; answer.probabilities.safe = 0.82; }
+  ]) {
+    const invalid = demoResponse();
+    mutate(invalid.answers.classification);
+    const client = { systemOne: async () => invalid } as unknown as TypeSafeClient;
+    assert.equal((await judgeDemoWithJev(JSON.stringify(packet), client)).kind, "abstain");
+  }
+});
+
+test("demo Jev accepts tied maxima and preserves low confidence", async () => {
+  const tied = demoResponse();
+  tied.answers.classification.confidence = 0.1;
+  tied.answers.classification.probabilities = { vulnerable_injection: 0.43, vulnerable_broken_access_control: 0.01, vulnerable_ssrf: 0.02, safe: 0.43, insufficient_context: 0.11 };
+  const client = { systemOne: async () => tied } as unknown as TypeSafeClient;
+
+  const result = await judgeDemoWithJev(JSON.stringify(packet), client);
+
+  assert.equal(result.kind, "judgment");
+  if (result.kind === "judgment") assert.equal(result.choice.confidence, 0.1);
+});
 
 test("Jev sends every independent judgment in one pinned request", async () => {
   let request: unknown;
