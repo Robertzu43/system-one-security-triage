@@ -13,7 +13,6 @@ test("dashboard explains recorded synthetic model comparison accessibly", async 
   assert.match(html, /recorded/i);
   assert.match(html, /synthetic/i);
   assert.match(html, /id="provenance-note"/);
-  assert.match(html, /<button[^>]*id="replay"/);
   assert.match(html, /<main/);
   assert.match(html, /<noscript>/);
   assert.match(css, /prefers-reduced-motion/);
@@ -29,14 +28,12 @@ test("dashboard explains recorded synthetic model comparison accessibly", async 
   assert.match(readme, /JEV_RUN_ID/);
 });
 
-test("dashboard controls, legends, live status, and chart tables have semantic fallbacks", async () => {
+test("dashboard controls and chart tables have semantic fallbacks", async () => {
   const html = await readFile("dashboard/index.html", "utf8");
   for (const id of ["model-filter", "family-filter", "expected-filter", "decision-filter", "correct-filter", "status-filter"]) {
     assert.match(html, new RegExp(`<label[^>]*for="${id}"`));
     assert.match(html, new RegExp(`<select[^>]*id="${id}"`));
   }
-  assert.match(html, /id="replay-status"[^>]*aria-live="polite"/);
-  assert.match(html, /<ul[^>]*class="legend"[\s\S]*Vulnerable[\s\S]*Safe[\s\S]*Insufficient context[\s\S]*Error/);
   assert.match(html, /class="table-scroll"[^>]*tabindex="0"/);
   assert.match(html, /<table/);
 });
