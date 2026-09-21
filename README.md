@@ -10,7 +10,7 @@ The current focus is a reproducible **100-case recorded demo** comparing three m
 
 Jev is the model making the first set of decisions—not the name of the benchmark or dashboard. The browser only renders saved JSON artifacts. It contains no provider credentials, backend, or runtime model calls.
 
-> Live dashboard: [https://robertzu43.github.io/system-one-security-triage/](https://robertzu43.github.io/system-one-security-triage/) — serves the `2026-09-19-public-v5` run. Mirror on Cloudflare: [https://system-one-security-triage.rzuniga-9b4.workers.dev/](https://system-one-security-triage.rzuniga-9b4.workers.dev/). Share the GitHub Pages address: LinkedIn's link crawler refuses `workers.dev` hosts.
+> Live dashboard: [https://system-one-security-triage.rzuniga-9b4.workers.dev/](https://system-one-security-triage.rzuniga-9b4.workers.dev/) — serves the `2026-09-19-public-v5` run.
 
 > **Measurement status (2026-09-19).** The published numbers come from `results/recorded/2026-09-19-public-v5`: all three evaluators recorded together on the current label-neutral corpus, five passes per case, 1,500 decisions, zero errors. Earlier runs (`-v2`, `-v3`, `-v4`) were made on a corpus that leaked labels through file paths or left broken-access-control cases undecidable; each directory carries a `SUPERSEDED.md` explaining why, and `dashboard-build` rejects them by corpus hash. Background: [MVP measurement validation](docs/superpowers/specs/2026-09-19-mvp-measurement-validation.md).
 
@@ -96,9 +96,7 @@ npm run dashboard:build -- --run-dir results/recorded/2026-09-19-public-v5 --out
 npm run deploy
 ```
 
-GitHub Pages is the alternative: commit the reviewed `results/recorded/<run-id>/` directory, push it, then manually run the **Publish recorded demo dashboard** workflow in GitHub Actions with the matching `run_id`.
-
-The workflow runs the full test suite, rebuilds the public dataset from the three committed artifacts, and deploys only the static `dashboard/` directory. It has no provider secrets and cannot record new model results.
+The deployed site is static files only: no server code, no provider secrets, and it cannot record new model results.
 
 ## Larger project: in progress
 
