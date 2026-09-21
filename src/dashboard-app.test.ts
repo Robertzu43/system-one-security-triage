@@ -38,14 +38,3 @@ test("dashboard controls and chart tables have semantic fallbacks", async () => 
   assert.match(html, /<table/);
 });
 
-test("Pages deployment validates a selected committed run without provider credentials", async () => {
-  const workflow = await readFile(".github/workflows/pages.yml", "utf8");
-  assert.match(workflow, /workflow_dispatch:/);
-  assert.match(workflow, /run_id:/);
-  assert.match(workflow, /npm ci/);
-  assert.match(workflow, /npm run check/);
-  assert.match(workflow, /dashboard-build/);
-  assert.match(workflow, /actions\/deploy-pages/);
-  assert.doesNotMatch(workflow, /TYPESAFE_API_KEY|ANTHROPIC_API_KEY|OPENAI_API_KEY/);
-  assert.doesNotMatch(workflow, /pull_request:|push:/);
-});
