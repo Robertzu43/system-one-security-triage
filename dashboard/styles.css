@@ -195,6 +195,7 @@ footer nav { display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: .82rem; }
 }
 .author-link svg { width: 1.05rem; height: 1.05rem; display: block; }
 .author-link:hover, .author-link:focus-visible { background: var(--signal); color: var(--surface); }
-/* The masthead holds four items now, so let it wrap rather than crush them on a phone. */
-.masthead { flex-wrap: wrap; gap: .75rem 1rem; }
+/* Wordmark, byline and author links sit together on the left; the run state alone goes right. */
+.masthead { flex-wrap: wrap; justify-content: flex-start; gap: .75rem 1.25rem; }
+.run-state { margin-left: auto; }
 @media (max-width: 40rem) { .run-state { order: 4; } }
