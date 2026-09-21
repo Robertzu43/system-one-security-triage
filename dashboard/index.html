@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Recorded comparison of Jev, Terra, and Opus across 100 synthetic security-triage cases.">
   <title>System One · Recorded Security Triage</title>
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Jev vs Terra vs Opus: recorded security triage">
+  <meta property="og:description" content="Three AI models classified the same 100 synthetic security cases, five times each. Saved decisions, inspectable evidence, no live inference.">
+  <meta property="og:url" content="https://system-one-security-triage.rzuniga-9b4.workers.dev/">
+  <meta name="twitter:card" content="summary">
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.js"></script>
 </head>
@@ -12,22 +17,32 @@
   <a class="skip-link" href="#main">Skip to results</a>
   <header class="masthead">
     <a class="wordmark" href="./" aria-label="System One demo home"><span>S/1</span> Security Triage</a>
+    <p class="byline">Built by <strong>Roberto Zuniga</strong></p>
+    <nav class="author-links" aria-label="Author links">
+      <a class="author-link" href="https://github.com/Robertzu43" target="_blank" rel="noopener noreferrer" aria-label="Roberto Zuniga on GitHub" title="GitHub">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      </a>
+      <a class="author-link" href="https://www.linkedin.com/in/robertoa-zuniga/" target="_blank" rel="noopener noreferrer" aria-label="Roberto Zuniga on LinkedIn" title="LinkedIn">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg>
+      </a>
+    </nav>
     <span class="run-state"><i aria-hidden="true"></i> Recorded evidence</span>
   </header>
 
   <main id="main">
     <section class="hero" aria-labelledby="page-title">
       <div>
-        <p class="eyebrow">100 synthetic cases · recorded model run</p>
+        <p class="eyebrow">100 synthetic cases × 5 passes · 1,500 recorded decisions</p>
         <h1 id="page-title">Decisions,<br><em>under inspection.</em></h1>
       </div>
       <div class="hero-copy">
-        <p class="lede">A reproducible look at how three AI models classified the same security evidence. These are saved outputs—not live browser inference.</p>
+        <p class="lede">A reproducible look at how three AI models classified the same security evidence, five times each. These are saved outputs—not live browser inference.</p>
         <dl class="model-definitions">
           <div><dt>Jev</dt><dd>TypeSafe System One decision model</dd></div>
           <div><dt>Terra</dt><dd>OpenAI model through Codex CLI</dd></div>
           <div><dt>Opus</dt><dd>Anthropic Claude Opus through Claude tooling</dd></div>
         </dl>
+        <p id="provenance-note" class="provenance-note">Loading recorded-method provenance…</p>
       </div>
     </section>
 
@@ -35,53 +50,57 @@
       <div><span>Corpus</span><strong id="corpus-id">Loading…</strong></div>
       <div><span>Recorded</span><strong id="recorded-at">Loading…</strong></div>
       <div><span>Cases</span><strong id="case-count">100 synthetic</strong></div>
-      <button id="replay" type="button">Replay recorded run <span aria-hidden="true">↻</span></button>
-      <p id="replay-status" class="sr-only" aria-live="polite"></p>
+    </section>
+
+    <section class="warnings" aria-labelledby="warnings-title" hidden>
+      <h2 id="warnings-title" class="sr-only">Data caveats</h2>
+      <ul id="warnings"></ul>
     </section>
 
     <section class="primary-results" aria-labelledby="scoreboard-title">
       <div class="section-heading">
         <div><p class="section-number">01 / Scoreboard</p><h2 id="scoreboard-title">The run at a glance</h2></div>
-        <p>Errors stay in every denominator. Missing usage or cost stays unknown—not zero.</p>
+        <p>Errors stay in every denominator. Missing usage or cost stays unknown—not zero. Balanced accuracy is the mean of per-class recall over vulnerable, safe, and insufficient context.</p>
       </div>
       <div id="scorecards" class="scorecards" aria-live="polite"></div>
     </section>
 
-    <section class="panel decision-panel" aria-labelledby="decision-title">
-      <div class="section-heading compact">
-        <div><p class="section-number">02 / Decision map</p><h2 id="decision-title">Jev’s 100 decisions</h2></div>
-        <p>One cell per case, in frozen corpus order.</p>
-      </div>
-      <ul class="legend" aria-label="Decision legend">
-        <li><span class="legend-mark vulnerable">V</span> Vulnerable</li>
-        <li><span class="legend-mark safe">S</span> Safe</li>
-        <li><span class="legend-mark insufficient">?</span> Insufficient context</li>
-        <li><span class="legend-mark error">!</span> Error</li>
-      </ul>
-      <div id="decision-grid" class="decision-grid" role="list" aria-label="Jev decisions for 100 cases"></div>
-    </section>
-
     <div class="analysis-grid">
       <section class="panel" aria-labelledby="comparison-title">
-        <div class="section-heading compact"><div><p class="section-number">03 / Comparison</p><h2 id="comparison-title">Accuracy &amp; recall</h2></div></div>
+        <div class="section-heading compact"><div><p class="section-number">02 / Comparison</p><h2 id="comparison-title">Balanced accuracy &amp; recall</h2></div></div>
         <div id="comparison-bars" class="chart" aria-hidden="true"></div>
         <div class="table-scroll" tabindex="0" aria-label="Comparison chart values">
-          <table id="comparison-table"><caption>Model comparison values</caption><thead><tr><th>Model</th><th>Accuracy</th><th>Vulnerability recall</th></tr></thead><tbody></tbody></table>
+          <table id="comparison-table"><caption>Model comparison values</caption><thead><tr><th>Model</th><th>Balanced accuracy</th><th>Vulnerability recall</th><th>False positive rate</th><th>False safe rate</th></tr></thead><tbody></tbody></table>
         </div>
       </section>
 
       <section class="panel" aria-labelledby="confusion-title">
-        <div class="section-heading compact"><div><p class="section-number">04 / Outcomes</p><h2 id="confusion-title">Decision matrices</h2></div></div>
+        <div class="section-heading compact"><div><p class="section-number">03 / Outcomes</p><h2 id="confusion-title">Decision matrices</h2></div></div>
         <div id="confusion-matrices" class="matrix-stack"></div>
       </section>
     </div>
+
+    <section class="panel" aria-labelledby="race-title">
+      <div class="section-heading compact">
+        <div><p class="section-number">04 / Speed</p><h2 id="race-title">The same 100 cases, in real time</h2></div>
+        <button id="race-play" type="button">Play the recorded race <span aria-hidden="true">▶</span></button>
+      </div>
+      <p class="race-note">Each lane replays that model&rsquo;s own recorded per-decision latencies, compressed so the slowest finishes in about twelve seconds. Nothing is animated for effect &mdash; the pacing is the measured time each decision actually took.</p>
+      <div id="race" class="race"></div>
+      <p class="race-note">Speed alone is easy to make flattering, so the counter shows decisions made <em>and</em> how many were right. A model can win the race and still be the wrong choice.</p>
+    </section>
 
     <section class="method" aria-labelledby="method-title">
       <p class="section-number">05 / Method</p>
       <h2 id="method-title">Same evidence in.<br>Saved decisions out.</h2>
       <div class="method-copy">
-        <p>Every evaluator received identical canonical evidence for 100 synthetic TypeScript/Node.js cases across injection, broken access control, and SSRF. The expected labels are part of the frozen corpus.</p>
-        <p>This is a descriptive demo, not a statistical benchmark. Replay only reveals the recorded results again; it never calls a model, changes a decision, or sends data elsewhere.</p>
+        <p>Every evaluator received identical canonical evidence for 100 synthetic TypeScript/Node.js cases across injection, broken access control, and SSRF. Span paths are numbered rather than named, span text is label-neutral, and no context-resolution flags are shown to any model. The expected labels are part of the frozen corpus but never part of the evidence. A build-time check fails if any repeated path token concentrates in one label.</p>
+        <p>Every evaluator is also given the same per-outcome definitions: Jev receives them as typed Choice criteria and the reasoning models receive the identical text, built from one shared source so the two cannot drift apart.</p>
+        <p>Jev answers one five-way typed Choice and its full probability distribution is recorded; the selected option is scored exactly as Terra's and Opus's structured answers are scored. No threshold changes Jev's selection. Vulnerability recall counts vulnerable cases labeled vulnerable with any family; recall with the family required, family accuracy, and precision are in the data.</p>
+        <p>Model latency is the time around the model request only; end-to-end CLI time is recorded separately. Token counts for Claude include cache reads and writes. Jev probabilities are not compared with any frontier-model confidence value.</p>
+        <p>This is a descriptive demo, not a statistical benchmark. Everything here is a saved result: the page never calls a model, changes a decision, or sends data elsewhere.</p>
+        <p>Every case was put to every evaluator five times. Each pass is kept, so a model that gives a different answer to identical evidence is visible rather than averaged away, and the accuracy figures are taken over all five hundred answers per model rather than one pass.</p>
+        <p><strong>Known limits.</strong> The expected labels were written by one author, so an arguable label is possible and would move these numbers. At 100 cases a difference smaller than roughly fifteen points is not distinguishable from noise, and per-class figures rest on about thirty cases each. The corpus is balanced by construction across the three outcomes; real code is overwhelmingly not vulnerable, so precision here does not transfer to production. Cases are hand-written rather than drawn from real repositories, which removes any chance a model memorised them and equally removes the messiness that makes real triage hard. Latency compares Jev&rsquo;s API against frontier models driven through agentic command-line tools, so it reflects how each is actually operated here, not a like-for-like inference-speed measurement.</p>
       </div>
     </section>
 

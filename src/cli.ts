@@ -1,15 +1,17 @@
+import { execFile } from "node:child_process";
 import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
-import { parseArgs } from "node:util";
+import { parseArgs, promisify } from "node:util";
 import { TypeSafeClient } from "@typesafe-ai/sdk";
 import { inventoryAst } from "./discover.js";
 import type { Candidate, ControlledEvaluator, Repetition, ScoreInput } from "./contracts.js";
 import { buildPublishedDemoData, writePublishedDemoData } from "./dashboard.js";
+import { loadPriceTable } from "./pricing.js";
 import { parseRecordedDemoRun, writeRecordedDemoRuns, type RecordedDemoRun } from "./demo-record.js";
 import { loadDemoCases, runDemo, type DemoAdapter, type DemoEvaluator, type EvaluatorMetadata } from "./demo.js";
 import { createJevDemoAdapter, createReasoningDemoAdapter } from "./demo-live.js";
-import { judgeWithJev } from "./jev.js";
+import { judgeDemoWithJev } from "./jev.js";
 import { canonicalJson } from "./jsonl.js";
 import { runArm, type PublishedRun } from "./pipeline.js";
 import { type ReasoningResult } from "./reasoning.js";
@@ -19,6 +21,15 @@ import { createSanitizedSnapshot } from "./sanitize.js";
 
 type Values = Record<string, string | boolean | undefined>;
 
+/** Commit that produced a recording. A run from a dirty tree is not reproducible, so refuse it. */
+async function headCommit(): Promise<string> {
+  const run = promisify(execFile);
+  const { stdout: sha } = await run("git", ["rev-parse", "HEAD"]);
+  const { stdout: dirty } = await run("git", ["status", "--porcelain"]);
+  if (dirty.trim().length > 0) throw new Error("refusing to record from a dirty working tree; commit first so the run can be reproduced");
+  return sha.trim();
+}
+
 function required(values: Values, name: string): string {
   const value = values[name];
   if (typeof value !== "string" || value.length === 0) throw new Error(`--${name} is required`);
@@ -26,8 +37,8 @@ function required(values: Values, name: string): string {
 }
 function fixtureReview(): ReasoningResult {
   return {
-    finalOutcome: "alert", output: { decision: "vulnerable", family: "injection", evidence_span_ids: ["s1"] }, usage: { inputTokens: 0, outputTokens: 0 },
-    usageStatus: "available", chargeUsd: null, costStatus: "inconclusive", attempts: 1, stdout: "", stderr: "", error: null
+    finalOutcome: "alert", output: { decision: "vulnerable", family: "injection", evidence_span_ids: ["s1"] }, usage: { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 },
+    usageStatus: "available", chargeUsd: null, costStatus: "inconclusive", attempts: 1, modelLatencyMs: 0, stdout: "", stderr: "", error: null
   };
 }
 
@@ -113,7 +124,7 @@ async function liveAdapters(selected: readonly DemoEvaluator[], emptySnapshot: s
   const adapters: DemoAdapter[] = [];
   if (selected.includes("jev")) {
     const client = new TypeSafeClient({ timeout: 30_000, retry: { maxRetries: 0 }, logLevel: "off" });
-    adapters.push(createJevDemoAdapter((stateJson) => judgeWithJev(stateJson, client)));
+    adapters.push(createJevDemoAdapter((state) => judgeDemoWithJev(state, client)));
   }
   if (selected.includes("terra")) adapters.push(createReasoningDemoAdapter("terra", emptySnapshot, undefined, { outputDirectory }));
   if (selected.includes("opus")) adapters.push(createReasoningDemoAdapter("opus", emptySnapshot, undefined, { outputDirectory }));
@@ -138,8 +149,8 @@ async function demo(values: Values): Promise<unknown> {
   }
   const adapters = (["jev", "terra", "opus"] as const).map((name): DemoAdapter => ({
     name,
-    metadata: { provider: "Fixture", modelId: name, runner: "fixture", runnerVersion: "1" },
-    evaluate: async (_stateJson, item) => ({ ...item.expected, inputTokens: 0, outputTokens: 0, costUsd: 0 })
+    metadata: { provider: "Fixture", modelId: name, runner: "fixture", runnerVersion: "1", promptSpecHash: "fixture" },
+    evaluate: async (_stateJson, item) => ({ ...item.expected, inputTokens: 0, outputTokens: 0, costUsd: 0, modelLatencyMs: 0 })
   }));
   return output(await runDemo(cases, adapters, "fixture"));
 }
@@ -148,6 +159,9 @@ async function demoRecord(values: Values): Promise<unknown> {
   const fixture = required(values, "fixture");
   const selected = selectedEvaluators(values);
   const runId = required(values, "run-id");
+  // Repeated passes are how run-to-run variation becomes visible; one pass cannot show it.
+  const repetitions = values.repetitions === undefined ? 1 : Number(values.repetitions);
+  if (!Number.isInteger(repetitions) || repetitions < 1) throw new Error("--repetitions must be a positive integer");
   const outputRoot = required(values, "output");
   requireCredentials(selected);
   const cases = await loadDemoCases(fixture);
@@ -156,11 +170,12 @@ async function demoRecord(values: Values): Promise<unknown> {
   await mkdir(emptySnapshot);
   try {
     const adapters = await liveAdapters(selected, emptySnapshot, root);
-    const report = await runDemo(cases, adapters, "live", 3);
+    const report = await runDemo(cases, adapters, "live", { maxConsecutiveErrors: 3, repetitions });
     return writeRecordedDemoRuns({
       cases,
       report,
       metadata: Object.fromEntries(adapters.map((adapter) => [adapter.name, adapter.metadata])) as Partial<Record<DemoEvaluator, EvaluatorMetadata>>,
+      gitSha: await headCommit(),
       runId,
       recordedAt: new Date().toISOString(),
       outputRoot
@@ -183,14 +198,15 @@ async function dashboardBuild(values: Values): Promise<unknown> {
     }
   }
   const generatedAt = runs.map((run) => run.recordedAt).sort().at(-1) ?? "1970-01-01T00:00:00.000Z";
-  const data = buildPublishedDemoData(cases, runs, generatedAt);
+  const prices = await loadPriceTable(values.prices === undefined ? "config/pricing.json" : String(values.prices));
+  const data = buildPublishedDemoData(cases, runs, generatedAt, { allowDegenerate: values["allow-degenerate"] === true, prices });
   await writePublishedDemoData(output, data);
   return { output: basename(output), corpusHash: data.corpusHash, sourceHashes: Object.fromEntries(data.sourceArtifacts.map(({ evaluator, artifactSha256 }) => [evaluator, artifactSha256])) };
 }
 
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({ args: process.argv.slice(2), allowPositionals: true, strict: true, options: {
-    source: { type: "string" }, destination: { type: "string" }, commit: { type: "string" }, snapshot: { type: "string" }, input: { type: "string" }, output: { type: "string" }, fixture: { type: "string" }, evaluator: { type: "string" }, "run-id": { type: "string" }, "run-dir": { type: "string" }, live: { type: "boolean" }, models: { type: "string" }, details: { type: "boolean" }
+    source: { type: "string" }, destination: { type: "string" }, commit: { type: "string" }, snapshot: { type: "string" }, input: { type: "string" }, output: { type: "string" }, fixture: { type: "string" }, evaluator: { type: "string" }, "run-id": { type: "string" }, "run-dir": { type: "string" }, live: { type: "boolean" }, models: { type: "string" }, details: { type: "boolean" }, "allow-degenerate": { type: "boolean" }, repetitions: { type: "string" }, prices: { type: "string" }
   } });
   const command = positionals[0];
   const result = command === "sanitize" ? await sanitize(values) : command === "discover" ? await discover(values) : command === "score" ? await score(values) : command === "run" ? await runFixture(values) : command === "demo" ? await demo(values) : command === "demo-record" ? await demoRecord(values) : command === "dashboard-build" ? await dashboardBuild(values) : (() => { throw new Error("expected sanitize, discover, run, score, demo, demo-record, or dashboard-build"); })();

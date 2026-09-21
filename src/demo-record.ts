@@ -1,6 +1,6 @@
 import { lstat, mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { parseDemoDecision, type DemoCase, type DemoEvaluator, type DemoReport, type DemoResult, type EvaluatorMetadata } from "./demo.js";
+import { isCorrectDecision, parseDemoDecision, type DemoCase, type DemoEvaluator, type DemoReport, type DemoResult, type EvaluatorMetadata } from "./demo.js";
 import { stableHash, writeJsonlExclusive } from "./jsonl.js";
 
 export interface RecordedDemoRun {
@@ -13,8 +13,14 @@ export interface RecordedDemoRun {
   modelId: string;
   runner: string;
   runnerVersion: string;
+  /** Hash of the prompt text this evaluator received; runs may only be pooled when it matches. */
+  promptSpecHash: string;
+  /** Commit that produced the run, so a result can be traced to the code that generated it. */
+  gitSha: string;
   corpusHash: string;
   caseCount: number;
+  /** Passes over the corpus in this run; results carry one entry per case per pass. */
+  repetitions: number;
   results: DemoResult[];
   artifactSha256: string;
 }
@@ -25,6 +31,7 @@ export interface RecordDemoInput {
   runId: string;
   recordedAt: string;
   outputRoot: string;
+  gitSha: string;
   metadata: Readonly<Partial<Record<DemoEvaluator, EvaluatorMetadata>>>;
 }
 
@@ -64,29 +71,37 @@ function isoTimestamp(value: unknown): string {
   return timestamp;
 }
 
-function isCorrect(actual: DemoResult["decision"], expected: DemoCase["expected"]): boolean {
-  return actual !== null && actual.disposition === expected.disposition && (expected.disposition !== "vulnerable" || actual.family === expected.family);
+function latency(value: unknown, label: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) throw new Error(`${label} is invalid`);
+  return value;
 }
 
 function parseResult(value: unknown, index: number, evaluator: DemoEvaluator, item: DemoCase): DemoResult {
-  const row = record(value, `results[${index}]`);
-  const resultEvaluator = text(row.evaluator, `results[${index}].evaluator`) as DemoEvaluator;
-  if (!evaluators.has(resultEvaluator) || resultEvaluator !== evaluator) throw new Error(`results[${index}] evaluator mismatch`);
+  const label = `results[${index}]`;
+  const row = record(value, label);
+  const resultEvaluator = text(row.evaluator, `${label}.evaluator`) as DemoEvaluator;
+  if (!evaluators.has(resultEvaluator) || resultEvaluator !== evaluator) throw new Error(`${label} evaluator mismatch`);
   const status = row.status;
-  if (status !== "valid" && status !== "error") throw new Error(`results[${index}].status is invalid`);
-  if (typeof row.correct !== "boolean") throw new Error(`results[${index}].correct must be boolean`);
-  if (typeof row.latencyMs !== "number" || !Number.isFinite(row.latencyMs) || row.latencyMs < 0) throw new Error(`results[${index}].latencyMs is invalid`);
+  if (status !== "valid" && status !== "error") throw new Error(`${label}.status is invalid`);
+  if (typeof row.correct !== "boolean") throw new Error(`${label}.correct must be boolean`);
+  const latencyMs = latency(row.latencyMs, `${label}.latencyMs`);
+  // Artifacts recorded before repeated passes existed carry a single pass.
+  const repetition = row.repetition === undefined ? 1 : row.repetition;
+  if (!Number.isInteger(repetition) || (repetition as number) < 1) throw new Error(`${label}.repetition must be a positive integer`);
+  // Older artifacts predate model-call timing; they parse with null rather than a fabricated zero.
+  const modelLatencyMs = row.modelLatencyMs === undefined || row.modelLatencyMs === null ? null : latency(row.modelLatencyMs, `${label}.modelLatencyMs`);
   if (status === "error") {
-    if (row.decision !== null || row.correct || typeof row.error !== "string" || row.error.length === 0) throw new Error(`results[${index}] has an invalid error outcome`);
-    return { caseId: item.caseId, evaluator, status, decision: null, correct: false, latencyMs: row.latencyMs, error: row.error };
+    if (row.decision !== null || row.correct || typeof row.error !== "string" || row.error.length === 0) throw new Error(`${label} has an invalid error outcome`);
+    return { caseId: item.caseId, repetition: repetition as number, evaluator, status, decision: null, correct: false, latencyMs, modelLatencyMs, error: row.error };
   }
-  if (row.error !== null) throw new Error(`results[${index}] has an error for a valid outcome`);
-  const decision = parseDemoDecision(row.decision, `results[${index}].decision`);
-  const correct = isCorrect(decision, item.expected);
-  if (row.correct !== correct) throw new Error(`results[${index}].correct is inconsistent`);
-  return { caseId: item.caseId, evaluator, status, decision, correct, latencyMs: row.latencyMs, error: null };
+  if (row.error !== null) throw new Error(`${label} has an error for a valid outcome`);
+  const decision = parseDemoDecision(row.decision, `${label}.decision`);
+  const correct = isCorrectDecision(decision, item.expected);
+  if (row.correct !== correct) throw new Error(`${label}.correct is inconsistent`);
+  return { caseId: item.caseId, repetition: repetition as number, evaluator, status, decision, correct, latencyMs, modelLatencyMs, error: null };
 }
 
+/** Hash over the model-visible corpus and its labels; private ledger metadata is excluded. */
 export function corpusHash(cases: readonly DemoCase[]): string {
   return stableHash(cases.map(({ caseId, family, state, expected }) => ({ caseId, family, state, expected })));
 }
@@ -104,16 +119,23 @@ export function parseRecordedDemoRun(value: unknown, cases: readonly DemoCase[])
   const hash = text(row.corpusHash, "corpusHash");
   if (hash !== corpusHash(cases)) throw new Error("corpus hash mismatch");
   if (row.caseCount !== cases.length) throw new Error("recorded run must have complete case coverage");
+  const repetitions = row.repetitions === undefined ? 1 : row.repetitions;
+  if (!Number.isInteger(repetitions) || (repetitions as number) < 1) throw new Error("repetitions must be a positive integer");
   if (!Array.isArray(row.results)) throw new Error("results must be an array");
   const byId = new Map(cases.map((item) => [item.caseId, item]));
+  // Every case must appear once per pass: a partial repeat would weight some cases more than others.
   const seen = new Set<string>();
   for (const [index, result] of row.results.entries()) {
-    const caseId = text(record(result, `results[${index}]`).caseId, `results[${index}].caseId`);
-    if (seen.has(caseId)) throw new Error(`duplicate case: ${caseId}`);
+    const entry = record(result, `results[${index}]`);
+    const caseId = text(entry.caseId, `results[${index}].caseId`);
+    const pass = entry.repetition === undefined ? 1 : entry.repetition;
     if (!byId.has(caseId)) throw new Error(`unknown case: ${caseId}`);
-    seen.add(caseId);
+    if (!Number.isInteger(pass) || (pass as number) < 1 || (pass as number) > (repetitions as number)) throw new Error(`results[${index}].repetition is outside 1..${repetitions}`);
+    const key = `${caseId}#${pass}`;
+    if (seen.has(key)) throw new Error(`duplicate case: ${caseId} repetition ${pass}`);
+    seen.add(key);
   }
-  if (seen.size !== cases.length) throw new Error("recorded run must have complete case coverage");
+  if (seen.size !== cases.length * (repetitions as number)) throw new Error("recorded run must have complete case coverage");
   const results = row.results.map((result, index) => {
     const caseId = (result as Record<string, unknown>).caseId as string;
     return parseResult(result, index, evaluator, byId.get(caseId)!);
@@ -131,8 +153,11 @@ export function parseRecordedDemoRun(value: unknown, cases: readonly DemoCase[])
     modelId: text(row.modelId, "modelId"),
     runner: text(row.runner, "runner"),
     runnerVersion: text(row.runnerVersion, "runnerVersion"),
+    promptSpecHash: text(row.promptSpecHash, "promptSpecHash"),
+    gitSha: text(row.gitSha, "gitSha"),
     corpusHash: hash,
     caseCount: cases.length,
+    repetitions: repetitions as number,
     results,
     artifactSha256
   };
@@ -165,8 +190,10 @@ export async function writeRecordedDemoRuns(input: RecordDemoInput): Promise<Rec
       mode: "live-recorded" as const,
       evaluator,
       ...details,
+      gitSha: input.gitSha,
       corpusHash: corpusHash(input.cases),
       caseCount: input.cases.length,
+      repetitions: input.report.repetitions,
       results: input.report.results.filter((result) => result.evaluator === evaluator)
     };
     return parseRecordedDemoRun({ ...body, artifactSha256: stableHash(body) }, input.cases);

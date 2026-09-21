@@ -1,1 +1,1614 @@
-{"artifactSha256":"702380b830ef874d5c69e488040e0272c45c6a703239482151e45fac54dc106f","caseCount":100,"corpusHash":"db483ab184d9bcdec78711addaabe5a4f981f82492b7438b65013985cfae462d","evaluator":"opus","mode":"live-recorded","modelId":"claude-opus-4-6","provider":"Anthropic","recordedAt":"2026-09-18T12:00:00.000Z","results":[{"caseId":"injection-vulnerable","correct":false,"decision":null,"error":"synthetic fixture failure","evaluator":"opus","latencyMs":1,"status":"error"},{"caseId":"injection-safe","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-insufficient","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-vulnerable","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"broken_access_control","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-safe","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-insufficient","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-vulnerable","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"ssrf","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-safe","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-insufficient","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-vulnerable-sql-order-sort","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"injection","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-vulnerable-sql-report-filter","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"injection","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-vulnerable-shell-export","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"injection","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-vulnerable-shell-git-ref","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"injection","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-vulnerable-eval-formula","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"injection","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-vulnerable-vm-script","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"injection","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-vulnerable-template-helper","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"injection","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-vulnerable-template-name","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"injection","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-vulnerable-path-archive","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"injection","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-vulnerable-orm-order","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"injection","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-vulnerable-graphql-raw-filter","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"injection","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-safe-sql-placeholder-email","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-safe-query-builder-eq","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-safe-shell-execfile-args","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-safe-shell-command-allowlist","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-safe-json-parse","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-safe-template-autoescape","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-safe-path-basename-root","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-safe-path-resolve-root","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-safe-orm-enum-sort","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-safe-parser-schema-validation","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-insufficient-sql-helper-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-insufficient-db-wrapper-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-insufficient-command-builder-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-insufficient-process-service-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-insufficient-expression-compiler-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-insufficient-template-sanitizer-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-insufficient-archive-path-guard-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-insufficient-upload-normalizer-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-insufficient-orm-filter-helper-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"injection-insufficient-parser-policy-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-vulnerable-invoice-read","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"broken_access_control","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-vulnerable-profile-update","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"broken_access_control","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-vulnerable-tenant-report","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"broken_access_control","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-vulnerable-admin-export","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"broken_access_control","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-vulnerable-project-delete","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"broken_access_control","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-vulnerable-document-download","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"broken_access_control","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-vulnerable-order-refund","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"broken_access_control","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-vulnerable-team-invite","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"broken_access_control","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-vulnerable-api-key-rotate","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"broken_access_control","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-vulnerable-mass-assignment-role","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"broken_access_control","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-safe-invoice-owner-query","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-safe-profile-self-id","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-safe-tenant-scope-query","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-safe-admin-middleware","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-safe-project-owner-check","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-safe-document-membership","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-safe-refund-permission","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-safe-team-owner-guard","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-safe-api-key-session-user","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-safe-mass-assignment-allowlist","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-insufficient-invoice-policy-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-insufficient-profile-auth-helper","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-insufficient-tenant-context-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-insufficient-admin-middleware-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-insufficient-project-permission-service","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-insufficient-document-acl-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-insufficient-refund-policy-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-insufficient-team-role-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-insufficient-api-key-authorization-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"access-insufficient-field-policy-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-vulnerable-avatar-url","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"ssrf","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-vulnerable-webhook-test-url","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"ssrf","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-vulnerable-pdf-render-url","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"ssrf","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-vulnerable-redirect-follow","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"ssrf","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-vulnerable-metadata-host","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"ssrf","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-vulnerable-dns-rebind-host","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"ssrf","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-vulnerable-proxy-destination","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"ssrf","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-vulnerable-image-import-url","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"ssrf","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-vulnerable-feed-fetch-url","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"ssrf","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-vulnerable-oauth-jwks-url","correct":true,"decision":{"costUsd":0.001,"disposition":"vulnerable","family":"ssrf","inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-safe-avatar-host-allowlist","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-safe-webhook-https-domain","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-safe-pdf-fixed-origin","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-safe-redirect-disabled","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-safe-private-ip-block","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-safe-dns-pin-check","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-safe-proxy-service-enum","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-safe-image-object-key","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-safe-feed-registry","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-safe-jwks-issuer-map","correct":true,"decision":{"costUsd":0.001,"disposition":"safe","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-insufficient-avatar-validator-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-insufficient-webhook-policy-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-insufficient-pdf-resolver-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-insufficient-redirect-config-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-insufficient-ip-filter-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-insufficient-dns-cache-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-insufficient-proxy-map-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-insufficient-image-fetcher-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-insufficient-feed-resolver-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"},{"caseId":"ssrf-insufficient-jwks-discovery-hidden","correct":true,"decision":{"costUsd":0.001,"disposition":"insufficient_context","family":null,"inputTokens":10,"outputTokens":2},"error":null,"evaluator":"opus","latencyMs":1,"status":"valid"}],"runId":"dashboard-runs","runner":"claude-code","runnerVersion":"2.1.277","schemaVersion":1}
+{
+  "evaluator": "opus",
+  "mode": "live-recorded",
+  "modelId": "claude-opus-4-6",
+  "provider": "Anthropic",
+  "recordedAt": "2026-09-18T12:00:00.000Z",
+  "runId": "dashboard-runs",
+  "runner": "claude-code",
+  "runnerVersion": "2.1.278",
+  "schemaVersion": 1,
+  "promptSpecHash": "reasoning-prompt",
+  "gitSha": "0000000000000000000000000000000000000000",
+  "corpusHash": "c4fe8e5deec865ac833bde4e2aa1d7dd3b65418ecada4b1b61f59db52a58de85",
+  "caseCount": 100,
+  "repetitions": 1,
+  "results": [
+    {
+      "caseId": "injection-vulnerable",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "injection",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-safe",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-insufficient",
+      "correct": false,
+      "decision": null,
+      "error": "fixture service failure",
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": null,
+      "status": "error",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-vulnerable",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "broken_access_control",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-safe",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-insufficient",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-vulnerable",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "ssrf",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-safe",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-insufficient",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-vulnerable-sql-order-sort",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "injection",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-vulnerable-sql-report-filter",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "injection",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-vulnerable-shell-export",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "injection",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-vulnerable-shell-git-ref",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "injection",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-vulnerable-eval-formula",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "injection",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-vulnerable-vm-script",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "injection",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-vulnerable-template-helper",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "injection",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-vulnerable-template-name",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "injection",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-vulnerable-path-archive",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "injection",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-vulnerable-orm-order",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "injection",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-vulnerable-graphql-raw-filter",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "injection",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-safe-sql-placeholder-email",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-safe-query-builder-eq",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-safe-shell-execfile-args",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-safe-shell-command-allowlist",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-safe-json-parse",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-safe-template-autoescape",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-safe-path-basename-root",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-safe-path-resolve-root",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-safe-orm-enum-sort",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-safe-parser-schema-validation",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-insufficient-sql-helper-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-insufficient-db-wrapper-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-insufficient-command-builder-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-insufficient-process-service-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-insufficient-expression-compiler-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-insufficient-template-sanitizer-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-insufficient-archive-path-guard-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-insufficient-upload-normalizer-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-insufficient-orm-filter-helper-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "injection-insufficient-parser-policy-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-vulnerable-invoice-read",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "broken_access_control",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-vulnerable-profile-update",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "broken_access_control",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-vulnerable-tenant-report",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "broken_access_control",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-vulnerable-admin-export",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "broken_access_control",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-vulnerable-project-delete",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "broken_access_control",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-vulnerable-document-download",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "broken_access_control",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-vulnerable-order-refund",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "broken_access_control",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-vulnerable-team-invite",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "broken_access_control",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-vulnerable-api-key-rotate",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "broken_access_control",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-vulnerable-mass-assignment-role",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "broken_access_control",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-safe-invoice-owner-query",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-safe-profile-self-id",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-safe-tenant-scope-query",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-safe-admin-middleware",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-safe-project-owner-check",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-safe-document-membership",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-safe-refund-permission",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-safe-team-owner-guard",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-safe-api-key-session-user",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-safe-mass-assignment-allowlist",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-insufficient-invoice-policy-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-insufficient-profile-auth-helper",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-insufficient-tenant-context-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-insufficient-admin-middleware-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-insufficient-project-permission-service",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-insufficient-document-acl-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-insufficient-refund-policy-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-insufficient-team-role-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-insufficient-api-key-authorization-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "access-insufficient-field-policy-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-vulnerable-avatar-url",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "ssrf",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-vulnerable-webhook-test-url",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "ssrf",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-vulnerable-pdf-render-url",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "ssrf",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-vulnerable-redirect-follow",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "ssrf",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-vulnerable-metadata-host",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "ssrf",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-vulnerable-dns-rebind-host",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "ssrf",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-vulnerable-proxy-destination",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "ssrf",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-vulnerable-image-import-url",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "ssrf",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-vulnerable-feed-fetch-url",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "ssrf",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-vulnerable-oauth-jwks-url",
+      "correct": true,
+      "decision": {
+        "disposition": "vulnerable",
+        "family": "ssrf",
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-safe-avatar-host-allowlist",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-safe-webhook-https-domain",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-safe-pdf-fixed-origin",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-safe-redirect-disabled",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-safe-private-ip-block",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-safe-dns-pin-check",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-safe-proxy-service-enum",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-safe-image-object-key",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-safe-feed-registry",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-safe-jwks-issuer-map",
+      "correct": true,
+      "decision": {
+        "disposition": "safe",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-insufficient-avatar-validator-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-insufficient-webhook-policy-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-insufficient-pdf-resolver-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-insufficient-redirect-config-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-insufficient-ip-filter-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-insufficient-dns-cache-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-insufficient-proxy-map-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-insufficient-image-fetcher-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-insufficient-feed-resolver-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    },
+    {
+      "caseId": "ssrf-insufficient-jwks-discovery-hidden",
+      "correct": true,
+      "decision": {
+        "disposition": "insufficient_context",
+        "family": null,
+        "inputTokens": 10,
+        "outputTokens": 2
+      },
+      "error": null,
+      "evaluator": "opus",
+      "latencyMs": 1,
+      "modelLatencyMs": 1,
+      "status": "valid",
+      "repetition": 1
+    }
+  ],
+  "artifactSha256": "5cf8ec1d0bf0fa9197fb9412691fa26a9c3b3461c90cbd1e303d66cdf91e48cd"
+}
