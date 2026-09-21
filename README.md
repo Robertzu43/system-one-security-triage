@@ -120,3 +120,7 @@ npm run check
 ```
 
 Tests and dashboard builds never make paid model calls.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
