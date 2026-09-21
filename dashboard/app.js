@@ -1,7 +1,6 @@
 const evaluators = ["jev", "terra", "opus"];
 const names = { jev: "Jev", terra: "Terra", opus: "Opus" };
 const choiceNames = { vulnerable_injection: "injection", vulnerable_broken_access_control: "broken access control", vulnerable_ssrf: "SSRF", safe: "safe", insufficient_context: "insufficient context" };
-let sourceData;
 
 const byId = (id) => document.getElementById(id);
 const element = (tag, className, text) => {
@@ -50,7 +49,8 @@ function renderScorecards(data) {
       // Scores the reported distribution rather than only the argmax. Null for an evaluator that
       // returns a bare verdict, which is a fact about the model, not a gap in the recording.
       ["Brier score", summary.brierScore === null ? "n/a - no distribution reported" : summary.brierScore.toFixed(3)],
-      ["Run cost", money(economics?.costUsd)],
+      // Basis matters: a rate-card figure is computed from token counts, a provider figure is what was billed.
+      [economics ? `Run cost (${economics.basis})` : "Run cost", money(economics?.costUsd)],
       ["Cost per correct", money(economics?.costPerCorrectUsd, 7)],
       ["Stable across passes", stability === undefined ? "n/a" : `${stability.stableCases}/${data.caseCount}`]
     ]) {
@@ -64,8 +64,6 @@ function renderScorecards(data) {
 }
 
 const firstPass = (outcome) => outcome.passes[0];
-
-
 
 function renderComparisonBars(data) {
   const width = 520;
@@ -243,7 +241,6 @@ async function start() {
     if (!response.ok) throw new Error(`data request failed: ${response.status}`);
     const data = await response.json();
     if (data.schemaVersion !== 1 || data.recorded !== true || data.synthetic !== true || data.caseCount !== 100 || typeof data.provenance?.description !== "string" || !Array.isArray(data.warnings)) throw new Error("dashboard data contract is invalid");
-    sourceData = data;
     renderMetadata(data); renderScorecards(data); renderComparisonBars(data); renderConfusionMatrices(data); renderRace(data); renderCases(data, selectedFilters());
     document.querySelectorAll(".filters select").forEach((control) => control.addEventListener("change", () => renderCases(data, selectedFilters())));
   } catch (error) {

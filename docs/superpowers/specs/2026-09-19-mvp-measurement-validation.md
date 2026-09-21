@@ -1,6 +1,6 @@
 # MVP measurement validation
 
-Status: harness fixes implemented; re-recording and corpus work outstanding
+Status: harness fixes implemented; re-recorded as `2026-09-19-public-v5` (three evaluators, five passes, 1,500 decisions); real-corpus work outstanding
 Date: 2026-09-19
 
 ## Why this exists
@@ -147,7 +147,7 @@ direct-choice design is retained.
 These items decide whether the comparison is valid in the field. None can be
 done from fixture data.
 
-1. **Re-record all three evaluators on the current corpus** under one run ID.
+1. **Re-record all three evaluators on the current corpus** under one run ID. Done: `2026-09-19-public-v5`.
    No earlier artifact can be reused as a control because the corpus hash
    changed twice: once to remove the label leak, once to make access-control
    cases decidable.
@@ -172,7 +172,7 @@ done from fixture data.
    separately from the bounded arm.
 7. **Cost.** Compute cost per thousand decisions from provider usage, with Jev at
    the published input-only price and free output. Terra usage is still null.
-8. **Repetitions and intervals.** Five repetitions per case, paired
+8. **Repetitions and intervals.** Five repetitions per case (done in v5), paired
    repository-clustered bootstrap, the preregistered two-point margin, as the
    design spec already requires.
 
@@ -180,9 +180,9 @@ done from fixture data.
 
 ```bash
 export TYPESAFE_API_KEY='...'
-export RUN_ID="$(date -u +%Y-%m-%d)-public-v4"
-npm run demo:record -- --models jev,terra --run-id "$RUN_ID"
-npm run demo:record -- --models opus --run-id "$RUN_ID"
+./record-v5.sh "$(date -u +%Y-%m-%d)-public-v6"   # or by hand:
+export RUN_ID="$(date -u +%Y-%m-%d)-public-v6"
+npm run demo:record -- --models jev,terra,opus --repetitions 5 --run-id "$RUN_ID"
 npm run dashboard:build -- --run-dir "results/recorded/$RUN_ID" --output dashboard/data/latest.json
 ```
 

@@ -65,9 +65,6 @@ h2 { margin: 0; font-size: clamp(2.25rem, 4vw, 4.2rem); }
 .run-strip > div { min-width: 0; padding: 1rem 1.25rem; border-right: 1px solid var(--line); }
 .run-strip span, .metric-label { display: block; margin-bottom: .25rem; color: var(--muted); font: .65rem var(--mono); text-transform: uppercase; letter-spacing: .08em; }
 .run-strip strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 650 .82rem var(--mono); }
-#replay { border: 0; padding: 1rem 1.5rem; background: var(--signal); color: var(--surface); cursor: pointer; font-weight: 800; }
-#replay:hover { filter: brightness(.9); }
-#replay:disabled { cursor: wait; opacity: .55; }
 
 .primary-results, .panel, .explorer { padding: clamp(4rem, 8vw, 8rem) 0; }
 .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: 2rem; }
@@ -133,8 +130,6 @@ th:first-child, td:first-child { text-align: left; }
 .case-result .outcome { overflow-wrap: anywhere; font-family: var(--mono); }
 .choice-probabilities { grid-column: 1 / -1; }
 .correctness { font-weight: 750; }
-.correctness.yes { color: var(--correct); }
-.correctness.no { color: var(--incorrect); }
 .empty { padding: 3rem; border: 1px dashed var(--line); text-align: center; color: var(--muted); }
 
 footer { display: flex; justify-content: space-between; gap: 2rem; padding: 3rem 0; border-top: 1px solid var(--line); }
@@ -160,7 +155,6 @@ footer nav { display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: .82rem; }
   .scorecards { grid-template-columns: 1fr; }
   .run-strip { grid-template-columns: 1fr 1fr; }
   .run-strip > div:nth-child(3) { border-top: 1px solid var(--line); }
-  #replay { border-top: 1px solid var(--line); }
   .section-heading, footer { align-items: start; flex-direction: column; }
   .filters { grid-template-columns: repeat(2,1fr); }
   .case summary { grid-template-columns: 1fr; gap: .4rem; }

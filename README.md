@@ -10,9 +10,9 @@ The current focus is a reproducible **100-case recorded demo** comparing three m
 
 Jev is the model making the first set of decisions—not the name of the benchmark or dashboard. The browser only renders saved JSON artifacts. It contains no provider credentials, backend, or runtime model calls.
 
-> Dashboard URL: [https://robertzu43.github.io/system-one-security-triage/](https://robertzu43.github.io/system-one-security-triage/)
+> Live dashboard: [https://system-one-security-triage.rzuniga-9b4.workers.dev/](https://system-one-security-triage.rzuniga-9b4.workers.dev/) — serves the `2026-09-19-public-v5` run.
 
-> **Measurement status (2026-09-19).** The committed runs (`2026-09-19-public-v2` and `-v3`) were made on a corpus whose model-visible file paths contained the expected label and whose context-resolution flags marked the insufficient-context cases. A first label-neutral recording then showed that the broken access control vulnerabilities were not decidable from the evidence without those flags, so those cases now show the route registration and middleware chain. All three evaluators must be re-recorded on the current corpus before any number is cited. Read [MVP measurement validation](docs/superpowers/specs/2026-09-19-mvp-measurement-validation.md) first.
+> **Measurement status (2026-09-19).** The published numbers come from `results/recorded/2026-09-19-public-v5`: all three evaluators recorded together on the current label-neutral corpus, five passes per case, 1,500 decisions, zero errors. Earlier runs (`-v2`, `-v3`, `-v4`) were made on a corpus that leaked labels through file paths or left broken-access-control cases undecidable; each directory carries a `SUPERSEDED.md` explaining why, and `dashboard-build` rejects them by corpus hash. Background: [MVP measurement validation](docs/superpowers/specs/2026-09-19-mvp-measurement-validation.md).
 
 ## The 100-case demo
 
@@ -54,14 +54,18 @@ The older terminal summary remains available with `npm run demo`. It also uses e
 
 ## Record a real three-model run
 
-The corpus hash changed when the fixture was de-leaked and again when the access-control evidence was made decidable, so the committed `2026-09-19-public-v2` and `-v3` artifacts no longer validate and cannot be reused as controls. Record all three evaluators under one run ID (Terra and Opus need macOS, Codex CLI 0.147.0, and Claude Code 2.1.278):
+The v5 run was produced by `record-v5.sh`, which records all three evaluators under one run ID with five passes per case (Terra and Opus need macOS, Codex CLI 0.147.0, and Claude Code 2.1.278; about 3.3 hours and roughly $40):
 
 ```bash
 export TYPESAFE_API_KEY='...'
-export RUN_ID="$(date -u +%Y-%m-%d)-public-v5"
+./record-v5.sh "$(date -u +%Y-%m-%d)-public-v6"
+```
 
-npm run demo:record -- --models jev,terra --run-id "$RUN_ID"
-npm run demo:record -- --models opus --run-id "$RUN_ID"
+The same steps by hand:
+
+```bash
+export RUN_ID="$(date -u +%Y-%m-%d)-public-v6"
+npm run demo:record -- --models jev,terra,opus --repetitions 5 --run-id "$RUN_ID"
 
 npm run dashboard:build -- --run-dir "results/recorded/$RUN_ID" --output dashboard/data/latest.json
 npm run dashboard:preview
@@ -83,9 +87,16 @@ npm run dashboard:build -- --run-dir "results/recorded/$JEV_RUN_ID" --output das
 
 Before committing, review all three files under `results/recorded/<run-id>/`. They must contain the same corpus hash and complete coverage of all 100 cases. Artifacts are exclusive-write and reject credentials, absolute local paths, duplicates, missing cases, unknown cases, and invalid hashes. If the build reports a degenerate run, inspect the per-case `choice` distributions before anything else.
 
-## Publish on GitHub Pages
+## Publish
 
-Commit the reviewed `results/recorded/<run-id>/` directory, push it, then manually run the **Publish recorded demo dashboard** workflow in GitHub Actions with the matching `run_id`.
+The live site is static assets on Cloudflare Workers. Build the dataset from a committed run, then deploy the `dashboard/` directory:
+
+```bash
+npm run dashboard:build -- --run-dir results/recorded/2026-09-19-public-v5 --output dashboard/data/latest.json
+npm run deploy
+```
+
+GitHub Pages is the alternative: commit the reviewed `results/recorded/<run-id>/` directory, push it, then manually run the **Publish recorded demo dashboard** workflow in GitHub Actions with the matching `run_id`.
 
 The workflow runs the full test suite, rebuilds the public dataset from the three committed artifacts, and deploys only the static `dashboard/` directory. It has no provider secrets and cannot record new model results.
 
